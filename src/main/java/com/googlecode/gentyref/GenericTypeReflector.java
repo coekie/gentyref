@@ -14,7 +14,7 @@ import java.util.List;
  * 
  * @author Wouter Coekaerts <wouter@coekaerts.be>
  */
-public class GenericsReflector {
+public class GenericTypeReflector {
 	
 	private static Class<?> getRawType(Type type) {
 		if (type instanceof Class) {
