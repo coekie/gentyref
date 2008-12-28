@@ -6,14 +6,16 @@ import java.lang.reflect.Type;
 /**
  * Wrapper around {@link Type}.
  * 
- * You can use this to create instances of Type for a type known at compile time.
+ * You can use this to create instances of Type for a type known at compile
+ * time.
  * 
  * For example, to get the Type that represents List&lt;String&gt;:
  * <code>Type listOfString = new TypeToken&lt;List&lt;String&gt;&gt;(){}.getType();</code>
  * 
  * @author Wouter Coekaerts <wouter@coekaerts.be>
- *
- * @param <T> The type represented by this TypeToken.
+ * 
+ * @param <T>
+ *            The type represented by this TypeToken.
  */
 public abstract class TypeToken<T> {
 	private final Type type;
@@ -25,9 +27,9 @@ public abstract class TypeToken<T> {
 		this.type = extractType();
 	}
 
-//	private TypeToken(Type type) {
-//		this.type = type;
-//	}
+	private TypeToken(Type type) {
+		this.type = type;
+	}
 
 	public Type getType() {
 		return type;
@@ -45,13 +47,33 @@ public abstract class TypeToken<T> {
 		return pt.getActualTypeArguments()[0];
 	}
 
-//	public static TypeToken<?> get(Type type) {
-//		return new SimpleTypeToken<Object>(type);
-//	}
-//
-//	private static class SimpleTypeToken<T> extends TypeToken<T> {
-//		public SimpleTypeToken(Type type) {
-//			super(type);
-//		}
-//	}
+	/**
+	 * Gets type token for the given {@code Class} instance.
+	 */
+	public static <T> TypeToken<T> get(Class<T> type) {
+		return new SimpleTypeToken<T>(type);
+	}
+
+	/**
+	 * Gets type token for the given {@code Type} instance.
+	 */
+	public static TypeToken<?> get(Type type) {
+		return new SimpleTypeToken<Object>(type);
+	}
+
+	private static class SimpleTypeToken<T> extends TypeToken<T> {
+		public SimpleTypeToken(Type type) {
+			super(type);
+		}
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return (obj instanceof TypeToken) && type.equals(((TypeToken<?>) obj).type);
+	}
+
+	@Override
+	public int hashCode() {
+		return type.hashCode();
+	}
 }
