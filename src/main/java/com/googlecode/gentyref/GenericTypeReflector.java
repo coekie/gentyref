@@ -146,6 +146,8 @@ public class GenericTypeReflector {
 				return true;
 			}
 		} else if (superType instanceof CaptureType) {
+			if (superType.equals(subType))
+				return true;
 			for (Type lowerBound : ((CaptureType) superType).getLowerBounds()) {
 				if (isSuperType(lowerBound, subType)) {
 					return true;
