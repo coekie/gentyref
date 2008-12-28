@@ -1,6 +1,4 @@
 package com.googlecode.gentyref;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -21,57 +19,85 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 	 */
 	private static final boolean COMPILE_CHECK = false;
 	
-	private static final Type ARRAYLIST_OF_STRING = new TypeToken<ArrayList<String>>(){}.getType();
-	private ArrayList<String> arrayListOfString;
-	private static final Type LIST_OF_STRING = new TypeToken<List<String>>(){}.getType();
-	@SuppressWarnings("unused")
-	private List<String> listOfString;
-	private static final Type COLLECTION_OF_STRING = new TypeToken<Collection<String>>(){}.getType();
-	@SuppressWarnings("unused")
-	private Collection<String> collectionOfString;
+	private static final TypeToken<ArrayList<String>> ARRAYLIST_OF_STRING = new TypeToken<ArrayList<String>>(){};
+	private static final TypeToken<List<String>> LIST_OF_STRING = new TypeToken<List<String>>(){};
+	private static final TypeToken<Collection<String>> COLLECTION_OF_STRING = new TypeToken<Collection<String>>(){};
 	
-	private static final Type ARRAYLIST_OF_LIST_OF_STRING = new TypeToken<ArrayList<List<String>>>(){}.getType();
-	private static final Type LIST_OF_LIST_OF_STRING = new TypeToken<List<List<String>>>(){}.getType();
-	private static final Type COLLECTION_OF_LIST_OF_STRING = new TypeToken<Collection<List<String>>>(){}.getType();
+	private static final TypeToken<ArrayList<List<String>>> ARRAYLIST_OF_LIST_OF_STRING = new TypeToken<ArrayList<List<String>>>(){};
+	private static final TypeToken<List<List<String>>> LIST_OF_LIST_OF_STRING = new TypeToken<List<List<String>>>(){};
+	private static final TypeToken<Collection<List<String>>> COLLECTION_OF_LIST_OF_STRING = new TypeToken<Collection<List<String>>>(){};
 	
-	private static final Type ARRAYLIST_OF_EXT_STRING = new TypeToken<ArrayList<? extends String>>(){}.getType();
-	private static final Type COLLECTION_OF_EXT_STRING = new TypeToken<Collection<? extends String>>(){}.getType();
+	private static final TypeToken<ArrayList<? extends String>> ARRAYLIST_OF_EXT_STRING = new TypeToken<ArrayList<? extends String>>(){};
+	private static final TypeToken<Collection<? extends String>> COLLECTION_OF_EXT_STRING = new TypeToken<Collection<? extends String>>(){};
 	
-	private static final Type COLLECTION_OF_SUPER_STRING = new TypeToken<Collection<? super String>>(){}.getType();
+	private static final TypeToken<Collection<? super String>> COLLECTION_OF_SUPER_STRING = new TypeToken<Collection<? super String>>(){};
 	
-	private static final Type ARRAYLIST_OF_LIST_OF_EXT_STRING = new TypeToken<ArrayList<List<? extends String>>>(){}.getType();
-	private static final Type LIST_OF_LIST_OF_EXT_STRING = new TypeToken<List<List<? extends String>>>(){}.getType();
-	private static final Type COLLECTION_OF_LIST_OF_EXT_STRING = new TypeToken<Collection<List<? extends String>>>(){}.getType();
-
-	class Box<T> {
-		public T t;
-	}
-
-	private void testFieldTypeExactSuperclass(Type expectedMatch, Type fieldClass, String fieldName) {
-		Type fieldType = getExactFieldType(fieldName, fieldClass);
-		testExactSuperclass(expectedMatch, fieldType);
+	private static final TypeToken<ArrayList<List<? extends String>>> ARRAYLIST_OF_LIST_OF_EXT_STRING = new TypeToken<ArrayList<List<? extends String>>>(){};
+	private static final TypeToken<List<List<? extends String>>> LIST_OF_LIST_OF_EXT_STRING = new TypeToken<List<List<? extends String>>>(){};
+	private static final TypeToken<Collection<List<? extends String>>> COLLECTION_OF_LIST_OF_EXT_STRING = new TypeToken<Collection<List<? extends String>>>(){};
+	
+	private final ReflectionStrategy strategy;
+	
+	class Box<T> implements WithF<T>, WithFToken<TypeToken<T>> {
+		public T f;
 	}
 	
-	private void testFieldTypeInexactSupertype(Type superType, Type fieldClass, String fieldName) {
-		Type returnType = getExactFieldType(fieldName, fieldClass);
-		testInexactSupertype(superType, returnType);
+	public AbstractGenericsReflectorTest(ReflectionStrategy strategy) {
+		this.strategy = strategy;
 	}
 	
-//	private void testReturnTypeExactSuperclass(Type expectedMatch, Type methodClass, String methodName) {
-//		Type returnType = getExactReturnType(methodName, methodClass);
-//		testExactSuperclass(expectedMatch, returnType);
-//	}
-//	
-//	private void testReturnTypeInexactSupertype(Type superType, Type methodClass, String methodName) {
-//		Type returnType = getExactReturnType(methodName, methodClass);
-//		testInexactSupertype(superType, returnType);
-//	}
+	private boolean isSupertype(TypeToken<?> supertype, TypeToken<?> subtype) {
+		return strategy.isSupertype(supertype.getType(), subtype.getType());
+	}
 	
-	abstract protected void testInexactSupertype(Type superType, Type subType);
+	/**
+	 * Test if superType is seen as a real (not equal) supertype of subType.
+	 */
+	private void testRealSupertype(TypeToken<?> superType, TypeToken<?> subType) {
+		// test if it's really seen as a supertype
+		assertTrue(isSupertype(superType, subType));
+		
+		// check if they're not seen as supertypes the other way around
+		assertFalse(isSupertype(subType, superType));
+	}
 	
-	abstract protected void testExactSuperclass(Type expectedSuperclass, Type type);
+	private <T> void checkedTestInexactSupertype(TypeToken<T> expectedSuperclass, TypeToken<? extends T> type) {
+		testInexactSupertype(expectedSuperclass, type);
+	}
 	
-	static protected Class<?> getClass(Type type) {
+	/**
+	 * Checks if the supertype is seen as a supertype of subType.
+	 * But, if superType is a Class or ParameterizedType, with different type parameters.
+	 */
+	private void testInexactSupertype(TypeToken<?> superType, TypeToken<?> subType) {
+		testRealSupertype(superType, subType);
+		strategy.testInexactSupertype(superType.getType(), subType.getType());
+	}
+	
+	/**
+	 * Like testExactSuperclass, but the types of the arguments are checked so only valid test cases can be applied
+	 */
+	private <T> void checkedTestExactSuperclass(TypeToken<T> expectedSuperclass, TypeToken<? extends T> type) {
+		testExactSuperclass(expectedSuperclass, type);
+	}
+	
+	/**
+	 * Like testExactSuperclass, but the types of the arguments are checked so only valid test cases can be applied
+	 */
+	private <T> void assertCheckedTypeEquals(TypeToken<T> expected, TypeToken<T> type) {
+		assertEquals(expected, type);
+	}
+	
+	/**
+	 * Checks if the supertype is seen as a supertype of subType.
+	 * SuperType must be a Class or ParameterizedType, with the right type parameters.
+	 */
+	private void testExactSuperclass(TypeToken<?> expectedSuperclass, TypeToken<?> type) {
+		testRealSupertype(expectedSuperclass, type);
+		strategy.testExactSuperclass(expectedSuperclass.getType(), type.getType());
+	}
+	
+	protected static Class<?> getClassType(Type type) {
 		if (type instanceof Class) {
 			return (Class<?>)type;
 		} else {
@@ -80,206 +106,269 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 		}
 	}
 	
-	private Type getExactFieldType(String fieldName, Type forType) {
+	private TypeToken<?> getFieldType(TypeToken<?> forType, String fieldName) {
+		return getFieldType(forType.getType(), fieldName);
+	}
+	
+	/**
+	 * Marker interface to mark the type of the field f.
+	 * Note: we could use a method instead of a field, so the method could be in the interface,
+	 * enforcing correct usage,  but that would influence the actual test too much.
+	 */
+	interface WithF<T> {}
+	
+	/**
+	 * Variant on WithF, where the type parameter is a TypeToken.
+	 * TODO do we really need this?
+	 */
+	interface WithFToken<T extends TypeToken<?>> {}
+	
+	/**
+	 * Uses the reflector being tested to get the type of the field named "f" in the given type.
+	 * The returned value is cased into a TypeToken assuming the WithF interface is used correctly,
+	 * and the reflector returned the correct result.
+	 */
+	@SuppressWarnings("unchecked") // assuming the WithT interface is used correctly
+	private <T> TypeToken<? extends T> getF(TypeToken<? extends WithF<? extends T>> type) {
+		return (TypeToken<? extends T>) getFieldType(type, "f");
+	}
+	/**
+	 * Variant of {@link #getF(TypeToken)} that's stricter in arguments and return type, for checked equals tests.
+	 * @see #getF(TypeToken)
+	 */
+	@SuppressWarnings("unchecked") // assuming the WithT interface is used correctly
+	private <T> TypeToken<T> getStrictF(TypeToken<? extends WithF<T>> type) {
+		return (TypeToken<T>) getFieldType(type, "f");
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends TypeToken<?>> T getFToken(TypeToken<? extends WithFToken<T>> type) {
+		return (T) getFieldType(type, "f");
+	}
+	
+	private TypeToken<?> getFieldType(Type forType, String fieldName) {
 		try {
-			Class<?> clazz = getClass(forType);
-			return getExactFieldType(clazz.getField(fieldName), forType);
+			Class<?> clazz = getClassType(forType);
+			return TypeToken.get(strategy.getFieldType(forType, clazz.getField(fieldName)));
 		} catch (NoSuchFieldException e) {
 			throw new RuntimeException("Error in test: can't find field " + fieldName, e);
 		}
 	}
 	
-//	private Type getExactReturnType(String methodName, Type forType) {
+//	private Type getReturnType(String methodName, Type forType) {
 //		try {
 //			Class<?> clazz = getClass(forType);
-//			return getExactReturnType(clazz.getMethod(methodName), forType);
+//			return strategy.getExactReturnType(clazz.getMethod(methodName), forType);
 //		} catch (NoSuchMethodException e) {
 //			throw new RuntimeException("Error in test: can't find method " + methodName, e);
 //		}
 //	}
 	
-//	private void testReturnTypeEquals(Type expected, String methodName, Type forType) {
-//		assertEquals(expected, getExactReturnType(methodName, forType));
+	private <T, U extends T> void checkedTestExactSuperclassChain(TypeToken<T> type1, TypeToken<U> type2, TypeToken<? extends U> type3) {
+		testExactSuperclassChain(type1, type2, type3);
+	}
+	
+	private void testExactSuperclassChain(TypeToken<?> ... types) {
+		for (int i = 0; i < types.length; i++) {
+			assertTrue(isSupertype(types[i], types[i]));
+			for (int j = i + 1; j < types.length; j++) {
+				testExactSuperclass(types[i], types[j]);
+			}
+		}
+	}
+
+	private <T, U extends T> void checkedTestInexactSupertypeChain(TypeToken<T> type1, TypeToken<U> type2, TypeToken<? extends U> type3) {
+		testInexactSupertypeChain(type1, type2, type3);
+	}
+	
+	private void testInexactSupertypeChain(TypeToken<?> ...types) {
+		for (int i = 0; i < types.length; i++) {
+			assertTrue(isSupertype(types[i], types[i]));
+			for (int j = i + 1; j < types.length; j++) {
+				testInexactSupertype(types[i], types[j]);
+			}
+		}
+	}
+	
+//	/**
+//	 * Test that type1 is not a supertype of type2 (and, while we're at it, not vice-versa either).
+//	 */
+//	private void testNotSupertypes(Type... types) {
+//		for (int i = 0; i < types.length; i++) {
+//			for (int j = i + 1; j < types.length; j++) {
+//				assertFalse(isSupertype(types[i], types[j]));				
+//				assertFalse(isSupertype(types[j], types[i]));				
+//			}
+//		}
 //	}
-	private void testFieldTypeEquals(Type expected, String fieldName, Type forType) {
-		assertEquals(expected, getExactFieldType(fieldName, forType));
+	
+	private <T> TypeToken<T> tt(Class<T> t) {
+		return TypeToken.get(t);
 	}
 	
-	protected abstract Type getExactReturnType(Method m, Type type);
-	protected abstract Type getExactFieldType(Field f, Type type);
-	
-	private void testExactSuperclassChain(Type type1, Type type2, Type type3) {
-		testExactSuperclass(type3, type3);
-		testExactSuperclass(type1, type2);
-		testExactSuperclass(type2, type3);
-		testExactSuperclass(type1, type3);
-	}
-	
-	public void testOfString() {
-		collectionOfString = listOfString = arrayListOfString; // compile check
-		testExactSuperclassChain(COLLECTION_OF_STRING, LIST_OF_STRING, ARRAYLIST_OF_STRING);
+	public void testSimpleTypeParam() {
+		checkedTestExactSuperclassChain(COLLECTION_OF_STRING, LIST_OF_STRING, ARRAYLIST_OF_STRING);
 	}
 
 	public interface StringList extends List<String> {
 	}
-	private StringList stringList;
 
 	public void testStringList() {
-		listOfString = stringList; // compile check
-		testExactSuperclassChain(COLLECTION_OF_STRING, LIST_OF_STRING, StringList.class);
+		checkedTestExactSuperclassChain(COLLECTION_OF_STRING, LIST_OF_STRING, tt(StringList.class));
 	}
 	
-
 	public void testTextendsStringList() {
-		class TExtendsStringList<T extends StringList> {
-			public T t;
+		class C<T extends StringList> implements WithF<T>{
+			public T f;
 		}
 
+		// raw
 		if (COMPILE_CHECK) {
 			@SuppressWarnings("unchecked")
-			TExtendsStringList tExtendsStringList = null;
-			listOfString = tExtendsStringList.t;
+			C c = null;
+			List<String> listOfString = c.f;
 		}
-		testFieldTypeExactSuperclass(LIST_OF_STRING, TExtendsStringList.class, "t");
+		testExactSuperclass(LIST_OF_STRING, getFieldType(C.class, "f"));
+		
+		// wildcard
+		TypeToken<? extends StringList> ft = getF(new TypeToken<C<?>>(){});
+		checkedTestExactSuperclassChain(LIST_OF_STRING, tt(StringList.class), ft);
 	}
 	
 	public void testExtendViaOtherTypeParam() {
-		class ExtendViaOtherTypeParam<T extends StringList, U extends T> {
+		class C<T extends StringList, U extends T> implements WithF<U> {
 			@SuppressWarnings("unused")
-			public U u;
+			public U f;
 		}
-		testFieldTypeExactSuperclass(LIST_OF_STRING, ExtendViaOtherTypeParam.class, "u");
+		// raw
+		testExactSuperclass(LIST_OF_STRING, getFieldType(C.class, "f"));
+		// wildcard
+		TypeToken<? extends StringList> ft = getF(new TypeToken<C<?,?>>(){});
+		checkedTestExactSuperclassChain(LIST_OF_STRING, tt(StringList.class), ft);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void testRawMultiBoundParametrizedStringList() {
-		class MultiBoundParametrizedStringList<T extends Object & StringList> {
+	public void testMultiBoundParametrizedStringList() {
+		class C<T extends Object & StringList> implements WithF<T>{
 			@SuppressWarnings("unused")
-			public T t;
+			public T f;
 		}
-		testFieldTypeEquals(Object.class, "t", MultiBoundParametrizedStringList.class);
-		
-		new MultiBoundParametrizedStringList().t = new Object();
-	}
-	
-	public void testWildcardMultiBoundParametrizedStringList() {
-		class C<T extends Object & StringList> {
-			public T t;
-		}
-		testFieldTypeExactSuperclass(LIST_OF_STRING, new TypeToken<C<?>>(){}.getType(), "t");
-		listOfString = ((C<?>)new C<StringList>()).t;
+		// raw
+		new C().f = new Object(); // compile check
+		assertEquals(tt(Object.class), getFieldType(C.class, "f"));
+		// wildcard
+		TypeToken<? extends StringList> ft = getF(new TypeToken<C<?>>(){});
+		checkedTestExactSuperclassChain(LIST_OF_STRING, tt(StringList.class), ft);
 	}
 	
 	public void testFListOfT_String() {
-		class FListOfT<T> {
+		class C<T> implements WithF<List<T>> {
 			@SuppressWarnings("unused")
 			public List<T> f;
 		}
-		testFieldTypeEquals(LIST_OF_STRING, "f", new TypeToken<FListOfT<String>>(){}.getType());
+		
+		TypeToken<List<String>> ft = getStrictF(new TypeToken<C<String>>(){});
+		assertCheckedTypeEquals(LIST_OF_STRING, ft);
 	}
 
 	public void testOfListOfString() {
-		testExactSuperclassChain(COLLECTION_OF_LIST_OF_STRING, LIST_OF_LIST_OF_STRING, ARRAYLIST_OF_LIST_OF_STRING);
+		checkedTestExactSuperclassChain(COLLECTION_OF_LIST_OF_STRING, LIST_OF_LIST_OF_STRING, ARRAYLIST_OF_LIST_OF_STRING);
 	}
 	
 	public void testFListOfListOfT_String() {
-		class FListOfListOfT<T> {
+		class C<T> implements WithF<List<List<T>>> {
 			@SuppressWarnings("unused")
 			public List<List<T>> f;
 		}
-		testFieldTypeEquals(LIST_OF_LIST_OF_STRING, "f", new TypeToken<FListOfListOfT<String>>(){}.getType());
+		TypeToken<List<List<String>>> ft = getStrictF(new TypeToken<C<String>>(){});
+		assertCheckedTypeEquals(LIST_OF_LIST_OF_STRING, ft);
 	}
 
 	public interface ListOfListOfT<T> extends List<List<T>> {}
 	
 	public void testListOfListOfT_String() {
-		testExactSuperclassChain(COLLECTION_OF_LIST_OF_STRING, LIST_OF_LIST_OF_STRING, new TypeToken<ListOfListOfT<String>>(){}.getType());
+		checkedTestExactSuperclassChain(COLLECTION_OF_LIST_OF_STRING, LIST_OF_LIST_OF_STRING, new TypeToken<ListOfListOfT<String>>(){});
 	}
 	
 	public interface ListOfListOfT_String extends ListOfListOfT<String> {}
 	public void testListOfListOfT_StringInterface() {
-		testExactSuperclassChain(COLLECTION_OF_LIST_OF_STRING, LIST_OF_LIST_OF_STRING, ListOfListOfT_String.class);
+		checkedTestExactSuperclassChain(COLLECTION_OF_LIST_OF_STRING, LIST_OF_LIST_OF_STRING, tt(ListOfListOfT_String.class));
 	}
 	
 	public interface ListOfListOfString extends List<List<String>> {}
 	public void testListOfListOfStringInterface() {
-		testExactSuperclassChain(COLLECTION_OF_LIST_OF_STRING, LIST_OF_LIST_OF_STRING, ListOfListOfString.class);
+		checkedTestExactSuperclassChain(COLLECTION_OF_LIST_OF_STRING, LIST_OF_LIST_OF_STRING, tt(ListOfListOfString.class));
 	}
 	
 	public void testWildcardTExtendsListOfListOfString() {
-		class C<T extends List<List<String>>> {
+		class C<T extends List<List<String>>> implements WithF<T> {
 			@SuppressWarnings("unused")
-			public T t;
+			public T f;
 		}
-		testFieldTypeExactSuperclass(COLLECTION_OF_LIST_OF_STRING, new TypeToken<C<?>>(){}.getType(), "t");
+		TypeToken<? extends List<List<String>>> ft = getF(new TypeToken<C<?>>(){});
+		checkedTestExactSuperclass(COLLECTION_OF_LIST_OF_STRING, ft);
 	}
 	
-	public void testArrayListOfExtString() {
-		testExactSuperclass(COLLECTION_OF_EXT_STRING, ARRAYLIST_OF_EXT_STRING);
-	}
-	
-	public void testArrayListOfListOfExtString() {
-		testExactSuperclass(COLLECTION_OF_LIST_OF_EXT_STRING, ARRAYLIST_OF_LIST_OF_EXT_STRING);
+	public void testExtWildcard() {
+		checkedTestExactSuperclass(COLLECTION_OF_EXT_STRING, ARRAYLIST_OF_EXT_STRING);
+		checkedTestExactSuperclass(COLLECTION_OF_LIST_OF_EXT_STRING, ARRAYLIST_OF_LIST_OF_EXT_STRING);
 	}
 	
 	public interface ListOfListOfExtT<T> extends List<List<? extends T>> {}
 	public void testListOfListOfExtT_String() {
-		testExactSuperclass(COLLECTION_OF_LIST_OF_EXT_STRING, new TypeToken<ListOfListOfExtT<String>>(){}.getType());
+		checkedTestExactSuperclass(COLLECTION_OF_LIST_OF_EXT_STRING, new TypeToken<ListOfListOfExtT<String>>(){});
 	}
 	
 	public void testUExtendsListOfExtT() {
-		class C<T, U extends List<? extends T>> {
-			public U u;
+		class C<T, U extends List<? extends T>> implements WithF<U> {
+			@SuppressWarnings("unused")
+			public U f;
 		}
-		new TypeToken<C<? extends String, ?>>(){};
-		testFieldTypeInexactSupertype(COLLECTION_OF_EXT_STRING, new TypeToken<C<? extends String, ?>>(){}.getType(), "u");
 		
-		C<? extends String, ?> c = new C<String, List<String>>();
-		@SuppressWarnings("unused")
-		Collection<? extends String> o = c.u;
+		// this doesn't compile in eclipse, so we hold the compilers hand by adding a step in between
+		// TODO check if this compiles with sun compiler
+		// TypeToken<? extends List<? extends String>> ft = getF(new TypeToken<C<? extends String, ?>>(){});
+		TypeToken<? extends C<? extends String, ?>> tt = new TypeToken<C<? extends String, ?>>(){};
+		TypeToken<? extends List<? extends String>> ft = getF(tt);
+
+		checkedTestInexactSupertype(COLLECTION_OF_EXT_STRING, ft);
 	}
 
 	public void testListOfExtT() {
-		class C<T> {
-			public List<? extends T> t;
+		class C<T> implements WithF<List<? extends T>> {
+			@SuppressWarnings("unused")
+			public List<? extends T> f;
 		}
-		testFieldTypeExactSuperclass(COLLECTION_OF_EXT_STRING, new TypeToken<C<String>>(){}.getType(), "t");
-		if (COMPILE_CHECK) {
-			List<? extends String> listOfExtString = null;
-			new C<String>().t = listOfExtString;
-			listOfExtString = new C<String>().t;
-		}
+		TypeToken<? extends List<? extends String>> ft = getF(new TypeToken<C<String>>(){});
+		checkedTestExactSuperclass(COLLECTION_OF_EXT_STRING, ft);
 	}
 	
 	public void testListOfSuperT() {
-		class C<T> {
-			public List<? super T> t;
+		class C<T> implements WithF<List<? super T>> {
+			@SuppressWarnings("unused")
+			public List<? super T> f;
 		}
-		testFieldTypeExactSuperclass(COLLECTION_OF_SUPER_STRING, new TypeToken<C<String>>(){}.getType(), "t");
-		if (COMPILE_CHECK) {
-			List<? super String> listOfSuperString = null;
-			new C<String>().t = listOfSuperString;
-			listOfSuperString = new C<String>().t;
-		}
+		TypeToken<? extends List<? super String>> ft = getF(new TypeToken<C<String>>(){});
+		checkedTestExactSuperclass(COLLECTION_OF_SUPER_STRING, ft);
 	}
 	
 	public void testInnerFieldWithTypeOfOuter() {
 		class Outer<T> {
 			@SuppressWarnings("unused")
-			class Inner {
-				public T t;
-				public List<List<? extends T>> llet;
+			class Inner implements WithF<T> {
+				public T f;
+			}
+			class Inner2 implements WithF<List<List<? extends T>>> {
+				@SuppressWarnings("unused")
+				public List<List<? extends T>> f;
 			}
 		}
-		if (COMPILE_CHECK) {
-			Outer<String>.Inner inner = null;
-			String s = inner.t = "";
-		}
 		
-		Type outerStringInner = new TypeToken<Outer<String>.Inner>(){}.getType(); 
-		
-		testFieldTypeEquals(String.class, "t", outerStringInner);
-		testFieldTypeEquals(LIST_OF_LIST_OF_EXT_STRING, "llet", outerStringInner);
+		TypeToken<String> ft = getStrictF(new TypeToken<Outer<String>.Inner>(){});
+		assertCheckedTypeEquals(tt(String.class), ft);
+
+		TypeToken<List<List<? extends String>>> ft2 = getStrictF(new TypeToken<Outer<String>.Inner2>(){});
+		assertCheckedTypeEquals(LIST_OF_LIST_OF_EXT_STRING, ft2);
 	}
 
 	/**
@@ -287,11 +376,11 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 	 */
 	@SuppressWarnings("unchecked")
 	public void testSubclassRaw() {
-		class SuperclassZom<T extends Number> {
+		class Superclass<T extends Number> {
 			public T t;
 		}
-		class Subclass<U> extends SuperclassZom<Integer>{}
-		testFieldTypeEquals(Number.class, "t", Subclass.class);
+		class Subclass<U> extends Superclass<Integer>{}
+		assertEquals(tt(Number.class), getFieldType(Subclass.class, "t"));
 		
 		Number n = new Subclass().t; // compile check
 		new Subclass().t = n; // compile check
@@ -308,7 +397,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 			public U u;
 		}
 		class Subclass<T> extends Superclass<T, Integer> {}
-		testFieldTypeEquals(Number.class, "u", Subclass.class);
+		assertEquals(tt(Number.class), getFieldType(Subclass.class, "u"));
 		
 		Number n = new Subclass().u; // compile check
 		new Subclass().u = n; // compile check
@@ -318,18 +407,16 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 	 * If a type has no parameters, it doesn't matter that it got erased.
 	 * So even though Middleclass was erased, its supertype is not.
 	 */
-	@SuppressWarnings("unchecked")
 	public void testSubclassRawViaUnparameterized() {
-		class Superclass<T extends Number> {
-			public T t;
+		class Superclass<T extends Number> implements WithF<T> {
+			@SuppressWarnings("unused")
+			public T f;
 		}
 		class Middleclass extends Superclass<Integer> {}
 		class Subclass<U> extends Middleclass {}
 		
-		testFieldTypeEquals(Integer.class, "t", Subclass.class);
-		
-		Integer i = new Subclass().t; // compile check
-		new Subclass().t = i; // compile check
+		TypeToken<Integer> ft = getStrictF(tt(Subclass.class));
+		assertCheckedTypeEquals(tt(Integer.class), ft);
 	}
 	
 	/**
@@ -346,9 +433,9 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 			}
 		}
 		
-		testFieldTypeEquals(Outer.Inner.class, "rawInner", Outer.class);
-		testFieldTypeEquals(Number.class, "t", Outer.Inner.class);
-		testFieldTypeEquals(Number.class, "u", Outer.Inner.class);
+		assertEquals(tt(Outer.Inner.class), getFieldType(Outer.class, "rawInner"));
+		assertEquals(tt(Number.class), getFieldType(Outer.Inner.class, "t"));
+		assertEquals(tt(Number.class), getFieldType(Outer.Inner.class, "u"));
 		
 		if (COMPILE_CHECK) {
 			Number n = new Outer<Integer>().rawInner.t; // compile check
@@ -360,9 +447,21 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 	
 	public void testSuperWildcard() {
 		Box<? super Integer> b = new Box<Integer>(); // compile check
-		b.t = new Integer(0); // compile check
+		b.f = new Integer(0); // compile check
 		
-		testInexactSupertype(getExactFieldType("t", new TypeToken<Box<? super Integer>>(){}.getType()), Integer.class);
+		testInexactSupertype(getFieldType(new TypeToken<Box<? super Integer>>(){}, "f"), tt(Integer.class));
+		
+		TypeToken<? super Integer> ft = getFToken(new TypeToken<Box<? super Integer>>(){});
+		checkedTestInexactSupertype(ft, tt(Integer.class));
+	}
+	
+	public void testContainment() {
+		checkedTestInexactSupertypeChain(new TypeToken<List<?>>(){},
+				new TypeToken<List<? extends Number>>(){},
+				new TypeToken<List<Integer>>(){});
+		checkedTestInexactSupertypeChain(new TypeToken<List<?>>(){},
+				new TypeToken<List<? super Integer>>(){},
+				new TypeToken<List<Object>>(){});
 	}
 	
 	// TODO graph tests for recursively referring bounds
