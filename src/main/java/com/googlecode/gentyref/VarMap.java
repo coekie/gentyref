@@ -28,11 +28,15 @@ class VarMap {
 		map.put(variable, value);
 	}
 	
-	VarMap(TypeVariable<?>[] variables, Type[] values) {
+	void addAll(TypeVariable<?>[] variables, Type[] values) {
 		assert variables.length == values.length;
 		for (int i = 0; i < variables.length; i++) {
 			map.put(variables[i], values[i]);
 		}
+	}
+	
+	VarMap(TypeVariable<?>[] variables, Type[] values) {
+		addAll(variables, values);
 	}
 	
 	Type map(Type type) {

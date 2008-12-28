@@ -13,6 +13,12 @@ import com.googlecode.gentyref.TypeToken;
 import junit.framework.TestCase;
 
 public abstract class AbstractGenericsReflectorTest extends TestCase {
+	/**
+	 * A constant that's false, to use in an if() block for code that's only there to show that it compiles.
+	 * This code "proves" that the test  is an actual valid test case, by showing the compiler agrees.
+	 * But some of the code should not actually be executed, because it might throw exceptions
+	 * (because we're too lazy to initialize everything). 
+	 */
 	private static final boolean COMPILE_CHECK = false;
 	
 	private static final Type ARRAYLIST_OF_STRING = new TypeToken<ArrayList<String>>(){}.getType();
@@ -34,6 +40,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 	private static final Type COLLECTION_OF_SUPER_STRING = new TypeToken<Collection<? super String>>(){}.getType();
 	
 	private static final Type ARRAYLIST_OF_LIST_OF_EXT_STRING = new TypeToken<ArrayList<List<? extends String>>>(){}.getType();
+	private static final Type LIST_OF_LIST_OF_EXT_STRING = new TypeToken<List<List<? extends String>>>(){}.getType();
 	private static final Type COLLECTION_OF_LIST_OF_EXT_STRING = new TypeToken<Collection<List<? extends String>>>(){}.getType();
 
 	class Box<T> {
@@ -254,6 +261,25 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 			new C<String>().t = listOfSuperString;
 			listOfSuperString = new C<String>().t;
 		}
+	}
+	
+	public void testInnerFieldWithTypeOfOuter() {
+		class Outer<T> {
+			@SuppressWarnings("unused")
+			class Inner {
+				public T t;
+				public List<List<? extends T>> llet;
+			}
+		}
+		if (COMPILE_CHECK) {
+			Outer<String>.Inner inner = null;
+			String s = inner.t = "";
+		}
+		
+		Type outerStringInner = new TypeToken<Outer<String>.Inner>(){}.getType(); 
+		
+		testFieldTypeEquals(String.class, "t", outerStringInner);
+		testFieldTypeEquals(LIST_OF_LIST_OF_EXT_STRING, "llet", outerStringInner);
 	}
 
 	/**

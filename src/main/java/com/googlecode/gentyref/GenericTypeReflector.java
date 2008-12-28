@@ -40,29 +40,37 @@ public class GenericTypeReflector {
 	 * @return toMapType, but with type parameters from typeAndParams replaced.
 	 */
 	private static Type mapTypeParameters(Type toMapType, Type typeAndParams) {
-		Class<?> clazz;
-		Type[] arguments;
-		
-		if (typeAndParams instanceof ParameterizedType) {
-			ParameterizedType pType = (ParameterizedType)typeAndParams;
-			clazz = (Class<?>)pType.getRawType(); // getRawType should always be Class
-			arguments = pType.getActualTypeArguments();
-			// TODO type parameters from pType pType.getOwnerType()
-		} else if (typeAndParams instanceof Class) {
-			clazz = (Class<?>)typeAndParams;
-			if (clazz.getTypeParameters().length == 0) {
-				return toMapType;
-			} else {
-				return getRawType(toMapType);
-			}
+		if (isMissingTypeParameters(typeAndParams)) {
+			return getRawType(toMapType);
 		} else {
-			throw new AssertionError("Unexpected type " + typeAndParams.getClass());
+			VarMap varMap = new VarMap();
+			Type handlingTypeAndParams = typeAndParams;
+			while(handlingTypeAndParams instanceof ParameterizedType) {
+				ParameterizedType pType = (ParameterizedType)handlingTypeAndParams;
+				Class<?> clazz = (Class<?>)pType.getRawType(); // getRawType should always be Class
+				varMap.addAll(clazz.getTypeParameters(), pType.getActualTypeArguments());
+				handlingTypeAndParams = pType.getOwnerType();
+			}
+			return varMap.map(toMapType);
 		}
-		return mapTypeParameters(toMapType, clazz.getTypeParameters(), arguments);
 	}
 	
-	private static Type mapTypeParameters(Type toMapType, TypeVariable<?>[] typeVariables, Type[] arguments) {
-		return new VarMap(typeVariables, arguments).map(toMapType);
+	/**
+	 * Checks if the given type is a class that is supposed to have type parameters, but doesn't.
+	 * In other words, if it's a really raw type.
+	 */
+	private static boolean isMissingTypeParameters(Type type) {
+		if (type instanceof Class) {
+			for (Class<?> clazz = (Class<?>) type; clazz != null; clazz = clazz.getDeclaringClass()) {
+				if (clazz.getTypeParameters().length != 0)
+					return true;
+			}
+			return false;
+		} else if (type instanceof ParameterizedType) {
+			return false;
+		} else {
+			throw new AssertionError("Unexpected type " + type.getClass());
+		}
 	}
 	
 	/**
@@ -260,11 +268,8 @@ public class GenericTypeReflector {
 			for (CaptureTypeImpl captured : toInit) {
 				captured.init(varMap);
 			}
-//			if (pType.getOwnerType() != null) {
-				// TODO capture owner type
-//				throw new RuntimeException("no implemented: owner type");
-//			}
-			return new ParameterizedTypeImpl(clazz, capturedArguments, null);
+			Type ownerType = (pType.getOwnerType() == null) ? null : capture(pType.getOwnerType());
+			return new ParameterizedTypeImpl(clazz, capturedArguments, ownerType);
 		} else {
 			return type;
 		}
