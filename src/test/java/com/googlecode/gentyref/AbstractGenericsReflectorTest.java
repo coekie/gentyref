@@ -31,6 +31,8 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 	private static final Type ARRAYLIST_OF_EXT_STRING = new TypeToken<ArrayList<? extends String>>(){}.getType();
 	private static final Type COLLECTION_OF_EXT_STRING = new TypeToken<Collection<? extends String>>(){}.getType();
 	
+	private static final Type COLLECTION_OF_SUPER_STRING = new TypeToken<Collection<? super String>>(){}.getType();
+	
 	private static final Type ARRAYLIST_OF_LIST_OF_EXT_STRING = new TypeToken<ArrayList<List<? extends String>>>(){}.getType();
 	private static final Type COLLECTION_OF_LIST_OF_EXT_STRING = new TypeToken<Collection<List<? extends String>>>(){}.getType();
 
@@ -218,14 +220,11 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 		testExactSuperclass(COLLECTION_OF_LIST_OF_EXT_STRING, new TypeToken<ListOfListOfExtT<String>>(){}.getType());
 	}
 	
-// TODO testUExtendsListOfExtT
-// need to fix handling of raw types first
 	public void testUExtendsListOfExtT() {
 		class C<T, U extends List<? extends T>> {
 			public U u;
 		}
 		new TypeToken<C<? extends String, ?>>(){};
-//		testFieldTypeInexactSupertype(COLLECTION_OF_EXT_STRING, C.class, "u");
 		testFieldTypeInexactSupertype(COLLECTION_OF_EXT_STRING, new TypeToken<C<? extends String, ?>>(){}.getType(), "u");
 		
 		C<? extends String, ?> c = new C<String, List<String>>();
@@ -242,6 +241,18 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 			List<? extends String> listOfExtString = null;
 			new C<String>().t = listOfExtString;
 			listOfExtString = new C<String>().t;
+		}
+	}
+	
+	public void testListOfSuperT() {
+		class C<T> {
+			public List<? super T> t;
+		}
+		testFieldTypeExactSuperclass(COLLECTION_OF_SUPER_STRING, new TypeToken<C<String>>(){}.getType(), "t");
+		if (COMPILE_CHECK) {
+			List<? super String> listOfSuperString = null;
+			new C<String>().t = listOfSuperString;
+			listOfSuperString = new C<String>().t;
 		}
 	}
 
@@ -321,12 +332,12 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 		}
 	}
 	
-//	public void testSuperWildcardTODO() {
-//		Box<? super Integer> b = new Box<Integer>(); // compile check
-//		b.t = new Integer(0); // compile check
-//		
-//		testInexactSupertype(getExactFieldType("t", new TypeToken<Box<? super Integer>>(){}.getType()), Integer.class);
-//	}
+	public void testSuperWildcard() {
+		Box<? super Integer> b = new Box<Integer>(); // compile check
+		b.t = new Integer(0); // compile check
+		
+		testInexactSupertype(getExactFieldType("t", new TypeToken<Box<? super Integer>>(){}.getType()), Integer.class);
+	}
 	
 	// TODO graph tests for recursively referring bounds
 //	interface Graph<N extends Node<N, E>, E extends Edge<N, E>> {}

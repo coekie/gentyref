@@ -137,6 +137,13 @@ public class GenericTypeReflector {
 				// TODO check outer class too
 				return true;
 			}
+		} else if (superType instanceof CaptureType) {
+			for (Type lowerBound : ((CaptureType) superType).getLowerBounds()) {
+				if (isSuperType(lowerBound, subType)) {
+					return true;
+				}
+			}
+			return false;
 		} else {
 			throw new RuntimeException("not implemented: " + superType.getClass());
 		}
