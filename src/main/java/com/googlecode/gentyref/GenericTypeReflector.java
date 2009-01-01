@@ -127,14 +127,15 @@ public class GenericTypeReflector {
 			} else if (superType instanceof Class<?>) {
 				return true;
 			} else if (mappedSubType instanceof Class<?>) {
-				// TODO treat supertype by being raw type differently 
+				// TODO treat supertype by being raw type differently ("supertype, but with warnings")
 				return true; // class has no parameters, or it's a raw type
 			} else {
 				assert mappedSubType instanceof ParameterizedType;
 				ParameterizedType pMappedSubType = (ParameterizedType) mappedSubType;
 				assert pMappedSubType.getRawType() == superClass;
+				ParameterizedType pSuperType = (ParameterizedType)superType;
 				
-				Type[] superTypeArgs = ((ParameterizedType)superType).getActualTypeArguments();
+				Type[] superTypeArgs = pSuperType.getActualTypeArguments();
 				Type[] subTypeArgs = pMappedSubType.getActualTypeArguments();
 				assert superTypeArgs.length == subTypeArgs.length;
 				for (int i = 0; i < superTypeArgs.length; i++) {
@@ -142,8 +143,8 @@ public class GenericTypeReflector {
 						return false;
 					}
 				}
-				// TODO check outer class too
-				return true;
+				// params of the class itself match, so if the owner types are supertypes too, it's a supertype.
+				return pSuperType.getOwnerType() == null || isSuperType(pSuperType.getOwnerType(), pMappedSubType.getOwnerType());
 			}
 		} else if (superType instanceof CaptureType) {
 			if (superType.equals(subType))
