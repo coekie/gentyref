@@ -3,6 +3,7 @@
  */
 package com.googlecode.gentyref;
 
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -51,6 +52,8 @@ class VarMap {
 		} else if (type instanceof WildcardType) {
 			WildcardType wType = (WildcardType) type;
 			return new WildcardTypeImpl(map(wType.getLowerBounds()), map(wType.getUpperBounds()));
+		} else if (type instanceof GenericArrayType) {
+			return GenericArrayTypeImpl.createArrayType(map(((GenericArrayType)type).getGenericComponentType()));
 		} else {
 			throw new RuntimeException("not implemented: mapping " + type.getClass() + " (" + type + ")");
 		}

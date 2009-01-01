@@ -1,7 +1,6 @@
 package com.googlecode.gentyref;
 
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
@@ -32,23 +31,10 @@ public class GenericTypeReflector {
 				return getRawType(tv.getBounds()[0]);
 		} else if (type instanceof GenericArrayType) {
 			GenericArrayType aType = (GenericArrayType) type;
-			return createArrayType(getRawType(aType.getGenericComponentType()));
+			return GenericArrayTypeImpl.createArrayType(getRawType(aType.getGenericComponentType()));
 		} else {
 			// TODO at least support CaptureType here
 			throw new RuntimeException("not supported: " + type.getClass());
-		}
-	}
-	
-	private static Class<?> createArrayType(Class<?> componentType) {
-		// there's no (clean) other way to create a array class, then create an instance of it
-		return Array.newInstance(getRawType(componentType), 0).getClass();
-	}
-	
-	private static Type createArrayType(Type componentType) {
-		if (componentType instanceof Class) {
-			return createArrayType((Class<?>)componentType);
-		} else {
-			return new GenericArrayTypeImpl(componentType);
 		}
 	}
 	
@@ -280,7 +266,7 @@ public class GenericTypeReflector {
 			Type[] componentSupertypes = getExactDirectSuperTypes(typeComponent);
 			result = new Type[componentSupertypes.length + 3];
 			for (resultIndex = 0; resultIndex < componentSupertypes.length; resultIndex++) {
-				result[resultIndex] = createArrayType(componentSupertypes[resultIndex]);
+				result[resultIndex] = GenericArrayTypeImpl.createArrayType(componentSupertypes[resultIndex]);
 			}
 		}
 		result[resultIndex++] = Object.class;

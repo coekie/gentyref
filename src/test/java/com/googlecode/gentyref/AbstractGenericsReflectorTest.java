@@ -514,8 +514,25 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 		assertTrue(isSupertype(tt(ArrayList[].class), new TypeToken<ArrayList<Integer>[]>(){})); // not checked* because we're avoiding the inverse test
 	}
 	
+	public void testArrayOfT() {
+		class C<T> implements WithF<T[]> {
+			@SuppressWarnings("unused")
+			public T[] f;
+		}
+		TypeToken<String[]> ft = getStrictF(new TypeToken<C<String>>(){});
+		assertCheckedTypeEquals(tt(String[].class), ft);
+	}
+	
+	public void testArrayOfListOfT() {
+		class C<T> implements WithF<List<T>[]> {
+			@SuppressWarnings("unused")
+			public List<T>[] f;
+		}
+		TypeToken<List<String>[]> ft = getStrictF(new TypeToken<C<String>>(){});
+		assertCheckedTypeEquals(new TypeToken<List<String>[]>(){}, ft);
+	}
+	
 	// TODO test more arrays stuff
-	// * that type params inside array type are replaced (T[], List<T>[],...)
 	// * that in a raw class also type parameters inside array are erased (List<String>[] -> List[])
 	// * arrays of primitive type
 	
