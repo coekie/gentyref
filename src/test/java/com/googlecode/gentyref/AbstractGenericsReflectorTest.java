@@ -53,6 +53,30 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 	}
 	
 	/**
+	 * Tests that the types given are not equal, but they are eachother's supertype.
+	 */
+	private void testMutualSupertypes(TypeToken<?>... types) {
+		for (int i = 0; i < types.length; i++) {
+			for (int j = i + 1; j < types.length; j++) {
+				assertFalse(types[i].equals(types[j]));
+				assertTrue(isSupertype(types[i], types[j]));
+				assertTrue(isSupertype(types[i], types[j]));
+			}
+		}
+	}
+	
+	/**
+	 * Tests that the types given are not equal, but they are eachother's supertype.
+	 */
+	private <T> void checkedTestMutualSupertypes(TypeToken<T> type1, TypeToken<T> type2) {
+		assertFalse(type1.equals(type2));
+		assertTrue(isSupertype(type1, type2));
+		assertTrue(isSupertype(type2, type1));
+	}
+	
+	
+	
+	/**
 	 * Test if superType is seen as a real (not equal) supertype of subType.
 	 */
 	private void testRealSupertype(TypeToken<?> superType, TypeToken<?> subType) {
@@ -504,6 +528,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 				new TypeToken<List<Object>>(){});
 	}
 	
+	
 	public void testArrays() {
 		checkedTestExactSuperclassChain(tt(Object[].class), tt(Number[].class), tt(Integer[].class));
 		testNotSupertypes(new TypeToken<Integer[]>(){}, new TypeToken<String[]>(){});
@@ -588,5 +613,26 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 		TypeToken<?> edgeOfNodeOfEdgeOfNode = getFieldType(nodeOfEdgeOfNode.getType(), e);
 		assertEquals(edgeOfNode, edgeOfNodeOfEdgeOfNode);
 		assertFalse(node.equals(nodeOfEdgeOfNode)); // node is not captured, nodeOfEdgeOfNode is
+	}
+	
+	/**
+	 * This test shows the need for capturing in isSupertype: the type parameters aren't contained,
+	 * but the capture of them is because of the bound on type variable
+	 */
+	public void testCaptureContainment() {
+		class C<T extends Number> {}
+		checkedTestMutualSupertypes(new TypeToken<C<? extends Number>>(){},
+				new TypeToken<C<?>>(){});
+	}
+	
+	public void testCaptureContainmentViaOtherParam() {
+		class C<T extends Number, S extends List<T>> {}
+		
+		C<? extends Number, ? extends List<? extends Number>> c1 = null;
+		C<? extends Number, ?> c2 = null;
+		c1 = c2;
+		c2 = c1;
+		testMutualSupertypes(new TypeToken<C<? extends Number, ? extends List<? extends Number>>>(){},
+				new TypeToken<C<? extends Number, ?>>(){});
 	}
 }
