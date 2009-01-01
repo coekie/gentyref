@@ -532,9 +532,20 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 		assertCheckedTypeEquals(new TypeToken<List<String>[]>(){}, ft);
 	}
 	
-	// TODO test more arrays stuff
-	// * that in a raw class also type parameters inside array are erased (List<String>[] -> List[])
-	// * arrays of primitive type
+	@SuppressWarnings("unchecked")
+	public void testArrayRaw() {
+		class C<T> {
+			@SuppressWarnings("unused")
+			public List<String> f;
+		}
+		new C().f = new ArrayList<Integer>(); // compile check
+		assertEquals(tt(List.class), getFieldType(new TypeToken<C>(){}, "f"));
+	}
+	
+	public void testPrimitiveArray() {
+		testNotSupertypes(tt(double[].class), tt(float[].class));
+		testNotSupertypes(tt(int[].class), tt(Integer[].class));
+	}
 	
 	// TODO graph tests for recursively referring bounds
 //	interface Graph<N extends Node<N, E>, E extends Edge<N, E>> {}
