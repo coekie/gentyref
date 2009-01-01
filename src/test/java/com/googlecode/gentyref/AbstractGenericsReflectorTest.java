@@ -1,12 +1,13 @@
 package com.googlecode.gentyref;
+import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import com.googlecode.gentyref.TypeToken;
-
+import java.util.RandomAccess;
 
 import junit.framework.TestCase;
 
@@ -100,9 +101,15 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 	protected static Class<?> getClassType(Type type) {
 		if (type instanceof Class) {
 			return (Class<?>)type;
-		} else {
+		} else if (type instanceof ParameterizedType) {
 			ParameterizedType pType = (ParameterizedType) type;
 			return (Class<?>)pType.getRawType();
+		} else if (type instanceof GenericArrayType) {
+			GenericArrayType aType = (GenericArrayType) type;
+			Class<?> componentType = getClassType(aType.getGenericComponentType());
+			return Array.newInstance(componentType, 0).getClass();
+		} else {
+			throw new IllegalArgumentException("Only supports Class, ParameterizedType and GenericArrayType. Not " + type.getClass());
 		}
 	}
 	
@@ -491,6 +498,26 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 				new TypeToken<List<? super Integer>>(){},
 				new TypeToken<List<Object>>(){});
 	}
+	
+	public void testArrays() {
+		checkedTestExactSuperclassChain(tt(Object[].class), tt(Number[].class), tt(Integer[].class));
+		testNotSupertypes(new TypeToken<Integer[]>(){}, new TypeToken<String[]>(){});
+		checkedTestExactSuperclassChain(tt(Object.class), tt(Object[].class), tt(Object[][].class));
+		checkedTestExactSuperclass(tt(Serializable.class), tt(Integer[].class));
+		checkedTestExactSuperclass(tt(Cloneable[].class), tt(Object[][].class));
+	}
+	
+	public void testGenericArrays() {
+		checkedTestExactSuperclass(new TypeToken<Collection<String>[]>(){}, new TypeToken<ArrayList<String>[]>(){});
+		checkedTestInexactSupertype(new TypeToken<Collection<? extends Number>[]>(){}, new TypeToken<ArrayList<Integer>[]>(){});
+		checkedTestExactSuperclass(tt(RandomAccess[].class), new TypeToken<ArrayList<Integer>[]>(){});
+		assertTrue(isSupertype(tt(ArrayList[].class), new TypeToken<ArrayList<Integer>[]>(){})); // not checked* because we're avoiding the inverse test
+	}
+	
+	// TODO test more arrays stuff
+	// * that type params inside array type are replaced (T[], List<T>[],...)
+	// * that in a raw class also type parameters inside array are erased (List<String>[] -> List[])
+	// * arrays of primitive type
 	
 	// TODO graph tests for recursively referring bounds
 //	interface Graph<N extends Node<N, E>, E extends Edge<N, E>> {}

@@ -1,6 +1,9 @@
 package com.googlecode.gentyref;
 
+import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -27,9 +30,25 @@ public class GenericTypeReflector {
 				return Object.class;
 			else
 				return getRawType(tv.getBounds()[0]);
+		} else if (type instanceof GenericArrayType) {
+			GenericArrayType aType = (GenericArrayType) type;
+			return createArrayType(getRawType(aType.getGenericComponentType()));
 		} else {
 			// TODO at least support CaptureType here
 			throw new RuntimeException("not supported: " + type.getClass());
+		}
+	}
+	
+	private static Class<?> createArrayType(Class<?> componentType) {
+		// there's no (clean) other way to create a array class, then create an instance of it
+		return Array.newInstance(getRawType(componentType), 0).getClass();
+	}
+	
+	private static Type createArrayType(Type componentType) {
+		if (componentType instanceof Class) {
+			return createArrayType((Class<?>)componentType);
+		} else {
+			return new GenericArrayTypeImpl(componentType);
 		}
 	}
 	
@@ -75,17 +94,13 @@ public class GenericTypeReflector {
 	
 	/**
 	 * With type a supertype of searchClass, returns the exact supertype of the given class, including type parameters.
+	 * Returns null if searchClass is not a superclass of type.
 	 * For example, with <tt>class StringList extends List&lt;String&gt;</tt>, <tt>getExactSuperType(StringList.class, Collection.class)</tt>
 	 * returns a {@link ParameterizedType} representing <tt>Collection&lt;String&gt;</tt>.
 	 */
 	public static Type getExactSuperType(Type type, Class<?> searchClass) {
-		if (type instanceof ParameterizedType || type instanceof Class) {
-			Class<?> clazz;
-			if (type instanceof ParameterizedType) {
-				clazz = (Class<?>)((ParameterizedType)type).getRawType();
-			} else {
-				clazz = (Class<?>)type;
-			}
+		if (type instanceof ParameterizedType || type instanceof Class || type instanceof GenericArrayType) {
+			Class<?> clazz = getRawType(type);
 			
 			if (searchClass == clazz) {
 				return type;
@@ -105,22 +120,11 @@ public class GenericTypeReflector {
 	}
 	
 	/**
-	 * Returns the class given, or the class of the ParameterizedType given
-	 * @param classOrParamterizedType Instance of either Class or ParameterizedType
-	 */
-	private static Class<?> getClass(Type classOrParameterizedType) {
-		if (classOrParameterizedType instanceof Class)
-			return (Class<?>)classOrParameterizedType;
-		else
-			return (Class<?>)((ParameterizedType) classOrParameterizedType).getRawType();
-	}
-	
-	/**
 	 * Checks if the capture of subType is a subtype of superType
 	 */
 	public static boolean isSuperType(Type superType, Type subType) {
-		if (superType instanceof ParameterizedType || superType instanceof Class) {
-			Class<?> superClass = getClass(superType);
+		if (superType instanceof ParameterizedType || superType instanceof Class || superType instanceof GenericArrayType) {
+			Class<?> superClass = getRawType(superType);
 			Type mappedSubType = getExactSuperType(capture(subType), superClass);
 			if (mappedSubType == null) {
 				return false;
@@ -129,6 +133,12 @@ public class GenericTypeReflector {
 			} else if (mappedSubType instanceof Class<?>) {
 				// TODO treat supertype by being raw type differently ("supertype, but with warnings")
 				return true; // class has no parameters, or it's a raw type
+			} else if (mappedSubType instanceof GenericArrayType) {
+				Type superComponentType = getArrayComponentType(superType);
+				assert superComponentType != null;
+				Type mappedSubComponentType = getArrayComponentType(mappedSubType);
+				assert mappedSubComponentType != null;
+				return isSuperType(superComponentType, mappedSubComponentType);
 			} else {
 				assert mappedSubType instanceof ParameterizedType;
 				ParameterizedType pMappedSubType = (ParameterizedType) mappedSubType;
@@ -155,8 +165,37 @@ public class GenericTypeReflector {
 				}
 			}
 			return false;
+		} else if (superType instanceof GenericArrayType) {
+			return isArraySupertype(superType, subType);
 		} else {
 			throw new RuntimeException("not implemented: " + superType.getClass());
+		}
+	}
+	
+	private static boolean isArraySupertype(Type arraySuperType, Type subType) {
+		Type superTypeComponent = getArrayComponentType(arraySuperType);
+		assert superTypeComponent != null;
+		Type subTypeComponent = getArrayComponentType(subType);
+		if (subTypeComponent == null) { // subType is not an array type
+			return false;
+		} else {
+			return isSuperType(superTypeComponent, subTypeComponent);
+		}
+	}
+	
+	/**
+	 * If type is an array type, returns the type of the component of the array.
+	 * Otherwise, returns null.
+	 */
+	private static Type getArrayComponentType(Type type) {
+		if (type instanceof Class) {
+			Class<?> clazz = (Class<?>)type;
+			return clazz.getComponentType();
+		} else if (type instanceof GenericArrayType) {
+			GenericArrayType aType = (GenericArrayType) type;
+			return aType.getGenericComponentType();
+		} else {
+			return null;
 		}
 	}
 	
@@ -188,7 +227,10 @@ public class GenericTypeReflector {
 			if (type instanceof ParameterizedType) {
 				clazz = (Class<?>)((ParameterizedType)type).getRawType();
 			} else {
+				// TODO primitive types?
 				clazz = (Class<?>)type;
+				if (clazz.isArray())
+					return getArrayExactDirectSuperTypes(clazz);
 			}
 			
 			Type[] superInterfaces = clazz.getGenericInterfaces();
@@ -218,11 +260,35 @@ public class GenericTypeReflector {
 			return ((WildcardType) type).getUpperBounds();
 		} else if (type instanceof CaptureType) {
 			return ((CaptureType)type).getUpperBounds();
+		} else if (type instanceof GenericArrayType) {
+			return getArrayExactDirectSuperTypes(type);
 		} else {
 			throw new RuntimeException("not implemented type: " + type);
 		}
 	}
+	
+	private static Type[] getArrayExactDirectSuperTypes(Type arrayType) {
+		// see http://java.sun.com/docs/books/jls/third_edition/html/typesValues.html#4.10.3
+		Type typeComponent = getArrayComponentType(arrayType);
 
+		Type[] result;
+		int resultIndex;
+		if (typeComponent instanceof Class && ((Class<?>)typeComponent).isPrimitive()) {
+			resultIndex = 0;
+			result = new Type[3];
+		} else {
+			Type[] componentSupertypes = getExactDirectSuperTypes(typeComponent);
+			result = new Type[componentSupertypes.length + 3];
+			for (resultIndex = 0; resultIndex < componentSupertypes.length; resultIndex++) {
+				result[resultIndex] = createArrayType(componentSupertypes[resultIndex]);
+			}
+		}
+		result[resultIndex++] = Object.class;
+		result[resultIndex++] = Cloneable.class;
+		result[resultIndex++] = Serializable.class;
+		return result;
+	}
+	
 	/**
 	 * Returns the exact return type of the given method in the given type.
 	 * This may be different from <tt>m.getGenericReturnType()</tt> when the method was declared in a superclass,
