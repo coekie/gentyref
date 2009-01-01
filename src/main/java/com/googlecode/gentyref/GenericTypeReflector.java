@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -17,6 +18,7 @@ import java.util.List;
  * @author Wouter Coekaerts <wouter@coekaerts.be>
  */
 public class GenericTypeReflector {
+	private static final Type UNBOUND_WILDCARD = new WildcardTypeImpl(new Type[]{}, new Type[]{Object.class});
 	
 	private static Class<?> getRawType(Type type) {
 		if (type instanceof Class) {
@@ -75,6 +77,29 @@ public class GenericTypeReflector {
 			return false;
 		} else {
 			throw new AssertionError("Unexpected type " + type.getClass());
+		}
+	}
+	
+	/**
+	 * Returns a type representing the class, with all type parameters the unbound wildcard ("?").
+	 * For example, <tt>addWildcardParameters(Map.class)</tt> returns a type representing <tt>Map&lt;?,?&gt;</tt>.
+	 * @return <ul>
+	 * <li>If clazz is a class or interface without type parameters, clazz itself is returned.</li>
+	 * <li>If clazz is a class or interface with type parameters, an instance of ParameterizedType is returned.</li>
+	 * <li>if clazz is an array type, an array type is returned with unbound wildcard parameters added in the the component type.   
+	 * </ul>
+	 */
+	public static Type addWildcardParameters(Class<?> clazz) {
+		if (clazz.isArray()) {
+			return GenericArrayTypeImpl.createArrayType(addWildcardParameters(clazz.getComponentType()));
+		} else if (isMissingTypeParameters(clazz)) {
+			TypeVariable<?>[] vars = clazz.getTypeParameters();
+			Type[] arguments = new Type[vars.length];
+			Arrays.fill(arguments, UNBOUND_WILDCARD);
+			Type owner = clazz.getDeclaringClass() == null ? null : addWildcardParameters(clazz.getDeclaringClass());
+			return new ParameterizedTypeImpl(clazz, arguments, owner);
+		} else {
+			return clazz;
 		}
 	}
 	
