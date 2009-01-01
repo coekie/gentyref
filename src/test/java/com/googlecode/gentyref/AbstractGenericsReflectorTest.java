@@ -190,24 +190,30 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 		}
 	}
 	
-//	/**
-//	 * Test that type1 is not a supertype of type2 (and, while we're at it, not vice-versa either).
-//	 */
-//	private void testNotSupertypes(Type... types) {
-//		for (int i = 0; i < types.length; i++) {
-//			for (int j = i + 1; j < types.length; j++) {
-//				assertFalse(isSupertype(types[i], types[j]));				
-//				assertFalse(isSupertype(types[j], types[i]));				
-//			}
-//		}
-//	}
+	/**
+	 * Test that type1 is not a supertype of type2 (and, while we're at it, not vice-versa either).
+	 */
+	private void testNotSupertypes(TypeToken<?>... types) {
+		for (int i = 0; i < types.length; i++) {
+			for (int j = i + 1; j < types.length; j++) {
+				assertFalse(isSupertype(types[i], types[j]));				
+				assertFalse(isSupertype(types[j], types[i]));				
+			}
+		}
+	}
 	
 	private <T> TypeToken<T> tt(Class<T> t) {
 		return TypeToken.get(t);
 	}
 	
+	public void testBasic() {
+		checkedTestExactSuperclassChain(tt(Object.class), tt(Number.class), tt(Integer.class));
+		testNotSupertypes(tt(Integer.class), tt(Double.class));
+	}
+	
 	public void testSimpleTypeParam() {
 		checkedTestExactSuperclassChain(COLLECTION_OF_STRING, LIST_OF_STRING, ARRAYLIST_OF_STRING);
+		testNotSupertypes(COLLECTION_OF_STRING, new TypeToken<ArrayList<Integer>>(){});
 	}
 
 	public interface StringList extends List<String> {
@@ -273,6 +279,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 
 	public void testOfListOfString() {
 		checkedTestExactSuperclassChain(COLLECTION_OF_LIST_OF_STRING, LIST_OF_LIST_OF_STRING, ARRAYLIST_OF_LIST_OF_STRING);
+		testNotSupertypes(COLLECTION_OF_LIST_OF_STRING, new TypeToken<ArrayList<List<Integer>>>(){});
 	}
 	
 	public void testFListOfListOfT_String() {
@@ -312,6 +319,8 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 	public void testExtWildcard() {
 		checkedTestExactSuperclass(COLLECTION_OF_EXT_STRING, ARRAYLIST_OF_EXT_STRING);
 		checkedTestExactSuperclass(COLLECTION_OF_LIST_OF_EXT_STRING, ARRAYLIST_OF_LIST_OF_EXT_STRING);
+		testNotSupertypes(COLLECTION_OF_EXT_STRING, new TypeToken<ArrayList<Integer>>(){});
+		testNotSupertypes(COLLECTION_OF_EXT_STRING, new TypeToken<ArrayList<Object>>(){});
 	}
 	
 	public interface ListOfListOfExtT<T> extends List<List<? extends T>> {}
@@ -369,6 +378,25 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 
 		TypeToken<List<List<? extends String>>> ft2 = getStrictF(new TypeToken<Outer<String>.Inner2>(){});
 		assertCheckedTypeEquals(LIST_OF_LIST_OF_EXT_STRING, ft2);
+	}
+	
+	public void testInnerExtendsWithTypeOfOuter() {
+		class Outer<T> {
+			class Inner extends ArrayList<T> {
+			}
+		}
+		checkedTestExactSuperclass(COLLECTION_OF_STRING, new TypeToken<Outer<String>.Inner>(){});
+	}
+	
+	public void testInnerDifferentParams() {
+		class Outer<T> {
+			class Inner<S> {
+			}
+		}
+		// inner param different
+		testNotSupertypes(new TypeToken<Outer<String>.Inner<Integer>>(){}, new TypeToken<Outer<String>.Inner<String>>(){});
+		// outer param different
+		testNotSupertypes(new TypeToken<Outer<Integer>.Inner<String>>(){}, new TypeToken<Outer<String>.Inner<String>>(){});
 	}
 
 	/**
