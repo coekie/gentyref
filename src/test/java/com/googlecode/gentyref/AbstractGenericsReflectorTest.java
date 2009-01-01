@@ -1,6 +1,7 @@
 package com.googlecode.gentyref;
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -156,10 +157,14 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 	private TypeToken<?> getFieldType(Type forType, String fieldName) {
 		try {
 			Class<?> clazz = getClassType(forType);
-			return TypeToken.get(strategy.getFieldType(forType, clazz.getField(fieldName)));
+			return getFieldType(forType, clazz.getField(fieldName));
 		} catch (NoSuchFieldException e) {
 			throw new RuntimeException("Error in test: can't find field " + fieldName, e);
 		}
+	}
+	
+	private TypeToken<?> getFieldType(Type forType, Field field) {
+		return TypeToken.get(strategy.getFieldType(forType, field));
 	}
 	
 //	private Type getReturnType(String methodName, Type forType) {
@@ -547,9 +552,41 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 		testNotSupertypes(tt(int[].class), tt(Integer[].class));
 	}
 	
-	// TODO graph tests for recursively referring bounds
-//	interface Graph<N extends Node<N, E>, E extends Edge<N, E>> {}
-//	interface Node<N extends Node<N,E>, E extends Edge<N, E>> {}
-//	interface Edge<N extends Node<N,E>, E extends Edge<N, E>> {}
-
+	public void testCapture() {
+		TypeToken<Box<?>> bw = new TypeToken<Box<?>>(){};
+		TypeToken<?> capture1 = getF(bw);
+		TypeToken<?> capture2 = getF(bw);
+		assertFalse(capture1.equals(capture2));
+		// if these were equal, this would be valid:
+//		Box<?> b1 = new Box<Integer>();
+//		Box<?> b2 = new Box<String>();
+//		b1.f = b2.f;
+		// but the capture is still equal to itself
+		assertTrue(capture1.equals(capture1));
+	}
+	
+	class Node<N extends Node<N,E>, E extends Edge<N, E>> implements WithF<List<E>> {
+		public List<E> f;
+		public E e;
+	}
+	class Edge<N extends Node<N,E>, E extends Edge<N, E>> implements WithF<List<N>> {
+		public List<N> f;
+		public N n;
+	}
+	
+	public void testGraphWildcard() {
+		TypeToken<? extends List<? extends Edge<? extends Node<?,?>,?>>> ft = getF(new TypeToken<Node<?, ?>>(){});
+		testInexactSupertype(new TypeToken<List<? extends Edge<? extends Node<?,?>,?>>>(){}, ft);
+	}
+	
+	public void testGraphCapture() throws NoSuchFieldException {
+		Field e = Node.class.getField("e");
+		Field n = Edge.class.getField("n");
+		TypeToken<?> node = new TypeToken<Node<?, ?>>(){};
+		TypeToken<?> edgeOfNode = getFieldType(node.getType(), e);
+		TypeToken<?> nodeOfEdgeOfNode = getFieldType(edgeOfNode.getType(), n);
+		TypeToken<?> edgeOfNodeOfEdgeOfNode = getFieldType(nodeOfEdgeOfNode.getType(), e);
+		assertEquals(edgeOfNode, edgeOfNodeOfEdgeOfNode);
+		assertFalse(node.equals(nodeOfEdgeOfNode)); // node is not captured, nodeOfEdgeOfNode is
+	}
 }
