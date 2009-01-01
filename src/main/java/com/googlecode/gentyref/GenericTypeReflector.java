@@ -105,9 +105,14 @@ public class GenericTypeReflector {
 	
 	/**
 	 * With type a supertype of searchClass, returns the exact supertype of the given class, including type parameters.
-	 * Returns null if searchClass is not a superclass of type.
 	 * For example, with <tt>class StringList extends List&lt;String&gt;</tt>, <tt>getExactSuperType(StringList.class, Collection.class)</tt>
 	 * returns a {@link ParameterizedType} representing <tt>Collection&lt;String&gt;</tt>.
+	 * <ul>
+	 * <li>Returns null if <tt>searchClass</tt> is not a superclass of type.</li>
+	 * <li>Returns an instance of {@link Class} if <tt>type</tt> if it is a raw type, or has no type parameters</li>
+	 * <li>Returns an instance of {@link ParameterizedType} if the type does have parameters</li>
+	 * <li>Returns an instance of {@link GenericArrayType} if <tt>searchClass</tt> is an array type, and the actual type has type parameters</li>
+	 * </ul>
 	 */
 	public static Type getExactSuperType(Type type, Class<?> searchClass) {
 		if (type instanceof ParameterizedType || type instanceof Class || type instanceof GenericArrayType) {
