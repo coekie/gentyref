@@ -590,6 +590,13 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 		assertTrue(capture1.equals(capture1));
 	}
 	
+	public void testCaptureBeforeReplaceSupertype() {
+		class C<T> extends ArrayList<List<T>> {}
+		testNotSupertypes(LIST_OF_LIST_OF_EXT_STRING, new TypeToken<C<? extends String>>(){});
+		// if it was a supertype, this would be valid:
+//		List<List<? extends String>> o = new C<? extends String>();
+	}
+	
 	class Node<N extends Node<N,E>, E extends Edge<N, E>> implements WithF<List<E>> {
 		public List<E> f;
 		public E e;
