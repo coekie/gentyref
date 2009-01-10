@@ -1,6 +1,10 @@
 package com.googlecode.gentyref;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -40,5 +44,27 @@ public class SamplesTest extends TestCase {
 	public void testProsessor() {
 		assertTrue(isStringProcessor(StringProcessor.class));
 		assertFalse(isStringProcessor(IntegerProcessor.class));
+	}
+	
+	abstract class Lister<T> {
+		public List<T> list() {
+			return null;
+		}
+	}
+	
+	class StringLister extends Lister<String> {
+	}
+	
+	public void testFooBar() throws NoSuchMethodException {
+		Method listMethod = StringLister.class.getMethod("list");
+		
+		// java returns List<T>
+		Type returnType = listMethod.getGenericReturnType();
+		assertTrue(returnType instanceof ParameterizedType);
+		assertTrue(((ParameterizedType)returnType).getActualTypeArguments()[0] instanceof TypeVariable);
+		
+		// we get List<String>
+		Type exactReturnType = GenericTypeReflector.getExactReturnType(listMethod, StringLister.class);
+		assertEquals(new TypeToken<List<String>>(){}.getType(), exactReturnType);
 	}
 }
