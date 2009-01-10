@@ -20,7 +20,10 @@ import java.util.List;
 public class GenericTypeReflector {
 	private static final Type UNBOUND_WILDCARD = new WildcardTypeImpl(new Type[]{}, new Type[]{Object.class});
 	
-	private static Class<?> getRawType(Type type) {
+	/**
+	 * Returns the erasure of the given type.
+	 */
+	public static Class<?> erase(Type type) {
 		if (type instanceof Class) {
 			return (Class<?>)type;
 		} else if (type instanceof ParameterizedType) {
@@ -30,10 +33,10 @@ public class GenericTypeReflector {
 			if (tv.getBounds().length == 0)
 				return Object.class;
 			else
-				return getRawType(tv.getBounds()[0]);
+				return erase(tv.getBounds()[0]);
 		} else if (type instanceof GenericArrayType) {
 			GenericArrayType aType = (GenericArrayType) type;
-			return GenericArrayTypeImpl.createArrayType(getRawType(aType.getGenericComponentType()));
+			return GenericArrayTypeImpl.createArrayType(erase(aType.getGenericComponentType()));
 		} else {
 			// TODO at least support CaptureType here
 			throw new RuntimeException("not supported: " + type.getClass());
@@ -48,7 +51,7 @@ public class GenericTypeReflector {
 	 */
 	private static Type mapTypeParameters(Type toMapType, Type typeAndParams) {
 		if (isMissingTypeParameters(typeAndParams)) {
-			return getRawType(toMapType);
+			return erase(toMapType);
 		} else {
 			VarMap varMap = new VarMap();
 			Type handlingTypeAndParams = typeAndParams;
@@ -116,7 +119,7 @@ public class GenericTypeReflector {
 	 */
 	public static Type getExactSuperType(Type type, Class<?> searchClass) {
 		if (type instanceof ParameterizedType || type instanceof Class || type instanceof GenericArrayType) {
-			Class<?> clazz = getRawType(type);
+			Class<?> clazz = erase(type);
 			
 			if (searchClass == clazz) {
 				return type;
@@ -140,7 +143,7 @@ public class GenericTypeReflector {
 	 */
 	public static boolean isSuperType(Type superType, Type subType) {
 		if (superType instanceof ParameterizedType || superType instanceof Class || superType instanceof GenericArrayType) {
-			Class<?> superClass = getRawType(superType);
+			Class<?> superClass = erase(superType);
 			Type mappedSubType = getExactSuperType(capture(subType), superClass);
 			if (mappedSubType == null) {
 				return false;
@@ -203,7 +206,7 @@ public class GenericTypeReflector {
 	 * If type is an array type, returns the type of the component of the array.
 	 * Otherwise, returns null.
 	 */
-	private static Type getArrayComponentType(Type type) {
+	public static Type getArrayComponentType(Type type) {
 		if (type instanceof Class) {
 			Class<?> clazz = (Class<?>)type;
 			return clazz.getComponentType();
