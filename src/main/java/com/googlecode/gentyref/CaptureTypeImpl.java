@@ -23,6 +23,10 @@ class CaptureTypeImpl implements CaptureType {
 		this.lowerBounds = wildcard.getLowerBounds();
 	}
 	
+	/**
+	 * Initialize this CaptureTypeImpl.
+	 * This is needed for type variable bounds referring to each other: we need the capture of the argument.
+	 */
 	void init(VarMap varMap) {
 		ArrayList<Type> upperBoundsList = new ArrayList<Type>();
 		upperBoundsList.addAll(Arrays.asList(varMap.map(variable.getBounds())));
@@ -44,5 +48,10 @@ class CaptureTypeImpl implements CaptureType {
 	public Type[] getUpperBounds() {
 		assert upperBounds != null;
 		return upperBounds.clone();
+	}
+	
+	@Override
+	public String toString() {
+		return "capture of " + wildcard;
 	}
 }

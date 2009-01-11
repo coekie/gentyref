@@ -40,4 +40,9 @@ class GenericArrayTypeImpl implements GenericArrayType {
 	public int hashCode() {
 		return componentType.hashCode() * 7;
 	}
+	
+	@Override
+	public String toString() {
+		return componentType + "[]";
+	}
 }

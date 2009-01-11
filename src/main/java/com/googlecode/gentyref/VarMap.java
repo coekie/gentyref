@@ -51,7 +51,7 @@ class VarMap {
 			return new ParameterizedTypeImpl((Class<?>)pType.getRawType(), map(pType.getActualTypeArguments()), pType.getOwnerType() == null ? pType.getOwnerType() : map(pType.getOwnerType()));
 		} else if (type instanceof WildcardType) {
 			WildcardType wType = (WildcardType) type;
-			return new WildcardTypeImpl(map(wType.getLowerBounds()), map(wType.getUpperBounds()));
+			return new WildcardTypeImpl(map(wType.getUpperBounds()), map(wType.getLowerBounds()));
 		} else if (type instanceof GenericArrayType) {
 			return GenericArrayTypeImpl.createArrayType(map(((GenericArrayType)type).getGenericComponentType()));
 		} else {
@@ -66,6 +66,4 @@ class VarMap {
 		}
 		return result;
 	}
-	
-
 }

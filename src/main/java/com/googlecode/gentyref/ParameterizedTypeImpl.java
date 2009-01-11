@@ -45,4 +45,34 @@ class ParameterizedTypeImpl implements ParameterizedType {
 			result ^= ownerType.hashCode();
 		return result;
 	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		
+		String clazz = rawType.getName();
+		
+		if (ownerType != null) {
+			sb.append(GenericTypeReflector.toString(ownerType)).append('.');
+			
+			String prefix = (ownerType instanceof ParameterizedType) ? ((Class<?>)((ParameterizedType)ownerType).getRawType()).getName() + '$'
+					: ((Class<?>)ownerType).getName() + '$';
+			if (clazz.startsWith(prefix))
+				clazz = clazz.substring(prefix.length());
+		}
+		sb.append(clazz);
+		
+		if(actualTypeArguments.length != 0) {
+			sb.append('<');
+			for (int i = 0; i < actualTypeArguments.length; i++) {
+				Type arg = actualTypeArguments[i];
+				if (i != 0)
+					sb.append(", ");
+				sb.append(GenericTypeReflector.toString(arg));
+			}
+			sb.append('>');
+		}
+		
+		return sb.toString();
+	}
 }
