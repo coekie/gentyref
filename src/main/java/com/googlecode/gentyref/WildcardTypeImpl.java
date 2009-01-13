@@ -43,11 +43,11 @@ class WildcardTypeImpl implements WildcardType {
 	@Override
 	public String toString() {
 		if (lowerBounds.length > 0) {
-			return "? super " + GenericTypeReflector.toString(lowerBounds[0]);
+			return "? super " + GenericTypeReflector.getTypeName(lowerBounds[0]);
 		} else if (upperBounds[0] == Object.class) {
 			return "?";			
 		} else {
-			return "? extends " + GenericTypeReflector.toString(upperBounds[0]);
+			return "? extends " + GenericTypeReflector.getTypeName(upperBounds[0]);
 		}
 	}
 }

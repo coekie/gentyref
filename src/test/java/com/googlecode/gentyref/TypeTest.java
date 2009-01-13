@@ -81,6 +81,10 @@ public class TypeTest extends TestCase {
 				"java.util.List<?>[]");
 	}
 	
+	public void testArray() {
+		assertEquals("java.lang.String[]", GenericTypeReflector.getTypeName(String[].class));
+	}
+	
 	public void testCapture() {
 		// Note: there's no jdk counterpart for CaptureType
 		assertEquals("java.util.List<capture of ?>", GenericTypeReflector.capture(new TypeToken<List<?>>(){}.getType()).toString());

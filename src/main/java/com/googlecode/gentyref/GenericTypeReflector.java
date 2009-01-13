@@ -363,9 +363,13 @@ public class GenericTypeReflector {
 		}
 	}
 	
-	static String toString(Type type) {
+	/**
+	 * Returns the display name of a Type.
+	 */
+	public static String getTypeName(Type type) {
 		if(type instanceof Class) {
-			return ((Class<?>) type).getName();
+			Class<?> clazz = (Class<?>) type;
+			return clazz.isArray() ? (getTypeName(clazz.getComponentType()) + "[]") : clazz.getName();
 		} else {
 			return type.toString();
 		}
