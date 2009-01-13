@@ -370,11 +370,11 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 			public U f;
 		}
 		
-		// this doesn't compile in eclipse, so we hold the compilers hand by adding a step in between
-		// TODO check if this compiles with sun compiler
+		// this doesn't compile in eclipse nor with sun compiler, so we hold the compilers hand by adding some steps in between
 		// TypeToken<? extends List<? extends String>> ft = getF(new TypeToken<C<? extends String, ?>>(){});
 		TypeToken<? extends C<? extends String, ?>> tt = new TypeToken<C<? extends String, ?>>(){};
-		TypeToken<? extends List<? extends String>> ft = getF(tt);
+		TypeToken<? extends C<? extends String, ? extends List<? extends String>>> ttt = tt;
+		TypeToken<? extends List<? extends String>> ft = getF(ttt);
 
 		checkedTestInexactSupertype(COLLECTION_OF_EXT_STRING, ft);
 	}
@@ -479,8 +479,10 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 		class Middleclass extends Superclass<Integer> {}
 		class Subclass<U> extends Middleclass {}
 		
-		TypeToken<Integer> ft = getStrictF(tt(Subclass.class));
-		assertCheckedTypeEquals(tt(Integer.class), ft);
+		// doesn't compile with sun compiler (but does work in eclipse)
+//		TypeToken<Integer> ft = getStrictF(tt(Subclass.class));
+//		assertCheckedTypeEquals(tt(Integer.class), ft);
+		assertEquals(tt(Integer.class), getFieldType(Subclass.class, "f"));
 	}
 	
 	/**
