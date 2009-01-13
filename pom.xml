@@ -4,7 +4,7 @@
 	<groupId>com.googlecode.gentyref</groupId>
 	<artifactId>gentyref</artifactId>
 	<packaging>jar</packaging>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<inceptionYear>2008</inceptionYear>
 	<name>GenTyRef</name>
 	<url>http://code.google.com/p/gentyref/</url>
