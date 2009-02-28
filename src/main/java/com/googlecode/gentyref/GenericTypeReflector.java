@@ -71,7 +71,7 @@ public class GenericTypeReflector {
 	 */
 	private static boolean isMissingTypeParameters(Type type) {
 		if (type instanceof Class) {
-			for (Class<?> clazz = (Class<?>) type; clazz != null; clazz = clazz.getDeclaringClass()) {
+			for (Class<?> clazz = (Class<?>) type; clazz != null; clazz = clazz.getEnclosingClass()) {
 				if (clazz.getTypeParameters().length != 0)
 					return true;
 			}

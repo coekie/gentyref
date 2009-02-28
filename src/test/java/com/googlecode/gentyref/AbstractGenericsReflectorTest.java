@@ -644,4 +644,21 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 		testMutualSupertypes(new TypeToken<C<? extends Number, ? extends List<? extends Number>>>(){},
 				new TypeToken<C<? extends Number, ?>>(){});
 	}
+	
+	// Issue #4
+	public void testClassInMethod() throws NoSuchFieldException {
+		class Outer<T> {
+			Class<?> getInnerClass() {
+				class Inner implements WithF<T> {
+					@SuppressWarnings("unused")
+					public T f;
+				};
+				return Inner.class;
+			}
+		}
+		Class<?> inner = new Outer<String>().getInnerClass();
+		assertEquals(WithF.class, GenericTypeReflector.getExactSuperType(inner, WithF.class));
+		assertEquals(Object.class, GenericTypeReflector.getExactFieldType(inner.getField("f"), inner));
+		
+	}
 }
