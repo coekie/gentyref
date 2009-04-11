@@ -108,7 +108,7 @@ public class GenericTypeReflector {
 	
 	/**
 	 * With type a supertype of searchClass, returns the exact supertype of the given class, including type parameters.
-	 * For example, with <tt>class StringList extends List&lt;String&gt;</tt>, <tt>getExactSuperType(StringList.class, Collection.class)</tt>
+	 * For example, with <tt>class StringList implements List&lt;String&gt;</tt>, <tt>getExactSuperType(StringList.class, Collection.class)</tt>
 	 * returns a {@link ParameterizedType} representing <tt>Collection&lt;String&gt;</tt>.
 	 * <ul>
 	 * <li>Returns null if <tt>searchClass</tt> is not a superclass of type.</li>
@@ -136,6 +136,28 @@ public class GenericTypeReflector {
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * Gets the type parameter for a given type that is the value for a given type variable.
+	 * For example, with <tt>class StringList implements List&lt;String&gt;</tt>,
+	 * <tt>getTypeParameter(StringList.class, Collection.class.getTypeParameters()[0])</tt>
+	 * returns <tt>String</tt>. 
+	 *  
+	 * @param type The type to inspect.
+	 * @param variable The type variable to find the value for.
+	 * @return The type parameter for the given variable. Or null if type is not a subtype of the
+	 * 	type that declares the variable, or if the variable isn't known (because of raw types).
+	 */
+	public static Type getTypeParameter(Type type, TypeVariable<? extends Class<?>> variable) {
+		Class<?> clazz = variable.getGenericDeclaration();
+		Type superType = getExactSuperType(type, clazz);
+		if (superType instanceof ParameterizedType) {
+			int index = Arrays.asList(clazz.getTypeParameters()).indexOf(variable);
+			return ((ParameterizedType)superType).getActualTypeArguments()[index];
+		} else {
+			return null;
+		}
 	}
 	
 	/**
