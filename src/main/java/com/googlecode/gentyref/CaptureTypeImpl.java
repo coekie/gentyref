@@ -5,6 +5,7 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 class CaptureTypeImpl implements CaptureType {
 	private final WildcardType wildcard;
@@ -30,7 +31,14 @@ class CaptureTypeImpl implements CaptureType {
 	void init(VarMap varMap) {
 		ArrayList<Type> upperBoundsList = new ArrayList<Type>();
 		upperBoundsList.addAll(Arrays.asList(varMap.map(variable.getBounds())));
-		upperBoundsList.addAll(Arrays.asList(wildcard.getUpperBounds()));
+		
+		List<Type> wildcardUpperBounds = Arrays.asList(wildcard.getUpperBounds());
+		if (wildcardUpperBounds.size() > 0 && wildcardUpperBounds.get(0) == Object.class) {
+			// skip the Object bound, we already have a first upper bound from 'variable'
+			upperBoundsList.addAll(wildcardUpperBounds.subList(1, wildcardUpperBounds.size()));
+		} else {
+			upperBoundsList.addAll(wildcardUpperBounds);
+		}
 		upperBounds = new Type[upperBoundsList.size()]; 
 		upperBoundsList.toArray(upperBounds);
 	}
