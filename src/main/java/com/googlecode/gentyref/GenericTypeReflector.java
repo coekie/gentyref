@@ -10,7 +10,9 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Utility class for doing reflection on types.
@@ -394,6 +396,42 @@ public class GenericTypeReflector {
 			return clazz.isArray() ? (getTypeName(clazz.getComponentType()) + "[]") : clazz.getName();
 		} else {
 			return type.toString();
+		}
+	}
+	
+	/**
+	 * Returns list of classes and interfaces that are supertypes of the given type.
+	 * For example given this class:
+	 * <tt>class Foo&lt;A extends Number & Iterable&lt;A&gt;, B extends A&gt;</tt><br>
+	 * calling this method on type parameters <tt>B</tt> (<tt>Foo.class.getTypeParameters()[1]</tt>)
+	 * returns a list containing <tt>Number</tt> and <tt>Iterable</tt>.
+	 * <p>
+	 * This is mostly useful if you get a type from one of the other methods in <tt>GenericTypeReflector</tt>,
+	 * but you don't want to deal with all the different sorts of types,
+	 * and you are only really interested in concrete classes and interfaces.
+	 * </p>
+	 *  
+	 * @return A List of classes, each of them a supertype of the given type.
+	 * 	If the given type is a class or interface itself, returns a List with just the given type.
+	 *  The list contains no duplicates, and is ordered in the order the upper bounds are defined on the type.
+	 */
+	public static List<Class<?>> getUpperBoundClassAndInterfaces(Type type) {
+		LinkedHashSet<Class<?>> result = new LinkedHashSet<Class<?>>();
+		buildUpperBoundClassAndInterfaces(type, result);
+		return new ArrayList<Class<?>>(result);
+	}
+	
+	/**
+	 * Helper method for getUpperBoundClassAndInterfaces, adding the result to the given set.
+	 */
+	private static void buildUpperBoundClassAndInterfaces(Type type, Set<Class<?>> result) {
+		if (type instanceof ParameterizedType || type instanceof Class<?>) {
+			result.add(erase(type));
+			return;
+		}
+		
+		for (Type superType: getExactDirectSuperTypes(type)) {
+			buildUpperBoundClassAndInterfaces(superType, result);
 		}
 	}
 }
