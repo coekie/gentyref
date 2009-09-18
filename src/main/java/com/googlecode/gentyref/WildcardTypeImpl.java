@@ -19,11 +19,11 @@ class WildcardTypeImpl implements WildcardType {
 	}
 
 	public Type[] getUpperBounds() {
-		return upperBounds;
+		return upperBounds.clone();
 	}
 	
 	public Type[] getLowerBounds() {
-		return lowerBounds;
+		return lowerBounds.clone();
 	}
 	
 	@Override
