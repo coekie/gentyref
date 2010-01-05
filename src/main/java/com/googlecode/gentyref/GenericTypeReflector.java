@@ -335,7 +335,7 @@ public class GenericTypeReflector {
 	/**
 	 * Returns the exact return type of the given method in the given type.
 	 * This may be different from <tt>m.getGenericReturnType()</tt> when the method was declared in a superclass,
-	 * of <tt>type</tt> is a raw type.
+	 * or <tt>type</tt> has a type parameter that is used in the return type, or <tt>type</tt> is a raw type.
 	 */
 	public static Type getExactReturnType(Method m, Type type) {
 		Type returnType = m.getGenericReturnType();
@@ -349,7 +349,7 @@ public class GenericTypeReflector {
 	/**
 	 * Returns the exact type of the given field in the given type.
 	 * This may be different from <tt>f.getGenericType()</tt> when the field was declared in a superclass,
-	 * of <tt>type</tt> is a raw type.
+	 * or <tt>type</tt> has a type parameter that is used in the type of the field, or <tt>type</tt> is a raw type.
 	 */
 	public static Type getExactFieldType(Field f, Type type) {
 		Type returnType = f.getGenericType();
@@ -363,7 +363,7 @@ public class GenericTypeReflector {
 	/**
 	 * Returns the exact parameter types of the given method in the given type.
 	 * This may be different from <tt>m.getGenericParameterTypes()</tt> when the method was declared in a superclass,
-	 * of <tt>type</tt> is a raw type.
+	 * or <tt>type</tt> has a type parameter that is used in one of the parameters, or <tt>type</tt> is a raw type.
 	 */
 	public static Type[] getExactParameterTypes(Method m, Type type) {
 		Type[] parameterTypes = m.getGenericParameterTypes();

@@ -8,7 +8,7 @@ class GenericArrayTypeImpl implements GenericArrayType {
 	private Type componentType;
 	
 	static Class<?> createArrayType(Class<?> componentType) {
-		// there's no (clean) other way to create a array class, then create an instance of it
+		// there's no (clean) other way to create a array class, than creating an instance of it
 		return Array.newInstance(componentType, 0).getClass();
 	}
 	
