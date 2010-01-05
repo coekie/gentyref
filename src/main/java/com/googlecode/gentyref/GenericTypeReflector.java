@@ -340,6 +340,9 @@ public class GenericTypeReflector {
 	public static Type getExactReturnType(Method m, Type type) {
 		Type returnType = m.getGenericReturnType();
 		Type exactDeclaringType = getExactSuperType(capture(type), m.getDeclaringClass());
+		if (exactDeclaringType == null) { // capture(type) is not a subtype of m.getDeclaringClass()
+			throw new IllegalArgumentException("The method " + m + " is not a member of type " + type);
+		}
 		return mapTypeParameters(returnType, exactDeclaringType);
 	}
 	
@@ -351,6 +354,9 @@ public class GenericTypeReflector {
 	public static Type getExactFieldType(Field f, Type type) {
 		Type returnType = f.getGenericType();
 		Type exactDeclaringType = getExactSuperType(capture(type), f.getDeclaringClass());
+		if (exactDeclaringType == null) { // capture(type) is not a subtype of f.getDeclaringClass()
+			throw new IllegalArgumentException("The field " + f + " is not a member of type " + type);
+		}
 		return mapTypeParameters(returnType, exactDeclaringType);
 	}
 	
