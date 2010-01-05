@@ -3,6 +3,7 @@ package com.googlecode.gentyref;
 import java.awt.Dimension;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,5 +58,14 @@ public class GenericTypeReflectorTest extends AbstractGenericsReflectorTest {
 			fail("expected exception");
 		} catch (IllegalArgumentException e) { // expected
 		}
+	}
+	
+	public void testgetExactParameterTypes() throws SecurityException, NoSuchMethodException {
+		// method: boolean add(int index, E o), erasure is boolean add(int index, Object o)
+		Method getMethod = List.class.getMethod("add", int.class, Object.class);
+		Type[] result = GenericTypeReflector.getExactParameterTypes(getMethod, new TypeToken<ArrayList<String>>(){}.getType());
+		assertEquals(2, result.length);
+		assertEquals(int.class, result[0]);
+		assertEquals(String.class, result[1]);
 	}
 }

@@ -361,6 +361,25 @@ public class GenericTypeReflector {
 	}
 	
 	/**
+	 * Returns the exact parameter types of the given method in the given type.
+	 * This may be different from <tt>m.getGenericParameterTypes()</tt> when the method was declared in a superclass,
+	 * of <tt>type</tt> is a raw type.
+	 */
+	public static Type[] getExactParameterTypes(Method m, Type type) {
+		Type[] parameterTypes = m.getGenericParameterTypes();
+		Type exactDeclaringType = getExactSuperType(capture(type), m.getDeclaringClass());
+		if (exactDeclaringType == null) { // capture(type) is not a subtype of m.getDeclaringClass()
+			throw new IllegalArgumentException("The method " + m + " is not a member of type " + type);
+		}
+
+		Type[] result = new Type[parameterTypes.length];
+		for (int i = 0; i < parameterTypes.length; i++) {
+			result[i] = mapTypeParameters(parameterTypes[i], exactDeclaringType);
+		}
+		return result;
+	}
+	
+	/**
 	 * Applies capture conversion to the given type.
 	 */
 	public static Type capture(Type type) {
