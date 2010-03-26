@@ -109,15 +109,19 @@ public class GenericTypeReflector {
 	}
 	
 	/**
-	 * With type a supertype of searchClass, returns the exact supertype of the given class, including type parameters.
-	 * For example, with <tt>class StringList implements List&lt;String&gt;</tt>, <tt>getExactSuperType(StringList.class, Collection.class)</tt>
-	 * returns a {@link ParameterizedType} representing <tt>Collection&lt;String&gt;</tt>.
+	 * Finds the most specific supertype of <tt>type</tt> whose erasure is <tt>searchClass</tt>.
+	 * In other words, returns a type representing the class <tt>searchClass</tt> plus its exact type parameters in <tt>type</tt>.
+	 * 
 	 * <ul>
+	 * <li>Returns an instance of {@link ParameterizedType} if <tt>searchClass</tt> is a real class or interface and <tt>type</tt> has parameters for it</li>
+	 * <li>Returns an instance of {@link GenericArrayType} if <tt>searchClass</tt> is an array type, and <tt>type</tt> has type parameters for it</li>
+	 * <li>Returns an instance of {@link Class} if <tt>type</tt> is a raw type, or has no type parameters for <tt>searchClass</tt></li>
 	 * <li>Returns null if <tt>searchClass</tt> is not a superclass of type.</li>
-	 * <li>Returns an instance of {@link Class} if <tt>type</tt> if it is a raw type, or has no type parameters</li>
-	 * <li>Returns an instance of {@link ParameterizedType} if the type does have parameters</li>
-	 * <li>Returns an instance of {@link GenericArrayType} if <tt>searchClass</tt> is an array type, and the actual type has type parameters</li>
 	 * </ul>
+	 * 
+	 * <p>For example, with <tt>class StringList implements List&lt;String&gt;</tt>, <tt>getExactSuperType(StringList.class, Collection.class)</tt>
+	 * returns a {@link ParameterizedType} representing <tt>Collection&lt;String&gt;</tt>.
+	 * </p>
 	 */
 	public static Type getExactSuperType(Type type, Class<?> searchClass) {
 		if (type instanceof ParameterizedType || type instanceof Class || type instanceof GenericArrayType) {
