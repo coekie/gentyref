@@ -46,25 +46,41 @@ public class SamplesTest extends TestCase {
 		assertFalse(isStringProcessor(IntegerProcessor.class));
 	}
 	
-	abstract class Lister<T> {
+	abstract class Collector<T> {
 		public List<T> list() {
 			return null;
 		}
+		public void add(T item) {
+		}
 	}
 	
-	class StringLister extends Lister<String> {
+	class StringCollector extends Collector<String> {
 	}
 	
-	public void testFooBar() throws NoSuchMethodException {
-		Method listMethod = StringLister.class.getMethod("list");
+	public void testCollectorList() throws NoSuchMethodException {
+		Method listMethod = StringCollector.class.getMethod("list");
 		
 		// java returns List<T>
 		Type returnType = listMethod.getGenericReturnType();
 		assertTrue(returnType instanceof ParameterizedType);
-		assertTrue(((ParameterizedType)returnType).getActualTypeArguments()[0] instanceof TypeVariable);
+		assertTrue(((ParameterizedType)returnType).getActualTypeArguments()[0] instanceof TypeVariable<?>);
 		
 		// we get List<String>
-		Type exactReturnType = GenericTypeReflector.getExactReturnType(listMethod, StringLister.class);
+		Type exactReturnType = GenericTypeReflector.getExactReturnType(listMethod, StringCollector.class);
 		assertEquals(new TypeToken<List<String>>(){}.getType(), exactReturnType);
+	}
+	
+	public void testCollectorAdd() throws NoSuchMethodException {
+		Method addMethod = StringCollector.class.getMethod("add", Object.class);
+		
+		// java returns T
+		Type[] parameterTypes = addMethod.getGenericParameterTypes();
+		assertEquals(1, parameterTypes.length);
+		assertTrue(parameterTypes[0] instanceof TypeVariable<?>);
+		
+		// we get String
+		Type[] exactParameterTypes = GenericTypeReflector.getExactParameterTypes(addMethod, StringCollector.class);
+		assertEquals(1, exactParameterTypes.length);
+		assertEquals(String.class, exactParameterTypes[0]);
 	}
 }
