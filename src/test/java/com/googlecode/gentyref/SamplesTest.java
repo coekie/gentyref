@@ -73,12 +73,12 @@ public class SamplesTest extends TestCase {
 	public void testCollectorAdd() throws NoSuchMethodException {
 		Method addMethod = StringCollector.class.getMethod("add", Object.class);
 		
-		// java returns T
+		// returns [T]
 		Type[] parameterTypes = addMethod.getGenericParameterTypes();
 		assertEquals(1, parameterTypes.length);
 		assertTrue(parameterTypes[0] instanceof TypeVariable<?>);
 		
-		// we get String
+		// returns [String]
 		Type[] exactParameterTypes = GenericTypeReflector.getExactParameterTypes(addMethod, StringCollector.class);
 		assertEquals(1, exactParameterTypes.length);
 		assertEquals(String.class, exactParameterTypes[0]);
