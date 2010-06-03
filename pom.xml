@@ -8,7 +8,19 @@
 	<inceptionYear>2008</inceptionYear>
 	<name>GenTyRef</name>
 	<url>http://code.google.com/p/gentyref/</url>
-	<description>Generics type reflection library for Java</description>
+	<description>Generic type reflection library</description>
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<scm>
+		<connection>scm:svn:http://gentyref.googlecode.com/svn/trunk/</connection>
+		<developerConnection>https://gentyref.googlecode.com/svn/trunk/</developerConnection>
+		<url>http://code.google.com/p/gentyref/source</url>
+	</scm>
 	<distributionManagement>
 		<repository>
 			<id>local.repo</id>
@@ -85,12 +97,35 @@
 					<show>public</show>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-			</plugin>
+
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-release-plugin</artifactId>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 	<developers>
 		<developer>
 			<name>Wouter Coekaerts</name>
