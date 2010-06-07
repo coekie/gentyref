@@ -44,7 +44,10 @@ class VarMap {
 		if (type instanceof Class) {
 			return type;
 		} else if (type instanceof TypeVariable) {
-			assert map.containsKey(type);
+			TypeVariable tv = (TypeVariable) type;
+			if (!map.containsKey(type)) {
+				throw new UnresolvedTypeVariableException(tv);
+			}
 			return map.get(type);
 		} else if (type instanceof ParameterizedType) {
 			ParameterizedType pType = (ParameterizedType) type;
