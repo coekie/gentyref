@@ -282,6 +282,12 @@ public class GenericTypeReflector {
 			
 			Type[] superInterfaces = clazz.getGenericInterfaces();
 			Type superClass = clazz.getGenericSuperclass();
+			
+			// the only supertype of an interface without superinterfaces is Object
+			if (superClass == null && superInterfaces.length == 0 && clazz.isInterface()) {
+				return new Type[] {Object.class};
+			}
+			
 			Type[] result;
 			int resultIndex;
 			if (superClass == null) {
