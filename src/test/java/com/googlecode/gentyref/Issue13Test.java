@@ -23,7 +23,7 @@ public class Issue13Test extends TestCase {
 	 * Test that toString method can be resolved in any class, interface or array
 	 */
     public void testObjectMethodOnInterface() throws NoSuchMethodException {
-        Method toString = Object.class.getMethod("toString", new Class<?>[]{});
+    	Method toString = Object.class.getMethod("toString", new Class<?>[]{});
         assertEquals(String.class, GenericTypeReflector.getExactReturnType(toString, ArrayList.class));
 		assertEquals(String.class, GenericTypeReflector.getExactReturnType(toString, List.class));
 		assertEquals(String.class, GenericTypeReflector.getExactReturnType(toString, String[].class));
