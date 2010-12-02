@@ -251,6 +251,13 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 		checkedTestExactSuperclassChain(COLLECTION_OF_STRING, LIST_OF_STRING, ARRAYLIST_OF_STRING);
 		testNotSupertypes(COLLECTION_OF_STRING, new TypeToken<ArrayList<Integer>>(){});
 	}
+	
+	/**
+	 * Dummy method to force the compiler to see the reference to the given local class.
+	 * Workaround for Issue 15 (http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7003595)
+	 */
+	private void use(Class<?> clazz) {
+	}
 
 	public interface StringList extends List<String> {
 	}
@@ -308,6 +315,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 			@SuppressWarnings("unused")
 			public List<T> f;
 		}
+		use(C.class);
 		
 		TypeToken<List<String>> ft = getStrictF(new TypeToken<C<String>>(){});
 		assertCheckedTypeEquals(LIST_OF_STRING, ft);
@@ -323,6 +331,8 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 			@SuppressWarnings("unused")
 			public List<List<T>> f;
 		}
+		use(C.class);
+		
 		TypeToken<List<List<String>>> ft = getStrictF(new TypeToken<C<String>>(){});
 		assertCheckedTypeEquals(LIST_OF_LIST_OF_STRING, ft);
 	}
@@ -348,6 +358,8 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 			@SuppressWarnings("unused")
 			public T f;
 		}
+		use(C.class);
+		
 		TypeToken<? extends List<List<String>>> ft = getF(new TypeToken<C<?>>(){});
 		checkedTestExactSuperclass(COLLECTION_OF_LIST_OF_STRING, ft);
 	}
@@ -384,6 +396,8 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 			@SuppressWarnings("unused")
 			public List<? extends T> f;
 		}
+		use(C.class);
+		
 		TypeToken<? extends List<? extends String>> ft = getF(new TypeToken<C<String>>(){});
 		checkedTestExactSuperclass(COLLECTION_OF_EXT_STRING, ft);
 	}
@@ -393,6 +407,8 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 			@SuppressWarnings("unused")
 			public List<? super T> f;
 		}
+		use(C.class);
+		
 		TypeToken<? extends List<? super String>> ft = getF(new TypeToken<C<String>>(){});
 		checkedTestExactSuperclass(COLLECTION_OF_SUPER_STRING, ft);
 	}
@@ -408,6 +424,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 				public List<List<? extends T>> f;
 			}
 		}
+		use(Outer.class);
 		
 		TypeToken<String> ft = getStrictF(new TypeToken<Outer<String>.Inner>(){});
 		assertCheckedTypeEquals(tt(String.class), ft);
@@ -421,6 +438,8 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 			class Inner extends ArrayList<T> {
 			}
 		}
+		use(Outer.class);
+		
 		checkedTestExactSuperclass(COLLECTION_OF_STRING, new TypeToken<Outer<String>.Inner>(){});
 	}
 	
@@ -429,6 +448,8 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 			class Inner<S> {
 			}
 		}
+		use(Outer.class);
+		
 		// inner param different
 		testNotSupertypes(new TypeToken<Outer<String>.Inner<Integer>>(){}, new TypeToken<Outer<String>.Inner<String>>(){});
 		// outer param different
@@ -444,6 +465,8 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 			public T t;
 		}
 		class Subclass<U> extends Superclass<Integer>{}
+		use(Superclass.class);
+		
 		assertEquals(tt(Number.class), getFieldType(Subclass.class, "t"));
 		
 		Number n = new Subclass().t; // compile check
@@ -461,6 +484,8 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 			public U u;
 		}
 		class Subclass<T> extends Superclass<T, Integer> {}
+		use(Superclass.class);
+		
 		assertEquals(tt(Number.class), getFieldType(Subclass.class, "u"));
 		
 		Number n = new Subclass().u; // compile check
@@ -478,6 +503,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 		}
 		class Middleclass extends Superclass<Integer> {}
 		class Subclass<U> extends Middleclass {}
+		use(Superclass.class);
 		
 		// doesn't compile with sun compiler (but does work in eclipse)
 //		TypeToken<Integer> ft = getStrictF(tt(Subclass.class));
@@ -551,6 +577,8 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 			@SuppressWarnings("unused")
 			public T[] f;
 		}
+		use(C.class);
+		
 		TypeToken<String[]> ft = getStrictF(new TypeToken<C<String>>(){});
 		assertCheckedTypeEquals(tt(String[].class), ft);
 	}
@@ -560,6 +588,8 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 			@SuppressWarnings("unused")
 			public List<T>[] f;
 		}
+		use(C.class);
+		
 		TypeToken<List<String>[]> ft = getStrictF(new TypeToken<C<String>>(){});
 		assertCheckedTypeEquals(new TypeToken<List<String>[]>(){}, ft);
 	}
@@ -594,6 +624,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 	
 	public void testCaptureBeforeReplaceSupertype() {
 		class C<T> extends ArrayList<List<T>> {}
+		use(C.class);
 		testNotSupertypes(LIST_OF_LIST_OF_EXT_STRING, new TypeToken<C<? extends String>>(){});
 		// if it was a supertype, this would be valid:
 //		List<List<? extends String>> o = new C<? extends String>();
@@ -630,6 +661,8 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 	 */
 	public void testCaptureContainment() {
 		class C<T extends Number> {}
+		use(C.class);
+		
 		checkedTestMutualSupertypes(new TypeToken<C<? extends Number>>(){},
 				new TypeToken<C<?>>(){});
 	}
