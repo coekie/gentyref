@@ -37,6 +37,10 @@
 		<system>Google Code Issue Tracking</system>
 		<url>http://code.google.com/p/gentyref/issues/list</url>
 	</issueManagement>
+	
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 
 	<dependencies>
 		<dependency>
