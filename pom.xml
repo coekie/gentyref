@@ -17,8 +17,8 @@
 		</license>
 	</licenses>
 	<scm>
-		<connection>scm:svn:http://gentyref.googlecode.com/svn/trunk/</connection>
-		<developerConnection>https://gentyref.googlecode.com/svn/trunk/</developerConnection>
+		<connection>scm:git:https://code.google.com/p/gentyref/</connection>
+		<developerConnection>scm:git:https://code.google.com/p/gentyref/</developerConnection>
 		<url>http://code.google.com/p/gentyref/source</url>
 	</scm>
 	<distributionManagement>
@@ -118,6 +118,11 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-release-plugin</artifactId>
+						<version>2.2.1</version>
+						<configuration>
+							<pushChanges>false</pushChanges>
+							<tagNameFormat>v@{project.version}</tagNameFormat>
+						</configuration>
 					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -131,6 +136,9 @@
 								</goals>
 							</execution>
 						</executions>
+						<configuration>
+							<useAgent>true</useAgent>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>
