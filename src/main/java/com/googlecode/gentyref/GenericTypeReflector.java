@@ -71,7 +71,7 @@ public class GenericTypeReflector {
 	 * Checks if the given type is a class that is supposed to have type parameters, but doesn't.
 	 * In other words, if it's a really raw type.
 	 */
-	private static boolean isMissingTypeParameters(Type type) {
+	static boolean isMissingTypeParameters(Type type) {
 		if (type instanceof Class) {
 			for (Class<?> clazz = (Class<?>) type; clazz != null; clazz = clazz.getEnclosingClass()) {
 				if (clazz.getTypeParameters().length != 0)
@@ -315,6 +315,8 @@ public class GenericTypeReflector {
 			return ((CaptureType)type).getUpperBounds();
 		} else if (type instanceof GenericArrayType) {
 			return getArrayExactDirectSuperTypes(type);
+		} else if (type == null) {
+			throw new NullPointerException();
 		} else {
 			throw new RuntimeException("not implemented type: " + type);
 		}
@@ -393,33 +395,47 @@ public class GenericTypeReflector {
 	 * Applies capture conversion to the given type.
 	 */
 	public static Type capture(Type type) {
-		VarMap varMap = new VarMap();
-		List<CaptureTypeImpl> toInit = new ArrayList<CaptureTypeImpl>();
 		if (type instanceof ParameterizedType) {
-			ParameterizedType pType = (ParameterizedType)type;
-			Class<?> clazz = (Class<?>)pType.getRawType();
-			Type[] arguments = pType.getActualTypeArguments();
-			TypeVariable<?>[] vars = clazz.getTypeParameters();
-			Type[] capturedArguments = new Type[arguments.length];
-			assert arguments.length == vars.length;
-			for (int i = 0; i < arguments.length; i++) {
-				Type argument = arguments[i];
-				if (argument instanceof WildcardType) {
-					CaptureTypeImpl captured = new CaptureTypeImpl((WildcardType)argument, vars[i]);
-					argument = captured;
-					toInit.add(captured);
-				}
-				capturedArguments[i] = argument;
-				varMap.add(vars[i], argument);
-			}
-			for (CaptureTypeImpl captured : toInit) {
-				captured.init(varMap);
-			}
-			Type ownerType = (pType.getOwnerType() == null) ? null : capture(pType.getOwnerType());
-			return new ParameterizedTypeImpl(clazz, capturedArguments, ownerType);
+			return capture((ParameterizedType)type);
 		} else {
 			return type;
 		}
+	}
+	
+	/**
+	 * Applies capture conversion to the given type.
+	 * @see #capture(Type)
+	 */
+	public static ParameterizedType capture(ParameterizedType type) {
+		// the map from parameters to their captured equivalent
+		
+		VarMap varMap = new VarMap();
+		// list of CaptureTypes we've created but aren't fully initialized yet
+		// we can only initialize them *after* we've fully populated varMap
+		List<CaptureTypeImpl> toInit = new ArrayList<CaptureTypeImpl>();
+		
+		Class<?> clazz = (Class<?>)type.getRawType();
+		Type[] arguments = type.getActualTypeArguments();
+		TypeVariable<?>[] vars = clazz.getTypeParameters();
+		Type[] capturedArguments = new Type[arguments.length];
+		
+		assert arguments.length == vars.length; // NICE throw an explaining exception
+		
+		for (int i = 0; i < arguments.length; i++) {
+			Type argument = arguments[i];
+			if (argument instanceof WildcardType) {
+				CaptureTypeImpl captured = new CaptureTypeImpl((WildcardType)argument, vars[i]);
+				argument = captured;
+				toInit.add(captured);
+			}
+			capturedArguments[i] = argument;
+			varMap.add(vars[i], argument);
+		}
+		for (CaptureTypeImpl captured : toInit) {
+			captured.init(varMap);
+		}
+		Type ownerType = (type.getOwnerType() == null) ? null : capture(type.getOwnerType());
+		return new ParameterizedTypeImpl(clazz, capturedArguments, ownerType);
 	}
 	
 	/**

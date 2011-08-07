@@ -25,6 +25,32 @@ class VarMap {
 	VarMap() {
 	}
 	
+	/**
+	 * Creates a VarMap mapping the type parameters of the class used in <tt>type</tt> to their actual value.
+	 */
+	VarMap(ParameterizedType type) {
+		// loop over the type and its generic owners
+		do {
+			Class<?> clazz = (Class<?>)type.getRawType();
+			Type[] arguments = type.getActualTypeArguments();
+			TypeVariable<?>[] typeParameters = clazz.getTypeParameters();
+			
+			// since we're looping over two arrays in parallel, just to be sure check they have the same size
+			if (arguments.length != typeParameters.length) {
+				throw new IllegalStateException("The given type [" + type + "] is inconsistent: it has " +
+						arguments.length + " arguments instead of " + typeParameters.length);
+			}
+
+			
+			for (int i = 0; i < arguments.length; i++) {
+				add(typeParameters[i], arguments[i]);
+			}
+			
+			Type owner = type.getOwnerType();
+			type = (owner instanceof ParameterizedType) ? (ParameterizedType)owner : null;
+		} while (type != null);
+	}
+	
 	void add(TypeVariable<?> variable, Type value) {
 		map.put(variable, value);
 	}

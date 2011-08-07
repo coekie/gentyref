@@ -108,7 +108,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 	}
 	
 	/**
-	 * Like testExactSuperclass, but the types of the arguments are checked so only valid test cases can be applied
+	 * Checks if the given types are equal
 	 */
 	private <T> void assertCheckedTypeEquals(TypeToken<T> expected, TypeToken<T> type) {
 		assertEquals(expected, type);
