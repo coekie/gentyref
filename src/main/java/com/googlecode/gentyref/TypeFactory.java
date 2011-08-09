@@ -227,5 +227,25 @@ public class TypeFactory {
 		}
 		return new WildcardTypeImpl(new Type[]{Object.class}, new Type[]{lowerBound});
 	}
+	
+	/**
+	 * Creates a array type.
+	 * <p>
+	 * If <tt>componentType</tt> is not a generic type but a {@link Class} object,
+	 * this returns the {@link Class} representing the non-generic array type.
+	 * Otherwise, returns a {@link GenericArrayType}.
+	 * <p>
+	 * For example: <ul>
+	 *    <li><tt>arrayOf(String.class)</tt> returns <tt>String[].class</tt></li>
+	 *    <li><tt>arrayOf(parameterizedClass(List.class, String.class))</tt> returns the {@link GenericArrayType}
+	 *     for <tt>List&lt;String&gt;[]</tt>
+	 * </ul>
+	 * 
+	 * @param componentType The type of the components of the array.
+	 * @return An array type.
+	 */
+	public static Type arrayOf(Type componentType) {
+		return GenericArrayTypeImpl.createArrayType(componentType);
+	}
 
 }

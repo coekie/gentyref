@@ -453,6 +453,15 @@ public class TypeFactoryTest extends TestCase {
 		assertEquals(getFirstTypeArgument(new TypeToken<List<? super String>>(){}),
 				TypeFactory.wildcardSuper(String.class));
 	}
+	
+	public void testClassArray() {
+		assertSame(String[].class, TypeFactory.arrayOf(String.class));
+	}
+	
+	public void testGenericArray() {
+		assertEquals(new TypeToken<List<String>[]>(){}.getType(),
+				TypeFactory.arrayOf(parameterizedClass(List.class, String.class)));
+	}
 }
 
 
