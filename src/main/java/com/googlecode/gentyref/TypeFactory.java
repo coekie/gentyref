@@ -4,6 +4,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 
 /**
  * Utility class for creating instances of {@link Type}.
@@ -12,6 +13,8 @@ import java.lang.reflect.TypeVariable;
  * @author Wouter Coekaerts <wouter@coekaerts.be>
  */
 public class TypeFactory {
+	private static final WildcardType UNBOUND_WILDCARD = new WildcardTypeImpl(new Type[]{Object.class}, new Type[]{});
+	
 	/**
 	 * Creates a type of class <tt>clazz</tt> with <tt>arguments</tt> as type arguments.
 	 * <p>
@@ -183,6 +186,46 @@ public class TypeFactory {
 				return transformedOwner;
 			}
 		}
+	}
+	
+	/**
+	 * Returns the wildcard type without bounds.
+	 * This is the '<tt>?</tt>' in for example <tt>List&lt;?&gt</tt>.
+	 * 
+	 * @return The unbound wildcard type
+	 */
+	public static WildcardType unboundWildcard() {
+		return UNBOUND_WILDCARD;
+	}
+	
+	/**
+	 * Creates a wildcard type with an upper bound.
+	 * <p>
+	 * For example <tt>wildcardExtends(String.class)</tt> returns the type <tt>? extends String</tt>. 
+	 * 
+	 * @param upperBound Upper bound of the wildcard
+	 * @return A wildcard type
+	 */
+	public static WildcardType wildcardExtends(Type upperBound) {
+		if (upperBound == null) {
+			throw new NullPointerException();
+		}
+		return new WildcardTypeImpl(new Type[]{upperBound}, new Type[]{});
+	}
+	
+	/**
+	 * Creates a wildcard type with a lower bound.
+	 * <p>
+	 * For example <tt>wildcardSuper(String.class)</tt> returns the type <tt>? super String</tt>. 
+	 * 
+	 * @param lowerBound Lower bound of the wildcard
+	 * @return A wildcard type
+	 */
+	public static WildcardType wildcardSuper(Type lowerBound) {
+		if (lowerBound == null) {
+			throw new NullPointerException();
+		}
+		return new WildcardTypeImpl(new Type[]{Object.class}, new Type[]{lowerBound});
 	}
 
 }

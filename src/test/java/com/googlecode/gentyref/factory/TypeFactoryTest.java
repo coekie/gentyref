@@ -3,6 +3,9 @@ package com.googlecode.gentyref.factory;
 import static com.googlecode.gentyref.TypeFactory.innerClass;
 import static com.googlecode.gentyref.TypeFactory.parameterizedClass;
 import static com.googlecode.gentyref.TypeFactory.parameterizedInnerClass;
+import static com.googlecode.gentyref.TypeFactory.unboundWildcard;
+import static com.googlecode.gentyref.TypeFactory.wildcardExtends;
+import static com.googlecode.gentyref.TypeFactory.wildcardSuper;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -12,6 +15,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import com.googlecode.gentyref.TypeFactory;
 import com.googlecode.gentyref.TypeToken;
 import com.googlecode.gentyref.factory.GenericOuter.DoubleGeneric;
 import com.googlecode.gentyref.factory.GenericOuter.Inner;
@@ -375,14 +379,34 @@ public class TypeFactoryTest extends TestCase {
 		}
 	}
 	
-	// TODO How do we create a wildcard type?
-	//  - WildcardToken<TypeToken<? extends Integer>>.getType() ?
-	//  - createUnboundWildcard(), createWildcardExtends(Type), createWildcardSuper(Type) 
-	// TODO testWildcardTypeArgumentInBound
-//	public void testWildcardTypeArgumentInBound() {
-//		class C<A extends Number>{}
-//		assertEquals(new TypeToken<C<? extends Integer>>(){}.getType(),
-//				createClassType(C.class, new TypeToken<? extends Integer>(){}.getType()));
+	public void testUnboundWildcardTypeArgumentInBound() {
+		assertEquals(new TypeToken<Bound<?>>(){}.getType(),
+				parameterizedClass(Bound.class, unboundWildcard()));
+	}
+	
+	public void testWildcardExtendsTypeArgumentInBound() {
+		assertEquals(new TypeToken<Bound<? extends Integer>>(){}.getType(),
+				parameterizedClass(Bound.class, wildcardExtends(Integer.class)));
+	}
+	
+	public void testUnrelatedWildcardExtendsTypeArgumentInBound() {
+		assertEquals(new TypeToken<Bound<? extends Runnable>>(){}.getType(),
+				parameterizedClass(Bound.class, wildcardExtends(Runnable.class)));
+	}
+	
+	public void testWildcardSuperTypeArgumentInBound() {
+		assertEquals(new TypeToken<Bound<? super Integer>>(){}.getType(),
+				parameterizedClass(Bound.class, wildcardSuper(Integer.class)));
+	}
+	
+	// TODO checking if wildcard parameters are within their bounds
+	// http://stackoverflow.com/questions/7003009
+//	public void testWildcardSuperTypeArgumentNotInBound() {
+//		try {
+//			parameterizedClass(Bound.class, wildcardSuper(String.class));
+//			fail("expected exception");
+//		} catch (IllegalArgumentException expected) {
+//		}
 //	}
 	
 	// TODO more wildcard parameter tests...
@@ -410,6 +434,24 @@ public class TypeFactoryTest extends TestCase {
 			fail("expected exception");
 		} catch (IllegalArgumentException expected) {
 		}
+	}
+	
+	private Type getFirstTypeArgument(TypeToken<?> typeToken) {
+		return ((ParameterizedType) typeToken.getType()).getActualTypeArguments()[0];
+	}
+	
+	public void testUnboundWildcard() {
+		assertEquals(getFirstTypeArgument(new TypeToken<List<?>>(){}), TypeFactory.unboundWildcard());
+	}
+	
+	public void testWildcardExtends() {
+		assertEquals(getFirstTypeArgument(new TypeToken<List<? extends String>>(){}),
+				TypeFactory.wildcardExtends(String.class));
+	}
+	
+	public void testWildcardSuper() {
+		assertEquals(getFirstTypeArgument(new TypeToken<List<? super String>>(){}),
+				TypeFactory.wildcardSuper(String.class));
 	}
 }
 
