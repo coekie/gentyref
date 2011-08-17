@@ -12,10 +12,10 @@ import junit.framework.TestCase;
  * @author Wouter Coekaerts <wouter@coekaerts.be>
  */
 public class CaptureSamplesTest extends TestCase {
-		class Foo<T> {
-			public List<? extends Number> listWildcard;
-			public List<T> listT;
-		}
+	class Foo<T> {
+		List<? extends Number> listWildcard;
+		List<T> listT;
+	}
 	
 	public void testFoo() throws NoSuchFieldException {
 		Foo<? extends Number> foo = new Foo<Integer>();
@@ -24,11 +24,25 @@ public class CaptureSamplesTest extends TestCase {
 		
 		Type fooWildcard = new TypeToken<Foo<? extends Number>>(){}.getType();
 		
-		Type listWildcardFieldType = GenericTypeReflector.getExactFieldType(Foo.class.getField("listWildcard"), fooWildcard);
-		Type listTFieldType = GenericTypeReflector.getExactFieldType(Foo.class.getField("listT"), fooWildcard);
+		Type listWildcardFieldType = GenericTypeReflector.getExactFieldType(Foo.class.getDeclaredField("listWildcard"), fooWildcard);
+		Type listTFieldType = GenericTypeReflector.getExactFieldType(Foo.class.getDeclaredField("listT"), fooWildcard);
 		
 		assertEquals(new TypeToken<List<? extends Number>>(){}.getType(), listWildcardFieldType);
 		assertTrue(GenericTypeReflector.isSuperType(listWildcardFieldType, new TypeToken<ArrayList<Long>>(){}.getType()));
 		assertFalse(GenericTypeReflector.isSuperType(listTFieldType, new TypeToken<ArrayList<Long>>(){}.getType()));
+	}
+	
+	class Bar<T extends Number> {
+		T t;
+	}
+	
+	@SuppressWarnings("unused")
+	public void testBar() throws NoSuchFieldException {
+		Bar<?> bar = new Bar<Integer>();
+		Number n = bar.t;
+		
+		Type barType = new TypeToken<Bar<?>>(){}.getType();
+		Type captureType = GenericTypeReflector.getExactFieldType(Bar.class.getDeclaredField("t"), barType);
+		assertTrue(GenericTypeReflector.isSuperType(Number.class, captureType));
 	}
 }
