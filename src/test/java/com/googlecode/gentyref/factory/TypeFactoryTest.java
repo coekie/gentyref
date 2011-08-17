@@ -15,6 +15,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import com.googlecode.gentyref.TypeArgumentNotInBoundException;
 import com.googlecode.gentyref.TypeFactory;
 import com.googlecode.gentyref.TypeToken;
 import com.googlecode.gentyref.factory.GenericOuter.DoubleGeneric;
@@ -389,6 +390,14 @@ public class TypeFactoryTest extends TestCase {
 				parameterizedClass(Bound.class, wildcardExtends(Integer.class)));
 	}
 	
+	public void testWildcardExtendsTypeArgumentNotInBound() {
+		try {
+			parameterizedClass(Bound.class, wildcardExtends(Thread.class));
+			fail("expected exception");
+		} catch (IllegalArgumentException expected) {
+		}
+	}
+	
 	public void testUnrelatedWildcardExtendsTypeArgumentInBound() {
 		assertEquals(new TypeToken<Bound<? extends Runnable>>(){}.getType(),
 				parameterizedClass(Bound.class, wildcardExtends(Runnable.class)));
@@ -399,20 +408,41 @@ public class TypeFactoryTest extends TestCase {
 				parameterizedClass(Bound.class, wildcardSuper(Integer.class)));
 	}
 	
-	// TODO checking if wildcard parameters are within their bounds
-	// http://stackoverflow.com/questions/7003009
-//	public void testWildcardSuperTypeArgumentNotInBound() {
-//		try {
-//			parameterizedClass(Bound.class, wildcardSuper(String.class));
-//			fail("expected exception");
-//		} catch (IllegalArgumentException expected) {
-//		}
-//	}
+	public void testWildcardSuperTypeArgumentNotInBound() {
+		try {
+			parameterizedClass(Bound.class, wildcardSuper(String.class));
+			fail("expected exception");
+		} catch (IllegalArgumentException expected) {
+		}
+	}
 	
-	// TODO more wildcard parameter tests...
-	// e.g. with lowerbound not in bound: Bound<? super String>
-	// ReferingBound<?, String>
-	// ReferingBound<List<?>, ?>
+	public void testWildcardInReferingBound() {
+		assertEquals(new TypeToken<ReferingBound<?, String>>(){}.getType(),
+				parameterizedClass(ReferingBound.class, unboundWildcard(), String.class));
+	}
+	
+	public void testInReferingToWildcardBound() {
+		// JDK doesn't allow this, but the eclipse compiler does.
+		// We prefer to be lenient, so we allow it.
+		// But we can't assertEquals it to a TypeToken because that wouldn't compile.
+		parameterizedClass(
+				ReferingBound.class,
+				parameterizedClass(List.class, wildcardExtends(Integer.class)),
+				wildcardExtends(Number.class)
+		);
+	}
+	
+	public void testNotInReferingToWildcardBound() {
+		try {
+			parameterizedClass(
+					ReferingBound.class,
+					parameterizedClass(List.class, wildcardExtends(Number.class)),
+					wildcardExtends(Integer.class)
+			);
+			fail("expected exception");
+		} catch (TypeArgumentNotInBoundException expected) {
+		}
+	}
 	
 	public void testLocalClass() {
 		class Local<T> {}

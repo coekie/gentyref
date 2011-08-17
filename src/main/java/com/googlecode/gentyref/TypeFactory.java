@@ -118,17 +118,10 @@ public class TypeFactory {
 	 * Check if the type arguments of the given type are within the bounds declared on the type parameters.
 	 * Only the type arguments of the type itself are checked, the possible owner type is assumed to be valid.
 	 * <p>
-	 * It does the check described in
-	 * the <a href="http://java.sun.com/docs/books/jls/third_edition/html/typesValues.html#4.5">JLS</a>:
-	 * <i>
-	 * Let A1 , ... , An be the formal type parameters of C, and let be Bi be the declared bound of Ai.
-	 * The notation [Ai := Ti] denotes substitution of the type variable Ai with the type Ti, for 1 <= i <= n.
-	 * <p>
-	 * Let P = G<T1, ..., Tn> be a parameterized type.
-	 * It must be the case that, after P is subjected to capture conversion (§5.1.10) resulting in the type
-	 * G<X1, ..., Xn>, for each actual type argument Xi, 1 <= i <= n , Xi <: Bi[A1 := X1, ..., An := Xn] (§4.10),
-	 * or a compile time error occurs.
-	 * </i>
+	 * It does not follow the checks defined in the
+	 * <a href="http://java.sun.com/docs/books/jls/third_edition/html/typesValues.html#4.5">JLS</a> because there are
+	 * several problems with those (see http://stackoverflow.com/questions/7003009 for one).
+	 * Instead, this applies some intuition and follows what Java compilers seem to do. 
 	 * 
 	 * @param type possibly inconsistent type to check.
 	 * @throws IllegalArgumentException if the type arguments are not within the bounds
@@ -137,26 +130,60 @@ public class TypeFactory {
 		Type[] arguments = type.getActualTypeArguments();
 		TypeVariable<?>[] typeParameters = ((Class<?>)type.getRawType()).getTypeParameters();
 		
-		// G<X1, ..., Xn>
-		ParameterizedType capturedResult = GenericTypeReflector.capture(type);
-		// X1...Xn
-		Type[] capturedArguments = capturedResult.getActualTypeArguments();
+		// a map of type arguments in the type, to fill in variables in the bounds 
+		VarMap varMap = new VarMap(type);
 		
-		// [A1 := X1, ..., An := Xn]
-		VarMap varMap = new VarMap(capturedResult);
-		
+		// for every bound on every parameter
 		for (int i = 0; i < arguments.length; i++) {
-			// loop over all bounds in Bi
-			// (instead of treating Bi like one (intersection?) type like the JLS does)
 			for (Type bound : typeParameters[i].getBounds()) {
+				// replace type variables in the bound by their value
 				Type replacedBound = varMap.map(bound);
-				// check that Bi[A1 := X1, ..., An := Xn] :> Xi
-				if (! GenericTypeReflector.isSuperType(replacedBound, capturedArguments[i])) {
-					throw new IllegalArgumentException("Given argument " + i + " [" + arguments[i] + "]" +
-							"is not within bounds " + replacedBound);
+				
+				
+				if (arguments[i] instanceof WildcardType) {
+					WildcardType wildcardTypeParameter = (WildcardType) arguments[i];
+					
+					// Check if a type satisfying both the bounds of the variable and of the wildcard could exist
+					
+					// upper bounds must not be mutually exclusive
+					for (Type wildcardUpperBound : wildcardTypeParameter.getUpperBounds()) {
+						if (!couldHaveCommonSubtype(replacedBound, wildcardUpperBound)) {
+							throw new TypeArgumentNotInBoundException(arguments[i], typeParameters[i], bound);
+						}
+					}
+					// a lowerbound in the wildcard must satisfy every upperbound 
+					for (Type wildcardLowerBound : wildcardTypeParameter.getLowerBounds()) {
+						if (!GenericTypeReflector.isSuperType(replacedBound, wildcardLowerBound)) {
+							throw new TypeArgumentNotInBoundException(arguments[i], typeParameters[i], bound);
+						}
+					}
+				} else {
+					if (! GenericTypeReflector.isSuperType(replacedBound, arguments[i])) {
+						throw new TypeArgumentNotInBoundException(arguments[i], typeParameters[i], bound);
+					}
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Checks if the intersection of two types is not empty.
+	 */
+	private static boolean couldHaveCommonSubtype(Type type1, Type type2) {
+		// this is an optimistically naive implementation.
+		// if they are parameterized types their parameters need to be checked,...
+		// so we're just a bit too lenient here
+		
+		Class<?> erased1 = GenericTypeReflector.erase(type1);
+		Class<?> erased2 = GenericTypeReflector.erase(type2);
+		// if they are both classes
+		if (!erased1.isInterface() &&  !erased2.isInterface()) {
+			// then one needs to be a subclass of another
+			if (!erased1.isAssignableFrom(erased2) && !erased2.isAssignableFrom(erased1)) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	/**
