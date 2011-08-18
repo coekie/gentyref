@@ -70,7 +70,7 @@ class VarMap {
 		if (type instanceof Class) {
 			return type;
 		} else if (type instanceof TypeVariable) {
-			TypeVariable tv = (TypeVariable) type;
+			TypeVariable<?> tv = (TypeVariable<?>) type;
 			if (!map.containsKey(type)) {
 				throw new UnresolvedTypeVariableException(tv);
 			}

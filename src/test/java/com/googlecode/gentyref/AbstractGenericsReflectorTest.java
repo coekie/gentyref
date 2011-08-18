@@ -273,7 +273,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 
 		// raw
 		if (COMPILE_CHECK) {
-			@SuppressWarnings("unchecked")
+			@SuppressWarnings("rawtypes")
 			C c = null;
 			List<String> listOfString = c.f;
 		}
@@ -296,7 +296,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 		checkedTestExactSuperclassChain(LIST_OF_STRING, tt(StringList.class), ft);
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testMultiBoundParametrizedStringList() {
 		class C<T extends Object & StringList> implements WithF<T>{
 			@SuppressWarnings("unused")
@@ -459,7 +459,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 	/**
 	 * Supertype of a raw type is erased
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testSubclassRaw() {
 		class Superclass<T extends Number> {
 			public T t;
@@ -477,7 +477,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 	 * Supertype of a raw type is erased.
 	 * (And  there's no such thing as a ParameterizedType with some type parameters raw and others not)
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testSubclassRawMix() {
 		class Superclass<T, U extends Number> {
 //			public T t;
@@ -517,6 +517,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 	@SuppressWarnings("unchecked")
 	public void testInnerRaw() {
 		class Outer<T extends Number> {
+			@SuppressWarnings("rawtypes")
 			public Inner rawInner;
 			
 			class Inner<U extends T> {
@@ -594,7 +595,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 		assertCheckedTypeEquals(new TypeToken<List<String>[]>(){}, ft);
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testArrayRaw() {
 		class C<T> {
 			@SuppressWarnings("unused")
