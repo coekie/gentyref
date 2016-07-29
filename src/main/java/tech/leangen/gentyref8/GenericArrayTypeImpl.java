@@ -1,5 +1,7 @@
-package com.googlecode.gentyref;
+package tech.leangen.gentyref8;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
@@ -12,11 +14,11 @@ class GenericArrayTypeImpl implements GenericArrayType {
 		return Array.newInstance(componentType, 0).getClass();
 	}
 	
-	static Type createArrayType(Type componentType) {
-		if (componentType instanceof Class) {
-			return createArrayType((Class<?>)componentType);
+	static AnnotatedType createArrayType(AnnotatedType componentType) {
+		if (componentType.getType() instanceof Class) {
+			return new AnnotatedArrayTypeImpl(createArrayType((Class<?>)componentType.getType()), (Class) componentType.getType());
 		} else {
-			return new GenericArrayTypeImpl(componentType);
+			return new AnnotatedArrayTypeImpl(new GenericArrayTypeImpl(componentType.getType()), new Annotation[0], componentType);
 		}
 	}
 	
