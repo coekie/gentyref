@@ -1,14 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>tech.leangen.gentyref8</groupId>
+	<groupId>io.leangen.gentyref8</groupId>
 	<artifactId>gentyref8</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0.0-SNAPSHOT</version>
 	<inceptionYear>2016</inceptionYear>
 	<name>GenTyRef8</name>
-	<url>http://code.google.com/p/gentyref/</url>
-	<description>Generic type reflection library</description>
+	<url>https://github.com/leangen/gentyref8</url>
+	<description>Generic type reflection library for Java 8</description>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -17,9 +17,9 @@
 		</license>
 	</licenses>
 	<scm>
-		<connection>scm:git:https://code.google.com/p/gentyref/</connection>
-		<developerConnection>scm:git:https://code.google.com/p/gentyref/</developerConnection>
-		<url>http://code.google.com/p/gentyref/source</url>
+		<connection>scm:git:git://github.com/leangen/gentyref8</connection>
+		<developerConnection>scm:git:git://github.com/leangen/gentyref8</developerConnection>
+		<url>https://github.com/leangen/gentyref8</url>
 	</scm>
 	<distributionManagement>
 		<snapshotRepository>
@@ -150,8 +150,8 @@
 	</profiles>
 	<developers>
 		<developer>
-			<name>Wouter Coekaerts</name>
-			<email>wouter@coekaerts.be</email>
+			<name>Bojan Tomic</name>
+			<email>veggen@gmail.com</email>
 		</developer>
 	</developers>
 </project>
