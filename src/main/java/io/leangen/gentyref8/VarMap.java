@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static io.leangen.gentyref8.GenericTypeReflector.annotate;
+import static io.leangen.gentyref8.GenericTypeReflector.updateAnnotations;
 import static java.util.Arrays.stream;
 
 /**
@@ -25,22 +27,22 @@ import static java.util.Arrays.stream;
  *
  * @author Wouter Coekaerts <wouter@coekaerts.be>
  */
-class AnnotatedVarMap {
+class VarMap {
 	private final Map<TypeVariable, AnnotatedType> map = new HashMap<>();
 
 	/**
-	 * Creates an empty AnnotatedVarMap
+	 * Creates an empty VarMap
 	 */
-	AnnotatedVarMap() {
+	VarMap() {
 	}
 
 	/**
-	 * Creates a AnnotatedVarMap mapping the type parameters of the class used in <tt>type</tt> to their actual value.
+	 * Creates a VarMap mapping the type parameters of the class used in <tt>type</tt> to their actual value.
 	 */
-	AnnotatedVarMap(AnnotatedParameterizedType type) {
+	VarMap(AnnotatedParameterizedType type) {
 		// loop over the type and its generic owners
 		do {
-			Class<?> clazz = (Class<?>) ((ParameterizedType) type).getRawType();
+			Class<?> clazz = (Class<?>) ((ParameterizedType)type.getType()).getRawType();
 			AnnotatedType[] arguments = type.getAnnotatedActualTypeArguments();
 			TypeVariable[] typeParameters = clazz.getTypeParameters();
 
@@ -54,30 +56,13 @@ class AnnotatedVarMap {
 				add(typeParameters[i], arguments[i]);
 			}
 
-			Type owner = ((ParameterizedType) type).getOwnerType();
+			Type owner = ((ParameterizedType) type.getType()).getOwnerType();
 			type = (owner instanceof ParameterizedType) ? (AnnotatedParameterizedType) annotate(owner) : null;
 		} while (type != null);
 	}
 
-	AnnotatedVarMap(ParameterizedType type) {
-		this((AnnotatedParameterizedType) GenericTypeReflector.annotate(type));
-	}
-
-	private AnnotatedType annotate(Type type) {
-		if (type instanceof ParameterizedType) {
-			ParameterizedType pType = (ParameterizedType) type;
-			TypeVariable<?>[] typeVars = ((Class<?>) pType.getRawType()).getTypeParameters();
-			AnnotatedType[] args = new AnnotatedType[typeVars.length];
-
-			for (int i = 0; i < typeVars.length; i++) {
-				args[i] = new AnnotatedTypeVariableImpl(typeVars[i]);
-			}
-			return new AnnotatedParameterizedTypeImpl(pType, ((Class<?>) pType.getRawType()).getAnnotations(), args);
-		}
-		if (type instanceof Class) {
-			return new AnnotatedTypeImpl(type, ((Class)type).getAnnotations());
-		}
-		throw new IllegalArgumentException("fuck if I know");
+	VarMap(ParameterizedType type) {
+		this((AnnotatedParameterizedType) annotate(type));
 	}
 
 	void add(TypeVariable variable, AnnotatedType value) {
@@ -91,7 +76,7 @@ class AnnotatedVarMap {
 		}
 	}
 
-	AnnotatedVarMap(TypeVariable[] variables, AnnotatedType[] values) {
+	VarMap(TypeVariable[] variables, AnnotatedType[] values) {
 		addAll(variables, values);
 	}
 
@@ -104,7 +89,7 @@ class AnnotatedVarMap {
 				throw new UnresolvedTypeVariableException(tv);
 			}
 			Annotation[] merged = Stream.concat(Arrays.stream(type.getAnnotations()), Arrays.stream(map.get(tv).getAnnotations())).distinct().toArray(Annotation[]::new);
-			return replaceAnnotations(map.get(tv), merged);
+			return updateAnnotations(map.get(tv), merged);
 		} else if (type instanceof AnnotatedParameterizedType) {
 			AnnotatedParameterizedType pType = (AnnotatedParameterizedType) type;
 			ParameterizedType inner = (ParameterizedType) pType.getType();
@@ -116,7 +101,13 @@ class AnnotatedVarMap {
 			AnnotatedWildcardType wType = (AnnotatedWildcardType) type;
 			AnnotatedType[] up = map(wType.getAnnotatedUpperBounds());
 			AnnotatedType[] lw = map(wType.getAnnotatedLowerBounds());
-			WildcardType w = new WildcardTypeImpl(stream(up).map(AnnotatedType::getType).toArray(Type[]::new), stream(lw).map(AnnotatedType::getType).toArray(Type[]::new));
+			Type[] upperBounds;
+			if (up == null || up.length == 0) {
+				upperBounds = ((WildcardType) wType.getType()).getUpperBounds();
+			} else {
+				upperBounds = stream(up).map(AnnotatedType::getType).toArray(Type[]::new);
+			}
+			WildcardType w = new WildcardTypeImpl(upperBounds, stream(lw).map(AnnotatedType::getType).toArray(Type[]::new));
 			return new AnnotatedWildcardTypeImpl(w, wType.getAnnotations(), lw, up);
 		} else if (type instanceof AnnotatedArrayType) {
 			return AnnotatedArrayTypeImpl.createArrayType(map(((AnnotatedArrayType)type).getAnnotatedGenericComponentType()));
@@ -139,22 +130,6 @@ class AnnotatedVarMap {
 	}
 
 	Type map(Type type) {
-		return map(GenericTypeReflector.annotate(type).getType());
-	}
-
-	private AnnotatedType replaceAnnotations(AnnotatedType type, Annotation[] annotations) {
-		if (type instanceof AnnotatedWildcardType) {
-			AnnotatedWildcardType wType = (AnnotatedWildcardType) type;
-			return new AnnotatedWildcardTypeImpl((WildcardType) type.getType(), annotations, wType.getAnnotatedLowerBounds(), wType.getAnnotatedUpperBounds());
-		}
-		if (type instanceof AnnotatedTypeVariable) {
-			AnnotatedTypeVariable vType = (AnnotatedTypeVariable) type;
-			return new AnnotatedTypeVariableImpl((TypeVariable<?>) vType.getType(), annotations);
-		}
-		if (type instanceof AnnotatedParameterizedType) {
-			AnnotatedParameterizedType pType = (AnnotatedParameterizedType) type;
-			return new AnnotatedParameterizedTypeImpl((ParameterizedType) pType.getType(), annotations, pType.getAnnotatedActualTypeArguments());
-		}
-		return new AnnotatedTypeImpl(type.getType(), annotations);
+		return map(annotate(type)).getType();
 	}
 }

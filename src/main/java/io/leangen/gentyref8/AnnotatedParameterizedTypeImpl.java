@@ -6,6 +6,8 @@ import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 
+import static io.leangen.gentyref8.GenericTypeReflector.typeArraysEqual;
+
 /**
  * Created by bojan.tomic on 7/24/16.
  */
@@ -25,9 +27,10 @@ public class AnnotatedParameterizedTypeImpl extends AnnotatedTypeImpl implements
 
 	@Override
 	public boolean equals(Object other) {
-		return other instanceof AnnotatedParameterizedTypeImpl
-				&& super.equals(other)
-				&& Arrays.equals(((AnnotatedParameterizedTypeImpl) other).typeArguments, this.typeArguments);
+		if (!(other instanceof AnnotatedParameterizedType) || !super.equals(other)) {
+			return false;
+		}
+		return typeArraysEqual(typeArguments, ((AnnotatedParameterizedType) other).getAnnotatedActualTypeArguments());
 	}
 
 	@Override

@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.leangen.gentyref8.GenericTypeReflector.replaceAnnotations;
+
 /**
  * Created by bojan.tomic on 7/24/16.
  */
@@ -52,15 +54,24 @@ public class AnnotatedTypeImpl implements AnnotatedType {
 
 	@Override
 	public boolean equals(Object other) {
-		if (!(other instanceof AnnotatedTypeImpl)) {
+		if (!(other instanceof AnnotatedType)) {
 			return false;
 		}
-		AnnotatedTypeImpl otherType = (AnnotatedTypeImpl) other;
+		AnnotatedType otherType = (AnnotatedType) other;
 		return this.getType().equals(otherType.getType()) && Arrays.equals(this.getAnnotations(), otherType.getAnnotations());
 	}
 
 	@Override
 	public int hashCode() {
 		return 31 * (this.getType().hashCode() + Arrays.hashCode(this.getAnnotations()));
+	}
+
+	public static boolean equals(AnnotatedType t1, AnnotatedType t2) {
+		Objects.requireNonNull(t1);
+		Objects.requireNonNull(t2);
+		t1 = t1 instanceof AnnotatedTypeImpl ? t1 : replaceAnnotations(t1, t1.getAnnotations());
+		t2 = t2 instanceof AnnotatedTypeImpl ? t2 : replaceAnnotations(t2, t2.getAnnotations());
+
+		return t1.equals(t2);
 	}
 }

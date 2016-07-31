@@ -16,8 +16,10 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -64,7 +66,7 @@ public class GenericTypeReflector {
 		if (isMissingTypeParameters(typeAndParams.getType())) {
 			return new AnnotatedTypeImpl(erase(toMapType.getType()), toMapType.getAnnotations());
 		} else {
-			AnnotatedVarMap varMap = new AnnotatedVarMap();
+			VarMap varMap = new VarMap();
 			AnnotatedType handlingTypeAndParams = typeAndParams;
 			while(handlingTypeAndParams instanceof AnnotatedParameterizedType) {
 				AnnotatedParameterizedType pType = (AnnotatedParameterizedType)handlingTypeAndParams;
@@ -105,21 +107,17 @@ public class GenericTypeReflector {
 	 * <li>if clazz is an array type, an array type is returned with unbound wildcard parameters added in the the component type.   
 	 * </ul>
 	 */
-	public static AnnotatedType addWildcardParameters(Class<?> clazz) {
+	public static Type addWildcardParameters(Class<?> clazz) {
 		if (clazz.isArray()) {
-			return AnnotatedArrayTypeImpl.createArrayType(addWildcardParameters(clazz.getComponentType()));
+			return GenericArrayTypeImpl.createArrayType(addWildcardParameters(clazz.getComponentType()));
 		} else if (isMissingTypeParameters(clazz)) {
 			TypeVariable<?>[] vars = clazz.getTypeParameters();
 			Type[] arguments = new Type[vars.length];
 			Arrays.fill(arguments, UNBOUND_WILDCARD);
-			AnnotatedType[] annotatedArgs = new AnnotatedType[vars.length];
-			Arrays.fill(annotatedArgs, new AnnotatedWildcardTypeImpl(UNBOUND_WILDCARD, new Annotation[0],
-					new AnnotatedType[0], new AnnotatedType[]{new AnnotatedTypeImpl(Object.class)}));
-			AnnotatedType owner = clazz.getDeclaringClass() == null ? null : addWildcardParameters(clazz.getDeclaringClass());
-			ParameterizedType pType = new ParameterizedTypeImpl(clazz, arguments, owner == null ? null : owner.getType());
-			return new AnnotatedParameterizedTypeImpl(pType, clazz.getAnnotations(), annotatedArgs);
+			Type owner = clazz.getDeclaringClass() == null ? null : addWildcardParameters(clazz.getDeclaringClass());
+			return new ParameterizedTypeImpl(clazz, arguments, owner);
 		} else {
-			return new AnnotatedTypeImpl(clazz);
+			return clazz;
 		}
 	}
 	
@@ -158,7 +156,12 @@ public class GenericTypeReflector {
 
 		return null;
 	}
-	
+
+	public static Type getExactSuperType(Type type, Class<?> searchClass) {
+		AnnotatedType superType = getExactSuperType(annotate(type), searchClass);
+		return superType == null ? null : superType.getType();
+	}
+
 	/**
 	 * Gets the type parameter for a given type that is the value for a given type variable.
 	 * For example, with <tt>class StringList implements List&lt;String&gt;</tt>,
@@ -170,15 +173,19 @@ public class GenericTypeReflector {
 	 * @return The type parameter for the given variable. Or null if type is not a subtype of the
 	 * 	type that declares the variable, or if the variable isn't known (because of raw types).
 	 */
-	public static Type getTypeParameter(AnnotatedType type, TypeVariable<? extends Class<?>> variable) {
+	public static AnnotatedType getTypeParameter(AnnotatedType type, TypeVariable<? extends Class<?>> variable) {
 		Class<?> clazz = variable.getGenericDeclaration();
 		AnnotatedType superType = getExactSuperType(type, clazz);
-		if (superType instanceof ParameterizedType) {
+		if (superType instanceof AnnotatedParameterizedType) {
 			int index = Arrays.asList(clazz.getTypeParameters()).indexOf(variable);
-			return ((ParameterizedType)superType).getActualTypeArguments()[index];
+			return ((AnnotatedParameterizedType)superType).getAnnotatedActualTypeArguments()[index];
 		} else {
 			return null;
 		}
+	}
+
+	public static Type getTypeParameter(Type type, TypeVariable<? extends Class<?>> variable) {
+		return getTypeParameter(annotate(type), variable).getType();
 	}
 
 	/**
@@ -187,7 +194,8 @@ public class GenericTypeReflector {
 	public static boolean isSuperType(Type superType, Type subType) {
 		if (superType instanceof ParameterizedType || superType instanceof Class || superType instanceof GenericArrayType) {
 			Class<?> superClass = erase(superType);
-			Type mappedSubType = getExactSuperType(capture(annotate(subType)), superClass).getType();
+			AnnotatedType annotatedMappedSubType = getExactSuperType(capture(annotate(subType)), superClass);
+			Type mappedSubType = annotatedMappedSubType == null ? null : annotatedMappedSubType.getType();
 			if (mappedSubType == null) {
 				return false;
 			} else if (superType instanceof Class<?>) {
@@ -288,7 +296,7 @@ public class GenericTypeReflector {
 	 * Returns the direct supertypes of the given type. Resolves type parameters.
 	 */
 	private static AnnotatedType[] getExactDirectSuperTypes(AnnotatedType type) {
-		if (type instanceof AnnotatedParameterizedType || type.getType() instanceof Class) {
+		if (type instanceof AnnotatedParameterizedType || (type != null && type.getType() instanceof Class)) {
 			Class<?> clazz;
 			if (type instanceof AnnotatedParameterizedType) {
 				clazz = (Class<?>)((ParameterizedType)type.getType()).getRawType();
@@ -296,7 +304,7 @@ public class GenericTypeReflector {
 				// TODO primitive types?
 				clazz = (Class<?>)type.getType();
 				if (clazz.isArray())
-					return null;
+					return getArrayExactDirectSuperTypes(annotate(clazz));
 			}
 
 			AnnotatedType[] superInterfaces = clazz.getAnnotatedInterfaces();
@@ -332,8 +340,6 @@ public class GenericTypeReflector {
 			return ((AnnotatedWildcardType) type).getAnnotatedUpperBounds();
 		} else if (type instanceof AnnotatedCaptureTypeImpl) {
 			return ((AnnotatedCaptureTypeImpl)type).getAnnotatedUpperBounds();
-		} else if (type instanceof CaptureType) {
-			return null;
 		} else if (type instanceof AnnotatedArrayType) {
 			return getArrayExactDirectSuperTypes(type);
 		} else if (type == null) {
@@ -349,7 +355,7 @@ public class GenericTypeReflector {
 
 		AnnotatedType[] result;
 		int resultIndex;
-		if (typeComponent.getType() instanceof Class && ((Class<?>)typeComponent.getType()).isPrimitive()) {
+		if (typeComponent != null && typeComponent.getType() instanceof Class && ((Class<?>)typeComponent.getType()).isPrimitive()) {
 			resultIndex = 0;
 			result = new AnnotatedType[3];
 		} else {
@@ -379,6 +385,10 @@ public class GenericTypeReflector {
 		return mapTypeParameters(returnType, exactDeclaringType);
 	}
 
+	public static Type getExactReturnType(Method m, Type type) {
+		return getExactReturnType(m, annotate(type)).getType();
+	}
+
 	/**
 	 * Returns the exact type of the given field in the given type.
 	 * This may be different from <tt>f.getGenericType()</tt> when the field was declared in a superclass,
@@ -391,6 +401,10 @@ public class GenericTypeReflector {
 			throw new IllegalArgumentException("The field " + f + " is not a member of type " + type);
 		}
 		return mapTypeParameters(returnType, exactDeclaringType);
+	}
+
+	public static Type getExactFieldType(Field f, Type type) {
+		return getExactFieldType(f, annotate(type)).getType();
 	}
 
 	/**
@@ -412,6 +426,10 @@ public class GenericTypeReflector {
 		return result;
 	}
 
+	public static Type[] getExactParameterTypes(Method m, Type type) {
+		return Arrays.stream(getExactParameterTypes(m, annotate(type))).map(AnnotatedType::getType).toArray(Type[]::new);
+	}
+
 	/**
 	 * Applies capture conversion to the given type.
 	 */
@@ -430,7 +448,7 @@ public class GenericTypeReflector {
 	public static AnnotatedParameterizedType capture(AnnotatedParameterizedType type) {
 		// the map from parameters to their captured equivalent
 
-		AnnotatedVarMap varMap = new AnnotatedVarMap();
+		VarMap varMap = new VarMap();
 		// list of CaptureTypes we've created but aren't fully initialized yet
 		// we can only initialize them *after* we've fully populated varMap
 		List<AnnotatedCaptureTypeImpl> toInit = new ArrayList<>();
@@ -490,29 +508,51 @@ public class GenericTypeReflector {
 	 * 	If the given type is a class or interface itself, returns a List with just the given type.
 	 *  The list contains no duplicates, and is ordered in the order the upper bounds are defined on the type.
 	 */
-	public static List<Class<?>> getUpperBoundClassAndInterfaces(AnnotatedType type) {
+	public static List<Class<?>> getUpperBoundClassAndInterfaces(Type type) {
 		LinkedHashSet<Class<?>> result = new LinkedHashSet<Class<?>>();
 		buildUpperBoundClassAndInterfaces(type, result);
 		return new ArrayList<>(result);
 	}
 
 	public static AnnotatedType annotate(Type type) {
+		return annotate(type, new HashMap<>());
+	}
+
+	public static AnnotatedType annotate(Type type, Map<CaptureCacheKey, AnnotatedType> cache) {
 		if (type instanceof ParameterizedType) {
 			ParameterizedType parameterized = (ParameterizedType) type;
 			AnnotatedType[] params = new AnnotatedType[parameterized.getActualTypeArguments().length];
 			for (int i = 0; i < params.length; i++) {
-				AnnotatedType param = annotate(parameterized.getActualTypeArguments()[i]);
-				params[i] = replaceAnnotations(param, erase(type).getTypeParameters()[i].getAnnotations());
+				AnnotatedType param = annotate(parameterized.getActualTypeArguments()[i], cache);
+				params[i] = updateAnnotations(param, erase(type).getTypeParameters()[i].getAnnotations());
 			}
 			return new AnnotatedParameterizedTypeImpl(parameterized, erase(type).getAnnotations(), params);
+		}
+		if (type instanceof CaptureType) {
+			CaptureCacheKey key = new CaptureCacheKey(((CaptureType) type));
+			if (cache.containsKey(key)) {
+				return cache.get(key);
+			}
+			CaptureType capture = ((CaptureType) type);
+			AnnotatedCaptureType annotatedCapture = new AnnotatedCaptureTypeImpl(
+					((AnnotatedWildcardType) annotate(capture.getWildcardType(), cache)),
+					(AnnotatedTypeVariable) annotate(capture.getTypeVariable(), cache),
+					null);
+
+			cache.put(new CaptureCacheKey(capture), annotatedCapture);
+			AnnotatedType[] upperBounds = Arrays.stream(capture.getUpperBounds())
+					.map(bound -> annotate(bound, cache))
+					.toArray(AnnotatedType[]::new);
+			annotatedCapture.setAnnotatedUpperBounds(upperBounds);
+			return annotatedCapture;
 		}
 		if (type instanceof WildcardType) {
 			WildcardType wildcard = (WildcardType) type;
 			AnnotatedType[] lowerBounds = Arrays.stream(wildcard.getLowerBounds())
-					.map(GenericTypeReflector::annotate)
+					.map(bound -> annotate(bound, cache))
 					.toArray(AnnotatedType[]::new);
 			AnnotatedType[] upperBounds = Arrays.stream(wildcard.getUpperBounds())
-					.map(GenericTypeReflector::annotate)
+					.map(bound -> annotate(bound, cache))
 					.toArray(AnnotatedType[]::new);
 			return new AnnotatedWildcardTypeImpl(wildcard, erase(type).getAnnotations(), lowerBounds, upperBounds);
 		}
@@ -534,6 +574,13 @@ public class GenericTypeReflector {
 			return new AnnotatedParameterizedTypeImpl((ParameterizedType) original.getType(), annotations,
 					((AnnotatedParameterizedType) original).getAnnotatedActualTypeArguments());
 		}
+		if (original instanceof AnnotatedCaptureType) {
+			return new AnnotatedCaptureTypeImpl(
+					((AnnotatedCaptureType) original).getAnnotatedWildcardType(),
+					((AnnotatedCaptureType) original).getAnnotatedTypeVariable(),
+					((AnnotatedCaptureType) original).getAnnotatedUpperBounds(),
+					annotations);
+		}
 		if (original instanceof AnnotatedWildcardType) {
 			return new AnnotatedWildcardTypeImpl((WildcardType) original.getType(), annotations,
 					((AnnotatedWildcardType) original).getAnnotatedLowerBounds(),
@@ -549,17 +596,64 @@ public class GenericTypeReflector {
 		return new AnnotatedTypeImpl(original.getType(), annotations);
 	}
 
+	public static AnnotatedType updateAnnotations(AnnotatedType original, Annotation[] annotations) {
+		if (Arrays.equals(original.getAnnotations(), annotations)) {
+			return original;
+		}
+		return replaceAnnotations(original, annotations);
+	}
+
+	public static boolean typeArraysEqual(AnnotatedType[] t1, AnnotatedType[] t2) {
+		if (t1 == null && t2 != null) return false;
+		if (t2 == null && t1 != null) return false;
+		if (t1 == null) return true;
+		if (t1.length != t2.length) return false;
+
+		for (int i = 0; i < t1.length; i++) {
+			if (!t1[i].getType().equals(t2[i].getType()) || !Arrays.equals(t1[i].getAnnotations(), t2[i].getAnnotations())) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	/**
 	 * Helper method for getUpperBoundClassAndInterfaces, adding the result to the given set.
 	 */
-	private static void buildUpperBoundClassAndInterfaces(AnnotatedType type, Set<Class<?>> result) {
-		if (type instanceof AnnotatedParameterizedType || type.getType() instanceof Class<?>) {
-			result.add(erase(type.getType()));
+	private static void buildUpperBoundClassAndInterfaces(Type type, Set<Class<?>> result) {
+		if (type instanceof ParameterizedType || type instanceof Class<?>) {
+			result.add(erase(type));
 			return;
 		}
 
-		for (AnnotatedType superType: getExactDirectSuperTypes(type)) {
-			buildUpperBoundClassAndInterfaces(superType, result);
+		for (AnnotatedType superType : getExactDirectSuperTypes(annotate(type))) {
+			buildUpperBoundClassAndInterfaces(superType.getType(), result);
+		}
+	}
+
+	private static class CaptureCacheKey {
+		CaptureType capture;
+
+		CaptureCacheKey(CaptureType capture) {
+			this.capture = capture;
+		}
+
+		@Override
+		public int hashCode() {
+			return capture.getWildcardType().hashCode() + capture.getTypeVariable().hashCode();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (!(obj instanceof CaptureCacheKey)) {
+				return false;
+			}
+			CaptureType other = ((CaptureCacheKey) obj).capture;
+			if (!capture.getWildcardType().equals(other.getWildcardType())
+					|| !capture.getTypeVariable().equals(other.getTypeVariable())) {
+				return false;
+			}
+			return Arrays.equals(capture.getUpperBounds(), other.getUpperBounds());
 		}
 	}
 }

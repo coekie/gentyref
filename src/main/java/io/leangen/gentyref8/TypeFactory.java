@@ -132,7 +132,7 @@ public class TypeFactory {
 		TypeVariable<?>[] typeParameters = ((Class<?>)type.getRawType()).getTypeParameters();
 
 		// a map of type arguments in the type, to fill in variables in the bounds
-		AnnotatedVarMap varMap = new AnnotatedVarMap(type);
+		VarMap varMap = new VarMap(type);
 
 		// for every bound on every parameter
 		for (int i = 0; i < arguments.length; i++) {
@@ -200,8 +200,8 @@ public class TypeFactory {
 			// transform it into the declaring class with the exact type parameters.
 			// For example with "class StringOuter extends GenericOuter<String>", transform
 			// "StringOuter.Inner" into "GenericOuter<String>.Inner", just like the Java compiler does.
-			Type transformedOwner = GenericTypeReflector.getExactSuperType(GenericTypeReflector.annotate(givenOwner),
-					clazz.getDeclaringClass()).getType();
+			Type transformedOwner = GenericTypeReflector.getExactSuperType(GenericTypeReflector.annotate(givenOwner).getType(),
+					clazz.getDeclaringClass());
 
 			if (transformedOwner == null) { // null means it's not a supertype
 				throw new IllegalArgumentException("Given owner type [" + givenOwner + "] is not appropriate for ["

@@ -6,6 +6,8 @@ import java.lang.reflect.AnnotatedWildcardType;
 import java.lang.reflect.WildcardType;
 import java.util.Arrays;
 
+import static io.leangen.gentyref8.GenericTypeReflector.typeArraysEqual;
+
 /**
  * Created by bojan.tomic on 7/24/16.
  */
@@ -17,6 +19,10 @@ public class AnnotatedWildcardTypeImpl extends AnnotatedTypeImpl implements Anno
 	public AnnotatedWildcardTypeImpl(WildcardType type, Annotation[] annotations, AnnotatedType[] lowerBounds, AnnotatedType[] upperBounds) {
 		super(type, annotations);
 		this.lowerBounds = lowerBounds;
+		if (upperBounds == null || upperBounds.length == 0) {
+			upperBounds = new AnnotatedType[1];
+			upperBounds[0] = GenericTypeReflector.annotate(Object.class);
+		}
 		this.upperBounds = upperBounds;
 	}
 
@@ -32,10 +38,11 @@ public class AnnotatedWildcardTypeImpl extends AnnotatedTypeImpl implements Anno
 
 	@Override
 	public boolean equals(Object other) {
-		return other instanceof AnnotatedWildcardTypeImpl
-				&& super.equals(other)
-				&& Arrays.equals(((AnnotatedWildcardTypeImpl) other).lowerBounds, this.lowerBounds)
-				&& Arrays.equals(((AnnotatedWildcardTypeImpl) other).upperBounds, this.upperBounds);
+		if (!(other instanceof AnnotatedWildcardType) || !super.equals(other)) {
+			return false;
+		}
+		return typeArraysEqual(lowerBounds, ((AnnotatedWildcardType) other).getAnnotatedLowerBounds())
+				&& typeArraysEqual(upperBounds, ((AnnotatedWildcardType) other).getAnnotatedUpperBounds());
 	}
 
 	@Override

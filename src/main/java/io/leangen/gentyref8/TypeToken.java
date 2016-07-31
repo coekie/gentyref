@@ -69,7 +69,7 @@ public abstract class TypeToken<T> {
 
 	@Override
 	public boolean equals(Object obj) {
-		return (obj instanceof TypeToken) && type.equals(((TypeToken<?>) obj).type);
+		return obj instanceof TypeToken && AnnotatedTypeImpl.equals(type, ((TypeToken<?>) obj).type);
 	}
 
 	@Override

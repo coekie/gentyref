@@ -6,6 +6,8 @@ import java.lang.reflect.AnnotatedTypeVariable;
 import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
 
+import static io.leangen.gentyref8.GenericTypeReflector.typeArraysEqual;
+
 /**
  * Created by bojan.tomic on 7/24/16.
  */
@@ -30,9 +32,10 @@ public class AnnotatedTypeVariableImpl extends AnnotatedTypeImpl implements Anno
 
 	@Override
 	public boolean equals(Object other) {
-		return other instanceof AnnotatedTypeVariableImpl
-				&& super.equals(other)
-				&& Arrays.equals(((AnnotatedTypeVariableImpl) other).annotatedBounds, this.annotatedBounds);
+		if (!(other instanceof AnnotatedTypeVariable) || !super.equals(other)) {
+			return false;
+		}
+		return typeArraysEqual(annotatedBounds, ((AnnotatedTypeVariable) other).getAnnotatedBounds());
 	}
 
 	@Override

@@ -32,7 +32,7 @@ public class StackoverflowQ182872Test extends TestCase {
 	
 	public boolean returnTypeExtendsListOfString(Class<?> clazz, String methodName) throws NoSuchMethodException {
 		Method method = clazz.getMethod(methodName);
-		Type returnType = GenericTypeReflector.getExactReturnType(method, clazz); // needed for method5, else the return type is just "T" 
+		Type returnType = GenericTypeReflector.getExactReturnType(method, clazz); // needed for method5, else the return type is just "T"
 		return GenericTypeReflector.isSuperType(LIST_OF_STRING, returnType);
 	}
 	

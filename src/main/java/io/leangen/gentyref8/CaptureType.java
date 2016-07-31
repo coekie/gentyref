@@ -1,6 +1,7 @@
 package io.leangen.gentyref8;
 
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 
 /**
@@ -9,7 +10,7 @@ import java.lang.reflect.WildcardType;
  * 
  * @author Wouter Coekaerts <wouter@coekaerts.be>
  */
-public interface CaptureType extends WildcardType {
+public interface CaptureType extends Type {
     /**
      * Returns an array of <tt>Type</tt> objects representing the upper
      * bound(s) of this capture. This includes both the upper bound of a <tt>? extends</tt> wildcard,
@@ -17,7 +18,6 @@ public interface CaptureType extends WildcardType {
      * References to other (or the same) type variables in bounds coming from the type variable are
      * replaced by their matching capture.
      */
-    @Override
 	Type[] getUpperBounds();
 	
     /**
@@ -25,6 +25,11 @@ public interface CaptureType extends WildcardType {
      * lower bound(s) of this type variable. This is the bound of a <tt>? super</tt> wildcard.
      * This normally contains only one or no types; it is an array for consistency with {@link WildcardType#getLowerBounds()}.
      */
-    @Override
 	Type[] getLowerBounds();
+
+	TypeVariable<?> getTypeVariable();
+
+	WildcardType getWildcardType();
+
+	void setUpperBounds(Type[] upperBounds);
 }

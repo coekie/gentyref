@@ -1,11 +1,5 @@
 package io.leangen.gentyref8.factory;
 
-import static com.googlecode.gentyref.TypeFactory.innerClass;
-import static com.googlecode.gentyref.TypeFactory.parameterizedClass;
-import static com.googlecode.gentyref.TypeFactory.parameterizedInnerClass;
-import static com.googlecode.gentyref.TypeFactory.unboundWildcard;
-import static com.googlecode.gentyref.TypeFactory.wildcardExtends;
-import static com.googlecode.gentyref.TypeFactory.wildcardSuper;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -13,13 +7,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import junit.framework.TestCase;
-
-import com.googlecode.gentyref.TypeArgumentNotInBoundException;
-import com.googlecode.gentyref.TypeFactory;
-import com.googlecode.gentyref.TypeToken;
+import io.leangen.gentyref8.TypeArgumentNotInBoundException;
+import io.leangen.gentyref8.TypeFactory;
+import io.leangen.gentyref8.TypeToken;
 import io.leangen.gentyref8.factory.GenericOuter.DoubleGeneric;
 import io.leangen.gentyref8.factory.GenericOuter.Inner;
+import junit.framework.TestCase;
+
+import static io.leangen.gentyref8.TypeFactory.innerClass;
+import static io.leangen.gentyref8.TypeFactory.parameterizedClass;
+import static io.leangen.gentyref8.TypeFactory.parameterizedInnerClass;
+import static io.leangen.gentyref8.TypeFactory.unboundWildcard;
+import static io.leangen.gentyref8.TypeFactory.wildcardExtends;
+import static io.leangen.gentyref8.TypeFactory.wildcardSuper;
 
 public class TypeFactoryTest extends TestCase {
 	private static final Type GENERICOUTER_STRING = new TypeToken<GenericOuter<String>>(){}.getType();
@@ -471,17 +471,17 @@ public class TypeFactoryTest extends TestCase {
 	}
 	
 	public void testUnboundWildcard() {
-		assertEquals(getFirstTypeArgument(new TypeToken<List<?>>(){}), TypeFactory.unboundWildcard());
+		assertEquals(getFirstTypeArgument(new TypeToken<List<?>>(){}), unboundWildcard());
 	}
 	
 	public void testWildcardExtends() {
 		assertEquals(getFirstTypeArgument(new TypeToken<List<? extends String>>(){}),
-				TypeFactory.wildcardExtends(String.class));
+				wildcardExtends(String.class));
 	}
 	
 	public void testWildcardSuper() {
 		assertEquals(getFirstTypeArgument(new TypeToken<List<? super String>>(){}),
-				TypeFactory.wildcardSuper(String.class));
+				wildcardSuper(String.class));
 	}
 	
 	public void testClassArray() {

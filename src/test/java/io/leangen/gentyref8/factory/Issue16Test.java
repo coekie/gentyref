@@ -1,12 +1,12 @@
 package io.leangen.gentyref8.factory;
 
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
-import com.googlecode.gentyref.TypeFactory;
-import com.googlecode.gentyref.GenericTypeReflector;
-import com.googlecode.gentyref.TypeToken;
-
+import io.leangen.gentyref8.GenericTypeReflector;
+import io.leangen.gentyref8.TypeFactory;
+import io.leangen.gentyref8.TypeToken;
 import junit.framework.TestCase;
 
 /**
@@ -35,7 +35,7 @@ public class Issue16Test extends TestCase {
 	}
 
 	/**
-	 * Simple test for our {@link #getExactReturnType()}.
+	 * Simple test for our {@link GenericTypeReflector#getExactReturnType(Method, AnnotatedType)}.
 	 */
 	public void test() throws NoSuchMethodException {
 		assertEquals(String.class, new StringOuter().getExactReturnType());
@@ -51,7 +51,7 @@ public class Issue16Test extends TestCase {
 	}
 
 	/**
-	 * Testing our {@link #getExactReturnType()} with a raw type.
+	 * Testing our {@link GenericTypeReflector#getExactReturnType(Method, AnnotatedType)} with a raw type.
 	 */
 	public void testRaw() throws NoSuchMethodException {
 		assertEquals(Object.class, new GenericOuter<String>().getExactReturnType());

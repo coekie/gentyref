@@ -45,12 +45,12 @@ public class TypeTest extends TestCase {
 	public void testNested() {
 		assertTypesEqual(new TypeToken<TypeTest.InnerWithParam<String>>(){},
 				new ParameterizedTypeImpl(TypeTest.InnerWithParam.class, new Type[]{String.class}, TypeTest.class),
-				"TypeTest.InnerWithParam<java.lang.String>");
+				"io.leangen.gentyref8.TypeTest.InnerWithParam<java.lang.String>");
 		assertTypesEqual(new TypeToken<TypeTest.InnerWithParam<String>.InnerInnerWithParam<Integer>>(){},
 				new ParameterizedTypeImpl(TypeTest.InnerWithParam.InnerInnerWithParam.class, new Type[]{Integer.class},
 						new ParameterizedTypeImpl(TypeTest.InnerWithParam.class, new Type[]{String.class}, TypeTest.class)
 				),
-				"TypeTest.InnerWithParam<java.lang.String>.InnerInnerWithParam<java.lang.Integer>");
+				"io.leangen.gentyref8.TypeTest.InnerWithParam<java.lang.String>.InnerInnerWithParam<java.lang.Integer>");
 	}
 	
 	public void testUnboundWildcard() {
@@ -87,6 +87,6 @@ public class TypeTest extends TestCase {
 	
 	public void testCapture() {
 		// Note: there's no jdk counterpart for CaptureType
-		assertEquals("java.util.List<capture of ?>", GenericTypeReflector.capture(new TypeToken<List<?>>(){}.getType()).toString());
+		assertEquals("java.util.List<capture of ?>", GenericTypeReflector.capture(new TypeToken<List<?>>(){}.getAnnotatedType()).getType().toString());
 	}
 }

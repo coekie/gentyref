@@ -14,7 +14,7 @@ class CaptureTypeImpl implements CaptureType {
 	private Type[] upperBounds;
 
 	/**
-	 * Creates an uninitialized CaptureTypeImpl. Before using this type, {@link #init(AnnotatedVarMap)} must be called.
+	 * Creates an uninitialized CaptureTypeImpl. Before using this type, {@link #init(VarMap)} must be called.
 	 * @param wildcard The wildcard this is a capture of
 	 * @param variable The type variable where the wildcard is a parameter for.
 	 */
@@ -28,7 +28,7 @@ class CaptureTypeImpl implements CaptureType {
 	 * Initialize this CaptureTypeImpl.
 	 * This is needed for type variable bounds referring to each other: we need the capture of the argument.
 	 */
-	void init(AnnotatedVarMap varMap) {
+	void init(VarMap varMap) {
 		ArrayList<Type> upperBoundsList = new ArrayList<>();
 		upperBoundsList.addAll(Arrays.asList(varMap.map(variable.getBounds())));
 
@@ -56,6 +56,20 @@ class CaptureTypeImpl implements CaptureType {
 	public Type[] getUpperBounds() {
 		assert upperBounds != null;
 		return upperBounds.clone();
+	}
+
+	@Override
+	public TypeVariable<?> getTypeVariable() {
+		return variable;
+	}
+
+	@Override
+	public WildcardType getWildcardType() {
+		return wildcard;
+	}
+
+	public void setUpperBounds(Type[] upperBounds) {
+		this.upperBounds = upperBounds;
 	}
 
 	@Override

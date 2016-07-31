@@ -37,9 +37,9 @@ public class AnnotatedArrayTypeImpl extends AnnotatedTypeImpl implements Annotat
 
 	@Override
 	public boolean equals(Object other) {
-		return other instanceof AnnotatedArrayTypeImpl
+		return other instanceof AnnotatedArrayType
 				&& super.equals(other)
-				&& ((AnnotatedArrayTypeImpl) other).componentType.equals(this.componentType);
+				&& ((AnnotatedArrayType) other).getAnnotatedGenericComponentType().equals(this.componentType);
 	}
 
 	@Override
