@@ -4,7 +4,7 @@
 	<groupId>io.leangen.gentyref8</groupId>
 	<artifactId>gentyref8</artifactId>
 	<packaging>jar</packaging>
-	<version>0.7.0</version>
+	<version>1.0.0.rc1</version>
 	<inceptionYear>2016</inceptionYear>
 	<name>GenTyRef8</name>
 	<url>https://github.com/leangen/gentyref8</url>
