@@ -36,7 +36,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 	private static final TypeToken<Collection<? super String>> COLLECTION_OF_SUPER_STRING = new TypeToken<Collection<? super String>>(){};
 	
 	private static final TypeToken<ArrayList<List<? extends String>>> ARRAYLIST_OF_LIST_OF_EXT_STRING = new TypeToken<ArrayList<List<? extends String>>>(){};
-	private static final TypeToken<List<List<? extends @NN String>>> LIST_OF_LIST_OF_EXT_STRING = new TypeToken<List<List<? extends @NN String>>>(){};
+	private static final TypeToken<List<List<? extends String>>> LIST_OF_LIST_OF_EXT_STRING = new TypeToken<List<List<? extends String>>>(){};
 	private static final TypeToken<Collection<List<? extends String>>> COLLECTION_OF_LIST_OF_EXT_STRING = new TypeToken<Collection<List<? extends String>>>(){};
 	
 	private final ReflectionStrategy strategy;
@@ -420,9 +420,9 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 			class Inner implements WithF<T> {
 				public T f;
 			}
-			class Inner2 implements WithF<List<List<? extends @NN T>>> {
+			class Inner2 implements WithF<List<List<? extends T>>> {
 				@SuppressWarnings("unused")
-				public List<List<? extends @NN T>> f;
+				public List<List<? extends T>> f;
 			}
 		}
 		use(Outer.class);
@@ -430,7 +430,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 		TypeToken<String> ft = getStrictF(new TypeToken<Outer<String>.Inner>(){});
 		assertCheckedTypeEquals(tt(String.class), ft);
 
-		TypeToken<List<List<? extends @NN String>>> ft2 = getStrictF(new TypeToken<Outer<String>.Inner2>(){});
+		TypeToken<List<List<? extends String>>> ft2 = getStrictF(new TypeToken<Outer<String>.Inner2>(){});
 		assertCheckedTypeEquals(LIST_OF_LIST_OF_EXT_STRING, ft2);
 	}
 	
