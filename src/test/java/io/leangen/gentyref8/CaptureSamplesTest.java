@@ -9,7 +9,7 @@ import junit.framework.TestCase;
 /**
  * see http://code.google.com/p/gentyref/wiki/CaptureType
  * 
- * @author Wouter Coekaerts <wouter@coekaerts.be>
+ * @author Wouter Coekaerts {@literal (wouter@coekaerts.be)}
  */
 public class CaptureSamplesTest extends TestCase {
 	class Foo<T> {

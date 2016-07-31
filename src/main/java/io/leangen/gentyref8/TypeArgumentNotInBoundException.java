@@ -7,7 +7,7 @@ import java.lang.reflect.TypeVariable;
  * Thrown to indicate that a type argument for a parameterized type is not within the bound declared on the type
  * parameter.
  * 
- * @author Wouter Coekaerts <wouter@coekaerts.be>
+ * @author Wouter Coekaerts {@literal (wouter@coekaerts.be)}
  */
 public class TypeArgumentNotInBoundException extends IllegalArgumentException {
 	private final Type argument;

@@ -13,7 +13,7 @@ import junit.framework.TestCase;
  * <li>test toString</li>
  * </ul>
  * 
- * @author Wouter Coekaerts <wouter@coekaerts.be>
+ * @author Wouter Coekaerts {@literal (wouter@coekaerts.be)}
  */
 public class TypeTest extends TestCase {
 

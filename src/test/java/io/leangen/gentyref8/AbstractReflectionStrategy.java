@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
 /**
  * ReflectionStrategy for implementations that provide a getExactSuperType implementation
  * 
- * @author Wouter Coekaerts <wouter@coekaerts.be>
+ * @author Wouter Coekaerts {@literal (wouter@coekaerts.be)}
  */
 public abstract class AbstractReflectionStrategy implements ReflectionStrategy {
 	

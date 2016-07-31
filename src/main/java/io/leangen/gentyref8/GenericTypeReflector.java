@@ -24,8 +24,9 @@ import java.util.Set;
 
 /**
  * Utility class for doing reflection on types.
- * 
- * @author Wouter Coekaerts <wouter@coekaerts.be>
+ *
+ * @author Wouter Coekaerts {@literal (wouter@coekaerts.be)}
+ * @author Bojan Tomic {@literal (veggen@gmail.com)}
  */
 public class GenericTypeReflector {
 	private static final WildcardType UNBOUND_WILDCARD = new WildcardTypeImpl(new Type[]{Object.class}, new Type[]{});
@@ -495,7 +496,7 @@ public class GenericTypeReflector {
 	/**
 	 * Returns list of classes and interfaces that are supertypes of the given type.
 	 * For example given this class:
-	 * <tt>class Foo&lt;A extends Number & Iterable&lt;A&gt;, B extends A&gt;</tt><br>
+	 * <tt>class {@literal Foo<A extends Number & Iterable<A>, B extends A>}</tt><br>
 	 * calling this method on type parameters <tt>B</tt> (<tt>Foo.class.getTypeParameters()[1]</tt>)
 	 * returns a list containing <tt>Number</tt> and <tt>Iterable</tt>.
 	 * <p>

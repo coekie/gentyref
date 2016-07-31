@@ -25,7 +25,8 @@ import static java.util.Arrays.stream;
 /**
  * Mapping between type variables and actual parameters.
  *
- * @author Wouter Coekaerts <wouter@coekaerts.be>
+ * @author Wouter Coekaerts {@literal (wouter@coekaerts.be)}
+ * @author Bojan Tomic {@literal (veggen@gmail.com)}
  */
 class VarMap {
 	private final Map<TypeVariable, AnnotatedType> map = new HashMap<>();

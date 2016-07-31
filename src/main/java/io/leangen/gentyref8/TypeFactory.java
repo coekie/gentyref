@@ -11,7 +11,7 @@ import java.lang.reflect.WildcardType;
  * Utility class for creating instances of {@link Type}.
  * These types can be used with the {@link GenericTypeReflector} or anything else handling Java types.
  *
- * @author Wouter Coekaerts <wouter@coekaerts.be>
+ * @author Wouter Coekaerts {@literal (wouter@coekaerts.be)}
  */
 public class TypeFactory {
 	private static final WildcardType UNBOUND_WILDCARD = new WildcardTypeImpl(new Type[]{Object.class}, new Type[]{});
@@ -219,7 +219,7 @@ public class TypeFactory {
 
 	/**
 	 * Returns the wildcard type without bounds.
-	 * This is the '<tt>?</tt>' in for example <tt>List&lt;?&gt</tt>.
+	 * This is the '<tt>?</tt>' in for example <tt>List&lt;?&gt;</tt>.
 	 *
 	 * @return The unbound wildcard type
 	 */

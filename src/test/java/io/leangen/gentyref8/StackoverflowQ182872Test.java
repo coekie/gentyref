@@ -11,7 +11,7 @@ import junit.framework.TestCase;
  * Sample in the form of a JUnit test, to show gentyref solves the problem on
  * http://stackoverflow.com/questions/182872/
  * 
- * @author Wouter Coekaerts <wouter@coekaerts.be>
+ * @author Wouter Coekaerts {@literal (wouter@coekaerts.be)}
  */
 public class StackoverflowQ182872Test extends TestCase {
 	private static Type LIST_OF_STRING = new TypeToken<List<String>>(){}.getType();

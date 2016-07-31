@@ -12,7 +12,7 @@ import junit.framework.TestCase;
  * Simple samples of what gentyref does, in the form of tests.
  * See http://code.google.com/p/gentyref/wiki/ExampleUsage
  * 
- * @author Wouter Coekaerts <wouter@coekaerts.be>
+ * @author Wouter Coekaerts {@literal (wouter@coekaerts.be)}
  */
 public class SamplesTest extends TestCase {
 	interface Processor<T> {
