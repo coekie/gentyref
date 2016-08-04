@@ -89,7 +89,8 @@ class VarMap {
 			if (!map.containsKey(tv)) {
 				throw new UnresolvedTypeVariableException(tv);
 			}
-			Annotation[] merged = Stream.concat(Arrays.stream(type.getAnnotations()), Arrays.stream(map.get(tv).getAnnotations())).distinct().toArray(Annotation[]::new);
+			TypeVariable varFromClass = map.keySet().stream().filter(key -> key.equals(tv)).findFirst().get();
+			Annotation[] merged = merge(tv.getAnnotations(), map.get(tv).getAnnotations(), varFromClass.getAnnotations());
 			return updateAnnotations(map.get(tv), merged);
 		} else if (type instanceof AnnotatedParameterizedType) {
 			AnnotatedParameterizedType pType = (AnnotatedParameterizedType) type;
@@ -132,5 +133,9 @@ class VarMap {
 
 	Type map(Type type) {
 		return map(annotate(type)).getType();
+	}
+
+	private Annotation[] merge(Annotation[]... arrays) {
+		return Arrays.stream(arrays).reduce((acc, arr) -> Stream.concat(Arrays.stream(acc), Arrays.stream(arr)).distinct().toArray(Annotation[]::new)).orElse(new Annotation[0]);
 	}
 }
