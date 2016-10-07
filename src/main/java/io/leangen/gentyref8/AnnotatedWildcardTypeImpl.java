@@ -11,7 +11,7 @@ import static io.leangen.gentyref8.GenericTypeReflector.typeArraysEqual;
 /**
  * Created by bojan.tomic on 7/24/16.
  */
-public class AnnotatedWildcardTypeImpl extends AnnotatedTypeImpl implements AnnotatedWildcardType {
+class AnnotatedWildcardTypeImpl extends AnnotatedTypeImpl implements AnnotatedWildcardType {
 
 	private AnnotatedType[] lowerBounds;
 	private AnnotatedType[] upperBounds;

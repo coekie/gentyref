@@ -16,9 +16,9 @@ import java.lang.reflect.WildcardType;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static io.leangen.gentyref8.GenericTypeReflector.annotate;
+import static io.leangen.gentyref8.GenericTypeReflector.merge;
 import static io.leangen.gentyref8.GenericTypeReflector.updateAnnotations;
 import static java.util.Arrays.stream;
 
@@ -133,9 +133,5 @@ class VarMap {
 
 	Type map(Type type) {
 		return map(annotate(type)).getType();
-	}
-
-	private Annotation[] merge(Annotation[]... arrays) {
-		return Arrays.stream(arrays).reduce((acc, arr) -> Stream.concat(Arrays.stream(acc), Arrays.stream(arr)).distinct().toArray(Annotation[]::new)).orElse(new Annotation[0]);
 	}
 }

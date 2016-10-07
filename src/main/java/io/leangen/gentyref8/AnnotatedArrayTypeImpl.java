@@ -8,7 +8,7 @@ import java.lang.reflect.GenericArrayType;
 /**
  * Created by bojan.tomic on 7/24/16.
  */
-public class AnnotatedArrayTypeImpl extends AnnotatedTypeImpl implements AnnotatedArrayType {
+class AnnotatedArrayTypeImpl extends AnnotatedTypeImpl implements AnnotatedArrayType {
 
 	private AnnotatedType componentType;
 

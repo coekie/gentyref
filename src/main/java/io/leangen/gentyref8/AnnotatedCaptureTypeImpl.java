@@ -20,7 +20,7 @@ import static java.util.Arrays.stream;
 /**
  * Created by bojan.tomic on 7/26/16.
  */
-public class AnnotatedCaptureTypeImpl implements AnnotatedCaptureType {
+class AnnotatedCaptureTypeImpl implements AnnotatedCaptureType {
 
 	private final AnnotatedWildcardType wildcard;
 	private final AnnotatedTypeVariable variable;

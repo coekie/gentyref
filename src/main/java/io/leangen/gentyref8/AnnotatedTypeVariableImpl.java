@@ -11,7 +11,7 @@ import static io.leangen.gentyref8.GenericTypeReflector.typeArraysEqual;
 /**
  * Created by bojan.tomic on 7/24/16.
  */
-public class AnnotatedTypeVariableImpl extends AnnotatedTypeImpl implements AnnotatedTypeVariable {
+class AnnotatedTypeVariableImpl extends AnnotatedTypeImpl implements AnnotatedTypeVariable {
 
 	private AnnotatedType[] annotatedBounds;
 

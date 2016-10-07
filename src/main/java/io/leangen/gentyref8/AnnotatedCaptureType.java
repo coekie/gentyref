@@ -7,7 +7,7 @@ import java.lang.reflect.AnnotatedWildcardType;
 /**
  * Created by bojan.tomic on 7/30/16.
  */
-public interface AnnotatedCaptureType extends AnnotatedType {
+interface AnnotatedCaptureType extends AnnotatedType {
 
 	AnnotatedType[] getAnnotatedUpperBounds();
 

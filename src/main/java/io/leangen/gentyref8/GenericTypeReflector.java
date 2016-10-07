@@ -20,7 +20,9 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Utility class for doing reflection on types.
@@ -510,7 +512,7 @@ public class GenericTypeReflector {
 	 *  The list contains no duplicates, and is ordered in the order the upper bounds are defined on the type.
 	 */
 	public static List<Class<?>> getUpperBoundClassAndInterfaces(Type type) {
-		LinkedHashSet<Class<?>> result = new LinkedHashSet<Class<?>>();
+		LinkedHashSet<Class<?>> result = new LinkedHashSet<>();
 		buildUpperBoundClassAndInterfaces(type, result);
 		return new ArrayList<>(result);
 	}
@@ -519,7 +521,11 @@ public class GenericTypeReflector {
 		return annotate(type, new HashMap<>());
 	}
 
-	public static AnnotatedType annotate(Type type, Map<CaptureCacheKey, AnnotatedType> cache) {
+	public static AnnotatedType annotate(Type type, Annotation[] annotations) {
+        return updateAnnotations(annotate(type), annotations);
+    }
+
+	private static AnnotatedType annotate(Type type, Map<CaptureCacheKey, AnnotatedType> cache) {
 		if (type instanceof ParameterizedType) {
 			ParameterizedType parameterized = (ParameterizedType) type;
 			AnnotatedType[] params = new AnnotatedType[parameterized.getActualTypeArguments().length];
@@ -601,8 +607,37 @@ public class GenericTypeReflector {
 		if (Arrays.equals(original.getAnnotations(), annotations)) {
 			return original;
 		}
-		return replaceAnnotations(original, annotations);
+		return replaceAnnotations(original, merge(original.getAnnotations(), annotations));
 	}
+
+	public static AnnotatedType clone(AnnotatedType type) {
+        return replaceAnnotations(type, type.getAnnotations());
+    }
+
+    /**
+     * Returns an array containing all annotations declared by the given annotated types, without duplicates.
+     *
+     * @param types Annotated types whose annotations are to be extracted and merged
+     * @return An array containing all annotations declared by the given annotated types, without duplicates
+     */
+    public static Annotation[] getMergedAnnotations(AnnotatedType... types) {
+        return Arrays.stream(types)
+                .flatMap(type -> Arrays.stream(type.getAnnotations()))
+                .distinct()
+                .toArray(Annotation[]::new);
+    }
+
+    /**
+     * Merges an arbitrary number of annotations arrays, and removes duplicates.
+     *
+     * @param annotations Annotation arrays to merge and deduplicate
+     * @return An array containing all annotations from the given arrays, without duplicates
+     */
+    public static Annotation[] merge(Annotation[]... annotations) {
+        return Arrays.stream(annotations).reduce(
+                (acc, arr) -> Stream.concat(Arrays.stream(acc), Arrays.stream(arr)).distinct().toArray(Annotation[]::new))
+                .orElse(new Annotation[0]);
+    }
 
 	public static boolean typeArraysEqual(AnnotatedType[] t1, AnnotatedType[] t2) {
 		if (t1 == null && t2 != null) return false;
@@ -617,6 +652,15 @@ public class GenericTypeReflector {
 		}
 		return true;
 	}
+
+    public static boolean equals(AnnotatedType t1, AnnotatedType t2) {
+        Objects.requireNonNull(t1);
+        Objects.requireNonNull(t2);
+        t1 = t1 instanceof AnnotatedTypeImpl ? t1 : clone(t1);
+        t2 = t2 instanceof AnnotatedTypeImpl ? t2 : clone(t2);
+
+        return t1.equals(t2);
+    }
 
 	/**
 	 * Helper method for getUpperBoundClassAndInterfaces, adding the result to the given set.
