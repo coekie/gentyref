@@ -1,14 +1,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>io.leangen.gentyref8</groupId>
-	<artifactId>gentyref8</artifactId>
+	<groupId>io.leangen.geantyref</groupId>
+	<artifactId>geantyref</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0.0</version>
+
 	<inceptionYear>2016</inceptionYear>
 	<name>GenTyRef8</name>
-	<url>https://github.com/leangen/gentyref8</url>
-	<description>Generic type reflection library for Java 8</description>
+	<url>https://github.com/leangen/geantyref</url>
+	<description>Generic type reflection library with support for AnnotatedType</description>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -16,20 +17,21 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+
 	<scm>
-		<connection>scm:git:git://github.com/leangen/gentyref8</connection>
-		<developerConnection>scm:git:git://github.com/leangen/gentyref8</developerConnection>
-		<url>https://github.com/leangen/gentyref8</url>
+		<connection>scm:git:git://github.com/leangen/geantyref</connection>
+		<developerConnection>scm:git:git://github.com/leangen/geantyref</developerConnection>
+		<url>https://github.com/leangen/geantyref</url>
 	</scm>
 	<distributionManagement>
 		<repository>
 			<id>bintray-leangen</id>
-			<url>https://api.bintray.com/maven/leangen/maven/gentyref8/</url>
+			<url>https://api.bintray.com/maven/leangen/maven/geantyref/</url>
 		</repository>
 	</distributionManagement>
 	<issueManagement>
 		<system>GitHub Issue Tracking</system>
-		<url>https://github.com/leangen/gentyref8/issues</url>
+		<url>https://github.com/leangen/geantyref/issues</url>
 	</issueManagement>
 
 	<properties>
@@ -44,6 +46,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
 	<build>
 		<defaultGoal>package</defaultGoal>
 		<plugins>
@@ -56,6 +59,7 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -70,6 +74,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
@@ -84,6 +89,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -142,6 +148,7 @@
 			</build>
 		</profile>
 	</profiles>
+
 	<developers>
 		<developer>
 			<name>Bojan Tomic</name>
