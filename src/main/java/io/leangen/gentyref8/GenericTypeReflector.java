@@ -517,14 +517,49 @@ public class GenericTypeReflector {
 		return new ArrayList<>(result);
 	}
 
+    /**
+     * Recursively wraps a {@link Type} into an {@link AnnotatedType} using the annotations found on
+     * the erasure classes.
+     *
+     * @param type Type to annotate
+     * @return Type whose structure has been recursively annotated
+     */
 	public static AnnotatedType annotate(Type type) {
 		return annotate(type, new HashMap<>());
 	}
 
+    /**
+     * Recursively wraps a {@link Type} into an {@link AnnotatedType} using the annotations found on
+     * the erasure classes, plus adding the provided annotations to the top level {@link Type} only.
+     *
+     * @param type Type to annotate
+     * @return Type whose structure has been recursively annotated, plus the provided annotation added
+     * at the top level
+     *
+     * <p>See {@link #annotate(Type)}</p>
+     */
 	public static AnnotatedType annotate(Type type, Annotation[] annotations) {
         return updateAnnotations(annotate(type), annotations);
     }
 
+    /**
+     * This is the method underlying both {@link #annotate(Type)} and {@link #annotate(Type, Annotation[])}.
+     * If goes recursively through the structure of the provided {@link Type} wrapping all type parameters,
+     * bounds etc encountered into {@link AnnotatedType}s using annotations found directly on the
+     * corresponding erasure class, with a special treatment for {@link CaptureType} which can have
+     * infinitely recursive structure by having itself as its upper bound.
+     *
+     * @param type The type to annotate
+     * @param cache The cache for already encountered {@link CaptureType}s. Necessary because
+     *       {@link CaptureType}s can have infinitely recursive structure.
+     *
+     * @return Type whose structure has been recursively annotated
+     *
+     * <p>See {@link #annotate(Type)}</p>
+     * <p>See {@link #annotate(Type, Annotation[])}</p>
+     * <p>See {@link CaptureCacheKey}</p>
+     * <p>See {@link CaptureType}</p>
+     */
 	private static AnnotatedType annotate(Type type, Map<CaptureCacheKey, AnnotatedType> cache) {
 		if (type instanceof ParameterizedType) {
 			ParameterizedType parameterized = (ParameterizedType) type;
@@ -550,7 +585,7 @@ public class GenericTypeReflector {
 			AnnotatedType[] upperBounds = Arrays.stream(capture.getUpperBounds())
 					.map(bound -> annotate(bound, cache))
 					.toArray(AnnotatedType[]::new);
-			annotatedCapture.setAnnotatedUpperBounds(upperBounds);
+			annotatedCapture.setAnnotatedUpperBounds(upperBounds); //complete the type
 			return annotatedCapture;
 		}
 		if (type instanceof WildcardType) {
@@ -576,6 +611,15 @@ public class GenericTypeReflector {
 		throw new IllegalArgumentException("Unrecognized type: " + type.getTypeName());
 	}
 
+    /**
+     * Creates a new {@link AnnotatedType} of the same type as the original, but with its annotations
+     * replaced with the provided ones.
+     *
+     * @param original The type whose structure is to be copied
+     * @param annotations Annotations to use instead of the ones found on the {@code original}
+     *
+     * @return A type of the same structure as the original but with replaced annotations
+     */
 	public static AnnotatedType replaceAnnotations(AnnotatedType original, Annotation[] annotations) {
 		if (original instanceof AnnotatedParameterizedType) {
 			return new AnnotatedParameterizedTypeImpl((ParameterizedType) original.getType(), annotations,
@@ -603,6 +647,15 @@ public class GenericTypeReflector {
 		return new AnnotatedTypeImpl(original.getType(), annotations);
 	}
 
+    /**
+     * Creates a new {@link AnnotatedType} of the same structure as the original, but with its annotations
+     * replaced with the provided ones.
+     *
+     * @param original The type whose structure is to be copied
+     * @param annotations Annotations to use instead of the ones found on the {@code original}
+     *
+     * @return A type of the same structure as the original but with replaced annotations
+     */
 	public static AnnotatedType updateAnnotations(AnnotatedType original, Annotation[] annotations) {
 		if (Arrays.equals(original.getAnnotations(), annotations)) {
 			return original;
@@ -610,6 +663,14 @@ public class GenericTypeReflector {
 		return replaceAnnotations(original, merge(original.getAnnotations(), annotations));
 	}
 
+    /**
+     * Creates a new {@link AnnotatedType} of the same structure and with the same annotations as the
+     * provided one.
+     *
+     * @param type The type from which the structure and annotations are to be copied
+     *
+     * @return A type of the same structure and with the same annotation as the provided one
+     */
 	public static AnnotatedType clone(AnnotatedType type) {
         return replaceAnnotations(type, type.getAnnotations());
     }
@@ -653,6 +714,14 @@ public class GenericTypeReflector {
 		return true;
 	}
 
+    /**
+     * Checks whether the two provided types are of the same structure and annotations on all levels.
+     *
+     * @param t1 The first type to be compared
+     * @param t2 The second type to be compared
+     *
+     * @return True if both types have the same structure and annotations on all levels
+     */
     public static boolean equals(AnnotatedType t1, AnnotatedType t2) {
         Objects.requireNonNull(t1);
         Objects.requireNonNull(t2);
@@ -676,6 +745,13 @@ public class GenericTypeReflector {
 		}
 	}
 
+    /**
+     * A key representing a {@link CaptureType}. Used for caching incomplete {@link CaptureType}s
+     * while recursively inspecting their structure. Necessary because {@link CaptureType} can have
+     * infinitely recursive structure.
+     *
+     * <p>See {@link #annotate(Type, Map)}</p>
+     */
 	private static class CaptureCacheKey {
 		CaptureType capture;
 
