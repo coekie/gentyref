@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * see http://code.google.com/p/gentyref/wiki/CaptureType
+ * See <a href="https://github.com/leangen/geantyref/wiki/CaptureType">CaptureType</a>
  *
  * @author Wouter Coekaerts {@literal (wouter@coekaerts.be)}
  */
@@ -17,18 +17,14 @@ public class CaptureSamplesTest extends TestCase {
         foo.listWildcard = new ArrayList<Long>();
         //foo.listT = new ArrayList<Long>(); // does not compile
 
-        Type fooWildcard = new TypeToken<Foo<? extends Number>>() {
-        }.getType();
+        Type fooWildcard = new TypeToken<Foo<? extends Number>>() {}.getType();
 
         Type listWildcardFieldType = GenericTypeReflector.getExactFieldType(Foo.class.getDeclaredField("listWildcard"), fooWildcard);
         Type listTFieldType = GenericTypeReflector.getExactFieldType(Foo.class.getDeclaredField("listT"), fooWildcard);
 
-        assertEquals(new TypeToken<List<? extends Number>>() {
-        }.getType(), listWildcardFieldType);
-        assertTrue(GenericTypeReflector.isSuperType(listWildcardFieldType, new TypeToken<ArrayList<Long>>() {
-        }.getType()));
-        assertFalse(GenericTypeReflector.isSuperType(listTFieldType, new TypeToken<ArrayList<Long>>() {
-        }.getType()));
+        assertEquals(new TypeToken<List<? extends Number>>() {}.getType(), listWildcardFieldType);
+        assertTrue(GenericTypeReflector.isSuperType(listWildcardFieldType, new TypeToken<ArrayList<Long>>() {}.getType()));
+        assertFalse(GenericTypeReflector.isSuperType(listTFieldType, new TypeToken<ArrayList<Long>>() {}.getType()));
     }
 
     @SuppressWarnings("unused")
@@ -36,8 +32,7 @@ public class CaptureSamplesTest extends TestCase {
         Bar<?> bar = new Bar<Integer>();
         Number n = bar.t;
 
-        Type barType = new TypeToken<Bar<?>>() {
-        }.getType();
+        Type barType = new TypeToken<Bar<?>>() {}.getType();
         Type captureType = GenericTypeReflector.getExactFieldType(Bar.class.getDeclaredField("t"), barType);
         assertTrue(GenericTypeReflector.isSuperType(Number.class, captureType));
     }

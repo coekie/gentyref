@@ -7,7 +7,7 @@
 	<version>1.0.0</version>
 
 	<inceptionYear>2016</inceptionYear>
-	<name>GenTyRef8</name>
+	<name>GeanTyRef</name>
 	<url>https://github.com/leangen/geantyref</url>
 	<description>Generic type reflection library with support for AnnotatedType</description>
 	<licenses>
