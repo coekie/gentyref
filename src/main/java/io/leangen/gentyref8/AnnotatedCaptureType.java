@@ -5,17 +5,17 @@ import java.lang.reflect.AnnotatedTypeVariable;
 import java.lang.reflect.AnnotatedWildcardType;
 
 /**
- * Created by bojan.tomic on 7/30/16.
+ * Annotated equivalent of {@link CaptureType}
  */
 interface AnnotatedCaptureType extends AnnotatedType {
 
-	AnnotatedType[] getAnnotatedUpperBounds();
+    AnnotatedType[] getAnnotatedUpperBounds();
 
-	AnnotatedType[] getAnnotatedLowerBounds();
+    AnnotatedType[] getAnnotatedLowerBounds();
 
-	AnnotatedTypeVariable getAnnotatedTypeVariable();
+    AnnotatedTypeVariable getAnnotatedTypeVariable();
 
-	AnnotatedWildcardType getAnnotatedWildcardType();
+    AnnotatedWildcardType getAnnotatedWildcardType();
 
-	void setAnnotatedUpperBounds(AnnotatedType[] upperBounds);
+    void setAnnotatedUpperBounds(AnnotatedType[] upperBounds);
 }

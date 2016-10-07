@@ -32,7 +32,7 @@ import java.util.stream.Stream;
  */
 public class GenericTypeReflector {
 	private static final WildcardType UNBOUND_WILDCARD = new WildcardTypeImpl(new Type[]{Object.class}, new Type[]{});
-	
+
 	/**
 	 * Returns the erasure of the given type.
 	 */
@@ -58,9 +58,9 @@ public class GenericTypeReflector {
 			throw new RuntimeException("not supported: " + type.getClass());
 		}
 	}
-	
+
 	/**
-	 * Maps type parameters in a type to their values. 
+	 * Maps type parameters in a type to their values.
 	 * @param toMapType Type possibly containing type arguments
 	 * @param typeAndParams must be either ParameterizedType, or (in case there are no type arguments, or it's a raw type) Class
 	 * @return toMapType, but with type parameters from typeAndParams replaced.
@@ -100,14 +100,14 @@ public class GenericTypeReflector {
 			throw new AssertionError("Unexpected type " + type.getClass());
 		}
 	}
-	
+
 	/**
 	 * Returns a type representing the class, with all type parameters the unbound wildcard ("?").
 	 * For example, <tt>addWildcardParameters(Map.class)</tt> returns a type representing <tt>Map&lt;?,?&gt;</tt>.
 	 * @return <ul>
 	 * <li>If clazz is a class or interface without type parameters, clazz itself is returned.</li>
 	 * <li>If clazz is a class or interface with type parameters, an instance of ParameterizedType is returned.</li>
-	 * <li>if clazz is an array type, an array type is returned with unbound wildcard parameters added in the the component type.   
+	 * <li>if clazz is an array type, an array type is returned with unbound wildcard parameters added in the the component type.
 	 * </ul>
 	 */
 	public static Type addWildcardParameters(Class<?> clazz) {
@@ -123,18 +123,18 @@ public class GenericTypeReflector {
 			return clazz;
 		}
 	}
-	
+
 	/**
 	 * Finds the most specific supertype of <tt>type</tt> whose erasure is <tt>searchClass</tt>.
 	 * In other words, returns a type representing the class <tt>searchClass</tt> plus its exact type parameters in <tt>type</tt>.
-	 * 
+	 *
 	 * <ul>
 	 * <li>Returns an instance of {@link ParameterizedType} if <tt>searchClass</tt> is a real class or interface and <tt>type</tt> has parameters for it</li>
 	 * <li>Returns an instance of {@link GenericArrayType} if <tt>searchClass</tt> is an array type, and <tt>type</tt> has type parameters for it</li>
 	 * <li>Returns an instance of {@link Class} if <tt>type</tt> is a raw type, or has no type parameters for <tt>searchClass</tt></li>
 	 * <li>Returns null if <tt>searchClass</tt> is not a superclass of type.</li>
 	 * </ul>
-	 * 
+	 *
 	 * <p>For example, with <tt>class StringList implements List&lt;String&gt;</tt>, <tt>getExactSuperType(StringList.class, Collection.class)</tt>
 	 * returns a {@link ParameterizedType} representing <tt>Collection&lt;String&gt;</tt>.
 	 * </p>
@@ -169,8 +169,8 @@ public class GenericTypeReflector {
 	 * Gets the type parameter for a given type that is the value for a given type variable.
 	 * For example, with <tt>class StringList implements List&lt;String&gt;</tt>,
 	 * <tt>getTypeParameter(StringList.class, Collection.class.getTypeParameters()[0])</tt>
-	 * returns <tt>String</tt>. 
-	 *  
+	 * returns <tt>String</tt>.
+	 *
 	 * @param type The type to inspect.
 	 * @param variable The type variable to find the value for.
 	 * @return The type parameter for the given variable. Or null if type is not a subtype of the
@@ -238,10 +238,10 @@ public class GenericTypeReflector {
 				}
 			}
 			return false;
-		} else if (superType instanceof GenericArrayType) {
-			return isArraySupertype(superType, subType);
+//		} else if (superType instanceof GenericArrayType) {
+//			return isArraySupertype(superType, subType);
 		} else {
-			throw new RuntimeException("not implemented: " + superType.getClass());
+			throw new RuntimeException("Type not supported: " + superType.getClass());
 		}
 	}
 
@@ -478,7 +478,7 @@ public class GenericTypeReflector {
 		}
 		ParameterizedType inner = (ParameterizedType) type.getType();
 		AnnotatedType ownerType = (inner.getOwnerType() == null) ? null : capture(annotate(inner.getOwnerType()));
-		Type[] rawArgs = Arrays.stream(capturedArguments).map(an -> an.getType()).toArray(Type[]::new);
+		Type[] rawArgs = Arrays.stream(capturedArguments).map(AnnotatedType::getType).toArray(Type[]::new);
 		ParameterizedType nn = new ParameterizedTypeImpl(clazz, rawArgs, ownerType == null ? null : ownerType.getType());
 		return new AnnotatedParameterizedTypeImpl(nn, type.getAnnotations(), capturedArguments);
 	}
@@ -494,7 +494,7 @@ public class GenericTypeReflector {
 			return type.toString();
 		}
 	}
-	
+
 	/**
 	 * Returns list of classes and interfaces that are supertypes of the given type.
 	 * For example given this class:
@@ -506,7 +506,7 @@ public class GenericTypeReflector {
 	 * but you don't want to deal with all the different sorts of types,
 	 * and you are only really interested in concrete classes and interfaces.
 	 * </p>
-	 *  
+	 *
 	 * @return A List of classes, each of them a supertype of the given type.
 	 * 	If the given type is a class or interface itself, returns a List with just the given type.
 	 *  The list contains no duplicates, and is ordered in the order the upper bounds are defined on the type.
