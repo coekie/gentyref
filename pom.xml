@@ -7,7 +7,7 @@
 	<version>1.0.0</version>
 
 	<inceptionYear>2016</inceptionYear>
-	<name>GeanTyRef</name>
+	<name>GeAnTyRef</name>
 	<url>https://github.com/leangen/geantyref</url>
 	<description>Generic type reflection library with support for AnnotatedType</description>
 	<licenses>
@@ -62,21 +62,6 @@
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.5</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>jar</goal>
-							<goal>test-jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
 				<version>2.4</version>
 				<executions>
@@ -124,9 +109,10 @@
 						<version>2.5.3</version>
 						<configuration>
 							<pushChanges>false</pushChanges>
-							<tagNameFormat>v@{project.version}</tagNameFormat>
+							<tagNameFormat>geantyref-v@{project.version}</tagNameFormat>
 						</configuration>
 					</plugin>
+
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
@@ -153,6 +139,8 @@
 		<developer>
 			<name>Bojan Tomic</name>
 			<email>veggen@gmail.com</email>
+            <organization>Leangen</organization>
+            <organizationUrl>http://leangen.io</organizationUrl>
 		</developer>
 	</developers>
 </project>
