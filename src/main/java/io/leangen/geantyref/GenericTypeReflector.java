@@ -181,7 +181,8 @@ public class GenericTypeReflector {
 		AnnotatedType superType = getExactSuperType(type, clazz);
 		if (superType instanceof AnnotatedParameterizedType) {
 			int index = Arrays.asList(clazz.getTypeParameters()).indexOf(variable);
-			return ((AnnotatedParameterizedType)superType).getAnnotatedActualTypeArguments()[index];
+			AnnotatedType resolvedVarType = ((AnnotatedParameterizedType)superType).getAnnotatedActualTypeArguments()[index];
+			return updateAnnotations(resolvedVarType, variable.getAnnotations());
 		} else {
 			return null;
 		}
@@ -326,10 +327,10 @@ public class GenericTypeReflector {
 			} else {
 				result = new AnnotatedType[superInterfaces.length + 1];
 				resultIndex = 1;
-				result[0] = mapTypeParameters(superClass, type);
+                result[0] = mergeVariableAnnotations(mapTypeParameters(superClass, type));
 			}
 			for (AnnotatedType superInterface : superInterfaces) {
-				result[resultIndex++] = mapTypeParameters(superInterface, type);
+				result[resultIndex++] = mergeVariableAnnotations(mapTypeParameters(superInterface, type));
 			}
 
 			return result;
@@ -365,7 +366,7 @@ public class GenericTypeReflector {
 			AnnotatedType[] componentSupertypes = getExactDirectSuperTypes(typeComponent);
 			result = new AnnotatedType[componentSupertypes.length + 3];
 			for (resultIndex = 0; resultIndex < componentSupertypes.length; resultIndex++) {
-				result[resultIndex] = AnnotatedArrayTypeImpl.createArrayType(componentSupertypes[resultIndex]);
+				result[resultIndex] = AnnotatedArrayTypeImpl.createArrayType(arrayType.getAnnotations(), componentSupertypes[resultIndex]);
 			}
 		}
 		result[resultIndex++] = new AnnotatedTypeImpl(Object.class);
@@ -641,7 +642,7 @@ public class GenericTypeReflector {
 			return new AnnotatedTypeVariableImpl((TypeVariable<?>) original.getType(), annotations);
 		}
 		if (original instanceof AnnotatedArrayType) {
-			return new AnnotatedArrayTypeImpl((GenericArrayType) original.getType(), annotations,
+			return new AnnotatedArrayTypeImpl(original.getType(), annotations,
 					((AnnotatedArrayType) original).getAnnotatedGenericComponentType());
 		}
 		return new AnnotatedTypeImpl(original.getType(), annotations);
@@ -688,6 +689,18 @@ public class GenericTypeReflector {
                 .toArray(Annotation[]::new);
     }
 
+    private static AnnotatedType mergeVariableAnnotations(AnnotatedType type) {
+        if (!(type instanceof AnnotatedParameterizedType)) {
+            return type;
+        }
+        Class raw = (Class) ((ParameterizedType) type.getType()).getRawType();
+        AnnotatedType[] typeParameters = new AnnotatedType[raw.getTypeParameters().length];
+        for (int i = 0; i < typeParameters.length; i++) {
+            typeParameters[i] = updateAnnotations(((AnnotatedParameterizedType) type).getAnnotatedActualTypeArguments()[i], raw.getTypeParameters()[i].getAnnotations());
+        }
+        return new AnnotatedParameterizedTypeImpl((ParameterizedType) type.getType(), type.getAnnotations(), typeParameters);
+    }
+    
     /**
      * Merges an arbitrary number of annotations arrays, and removes duplicates.
      *

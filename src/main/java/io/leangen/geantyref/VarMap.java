@@ -88,7 +88,7 @@ class VarMap {
                 throw new UnresolvedTypeVariableException(tv);
             }
             TypeVariable varFromClass = map.keySet().stream().filter(key -> key.equals(tv)).findFirst().get();
-            Annotation[] merged = merge(tv.getAnnotations(), map.get(tv).getAnnotations(), varFromClass.getAnnotations());
+            Annotation[] merged = merge(type.getAnnotations(), tv.getAnnotations(), map.get(tv).getAnnotations(), varFromClass.getAnnotations());
             return updateAnnotations(map.get(tv), merged);
         } else if (type instanceof AnnotatedParameterizedType) {
             AnnotatedParameterizedType pType = (AnnotatedParameterizedType) type;
@@ -110,9 +110,9 @@ class VarMap {
             WildcardType w = new WildcardTypeImpl(upperBounds, stream(lw).map(AnnotatedType::getType).toArray(Type[]::new));
             return new AnnotatedWildcardTypeImpl(w, wType.getAnnotations(), lw, up);
         } else if (type instanceof AnnotatedArrayType) {
-            return AnnotatedArrayTypeImpl.createArrayType(map(((AnnotatedArrayType) type).getAnnotatedGenericComponentType()));
+            return AnnotatedArrayTypeImpl.createArrayType(type.getAnnotations(), map(((AnnotatedArrayType) type).getAnnotatedGenericComponentType()));
         } else {
-            throw new RuntimeException("not implemented: mapping " + type.getClass() + " (" + type + ")");
+            throw new RuntimeException("Not implemented: mapping " + type.getClass() + " (" + type + ")");
         }
     }
 
