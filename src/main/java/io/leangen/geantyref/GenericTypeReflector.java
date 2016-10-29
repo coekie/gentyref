@@ -103,7 +103,7 @@ public class GenericTypeReflector {
 
 	/**
 	 * Returns a type representing the class, with all type parameters the unbound wildcard ("?").
-	 * For example, <tt>addWildcardParameters(Map.class)</tt> returns a type representing <tt>Map&lt;?,?&gt;</tt>.
+	 * For example, {@code addWildcardParameters(Map.class)} returns a type representing {@code Map<?,?>}.
 	 * @return <ul>
 	 * <li>If clazz is a class or interface without type parameters, clazz itself is returned.</li>
 	 * <li>If clazz is a class or interface with type parameters, an instance of ParameterizedType is returned.</li>
@@ -125,18 +125,18 @@ public class GenericTypeReflector {
 	}
 
 	/**
-	 * Finds the most specific supertype of <tt>type</tt> whose erasure is <tt>searchClass</tt>.
-	 * In other words, returns a type representing the class <tt>searchClass</tt> plus its exact type parameters in <tt>type</tt>.
+	 * Finds the most specific supertype of {@code type} whose erasure is {@code searchClass}.
+	 * In other words, returns a type representing the class {@code searchClass} plus its exact type parameters in {@code type}.
 	 *
 	 * <ul>
-	 * <li>Returns an instance of {@link ParameterizedType} if <tt>searchClass</tt> is a real class or interface and <tt>type</tt> has parameters for it</li>
-	 * <li>Returns an instance of {@link GenericArrayType} if <tt>searchClass</tt> is an array type, and <tt>type</tt> has type parameters for it</li>
-	 * <li>Returns an instance of {@link Class} if <tt>type</tt> is a raw type, or has no type parameters for <tt>searchClass</tt></li>
-	 * <li>Returns null if <tt>searchClass</tt> is not a superclass of type.</li>
+	 * <li>Returns an instance of {@link ParameterizedType} if {@code searchClass} is a real class or interface and {@code type} has parameters for it</li>
+	 * <li>Returns an instance of {@link GenericArrayType} if {@code searchClass} is an array type, and {@code type} has type parameters for it</li>
+	 * <li>Returns an instance of {@link Class} if {@code type} is a raw type, or has no type parameters for {@code searchClass}</li>
+	 * <li>Returns null if {@code searchClass} is not a superclass of type.</li>
 	 * </ul>
 	 *
-	 * <p>For example, with <tt>class StringList implements List&lt;String&gt;</tt>, <tt>getExactSuperType(StringList.class, Collection.class)</tt>
-	 * returns a {@link ParameterizedType} representing <tt>Collection&lt;String&gt;</tt>.
+	 * <p>For example, with {@code class StringList implements List<String>}, {@code getExactSuperType(StringList.class, Collection.class)}
+	 * returns a {@link ParameterizedType} representing {@code Collection<String>}.
 	 * </p>
 	 */
 	public static AnnotatedType getExactSuperType(AnnotatedType type, Class<?> searchClass) {
@@ -167,9 +167,9 @@ public class GenericTypeReflector {
 
 	/**
 	 * Gets the type parameter for a given type that is the value for a given type variable.
-	 * For example, with <tt>class StringList implements List&lt;String&gt;</tt>,
-	 * <tt>getTypeParameter(StringList.class, Collection.class.getTypeParameters()[0])</tt>
-	 * returns <tt>String</tt>.
+	 * For example, with {@code class StringList implements List<String>},
+	 * {@code getTypeParameter(StringList.class, Collection.class.getTypeParameters()[0])}
+	 * returns {@code String}.
 	 *
 	 * @param type The type to inspect.
 	 * @param variable The type variable to find the value for.
@@ -327,10 +327,10 @@ public class GenericTypeReflector {
 			} else {
 				result = new AnnotatedType[superInterfaces.length + 1];
 				resultIndex = 1;
-                result[0] = mergeVariableAnnotations(mapTypeParameters(superClass, type));
+                result[0] = mapTypeParameters(superClass, type);
 			}
 			for (AnnotatedType superInterface : superInterfaces) {
-				result[resultIndex++] = mergeVariableAnnotations(mapTypeParameters(superInterface, type));
+				result[resultIndex++] = mapTypeParameters(superInterface, type);
 			}
 
 			return result;
@@ -366,7 +366,7 @@ public class GenericTypeReflector {
 			AnnotatedType[] componentSupertypes = getExactDirectSuperTypes(typeComponent);
 			result = new AnnotatedType[componentSupertypes.length + 3];
 			for (resultIndex = 0; resultIndex < componentSupertypes.length; resultIndex++) {
-				result[resultIndex] = AnnotatedArrayTypeImpl.createArrayType(arrayType.getAnnotations(), componentSupertypes[resultIndex]);
+				result[resultIndex] = AnnotatedArrayTypeImpl.createArrayType(componentSupertypes[resultIndex], new Annotation[0]);
 			}
 		}
 		result[resultIndex++] = new AnnotatedTypeImpl(Object.class);
@@ -377,32 +377,32 @@ public class GenericTypeReflector {
 
 	/**
 	 * Returns the exact return type of the given method in the given type.
-	 * This may be different from <tt>m.getGenericReturnType()</tt> when the method was declared in a superclass,
-	 * or <tt>type</tt> has a type parameter that is used in the return type, or <tt>type</tt> is a raw type.
+	 * This may be different from {@code m.getGenericReturnType()} when the method was declared in a superclass,
+	 * or {@code declaringType} has a type parameter that is used in the return type, or {@code declaringType} is a raw type.
 	 */
-	public static AnnotatedType getExactReturnType(Method m, AnnotatedType type) {
+	public static AnnotatedType getExactReturnType(Method m, AnnotatedType declaringType) {
 		AnnotatedType returnType = m.getAnnotatedReturnType();
-		AnnotatedType exactDeclaringType = getExactSuperType(capture(type), m.getDeclaringClass());
+		AnnotatedType exactDeclaringType = getExactSuperType(capture(declaringType), m.getDeclaringClass());
 		if (exactDeclaringType == null) { // capture(type) is not a subtype of m.getDeclaringClass()
-			throw new IllegalArgumentException("The method " + m + " is not a member of type " + type);
+			throw new IllegalArgumentException("The method " + m + " is not a member of type " + declaringType);
 		}
 		return mapTypeParameters(returnType, exactDeclaringType);
 	}
 
-	public static Type getExactReturnType(Method m, Type type) {
-		return getExactReturnType(m, annotate(type)).getType();
+	public static Type getExactReturnType(Method m, Type declaringType) {
+		return getExactReturnType(m, annotate(declaringType)).getType();
 	}
 
 	/**
 	 * Returns the exact type of the given field in the given type.
-	 * This may be different from <tt>f.getGenericType()</tt> when the field was declared in a superclass,
-	 * or <tt>type</tt> has a type parameter that is used in the type of the field, or <tt>type</tt> is a raw type.
+	 * This may be different from {@code f.getGenericType()} when the field was declared in a superclass,
+	 * or {@code declaringType} has a type parameter that is used in the type of the field, or {@code declaringType} is a raw type.
 	 */
-	public static AnnotatedType getExactFieldType(Field f, AnnotatedType type) {
+	public static AnnotatedType getExactFieldType(Field f, AnnotatedType declaringType) {
 		AnnotatedType returnType = f.getAnnotatedType();
-		AnnotatedType exactDeclaringType = getExactSuperType(capture(type), f.getDeclaringClass());
+		AnnotatedType exactDeclaringType = getExactSuperType(capture(declaringType), f.getDeclaringClass());
 		if (exactDeclaringType == null) { // capture(type) is not a subtype of f.getDeclaringClass()
-			throw new IllegalArgumentException("The field " + f + " is not a member of type " + type);
+			throw new IllegalArgumentException("The field " + f + " is not a member of type " + declaringType);
 		}
 		return mapTypeParameters(returnType, exactDeclaringType);
 	}
@@ -413,14 +413,14 @@ public class GenericTypeReflector {
 
 	/**
 	 * Returns the exact parameter types of the given method in the given type.
-	 * This may be different from <tt>m.getGenericParameterTypes()</tt> when the method was declared in a superclass,
-	 * or <tt>type</tt> has a type parameter that is used in one of the parameters, or <tt>type</tt> is a raw type.
+	 * This may be different from {@code m.getGenericParameterTypes()} when the method was declared in a superclass,
+	 * or {@code declaringType} has a type parameter that is used in one of the parameters, or {@code declaringType} is a raw type.
 	 */
-	public static AnnotatedType[] getExactParameterTypes(Method m, AnnotatedType type) {
+	public static AnnotatedType[] getExactParameterTypes(Method m, AnnotatedType declaringType) {
 		AnnotatedType[] parameterTypes = m.getAnnotatedParameterTypes();
-		AnnotatedType exactDeclaringType = getExactSuperType(capture(type), m.getDeclaringClass());
+		AnnotatedType exactDeclaringType = getExactSuperType(capture(declaringType), m.getDeclaringClass());
 		if (exactDeclaringType == null) { // capture(type) is not a subtype of m.getDeclaringClass()
-			throw new IllegalArgumentException("The method " + m + " is not a member of type " + type);
+			throw new IllegalArgumentException("The method " + m + " is not a member of type " + declaringType);
 		}
 
 		AnnotatedType[] result = new AnnotatedType[parameterTypes.length];
@@ -430,8 +430,8 @@ public class GenericTypeReflector {
 		return result;
 	}
 
-	public static Type[] getExactParameterTypes(Method m, Type type) {
-		return Arrays.stream(getExactParameterTypes(m, annotate(type))).map(AnnotatedType::getType).toArray(Type[]::new);
+	public static Type[] getExactParameterTypes(Method m, Type declaringType) {
+		return Arrays.stream(getExactParameterTypes(m, annotate(declaringType))).map(AnnotatedType::getType).toArray(Type[]::new);
 	}
 
 	/**
@@ -499,11 +499,11 @@ public class GenericTypeReflector {
 	/**
 	 * Returns list of classes and interfaces that are supertypes of the given type.
 	 * For example given this class:
-	 * <tt>class {@literal Foo<A extends Number & Iterable<A>, B extends A>}</tt><br>
-	 * calling this method on type parameters <tt>B</tt> (<tt>Foo.class.getTypeParameters()[1]</tt>)
-	 * returns a list containing <tt>Number</tt> and <tt>Iterable</tt>.
+	 * {@code class {@literal Foo<A extends Number & Iterable<A>, B extends A>}}<br>
+	 * calling this method on type parameters {@code B} ({@code Foo.class.getTypeParameters()[1]})
+	 * returns a list containing {@code Number} and {@code Iterable}.
 	 * <p>
-	 * This is mostly useful if you get a type from one of the other methods in <tt>GenericTypeReflector</tt>,
+	 * This is mostly useful if you get a type from one of the other methods in {@code GenericTypeReflector},
 	 * but you don't want to deal with all the different sorts of types,
 	 * and you are only really interested in concrete classes and interfaces.
 	 * </p>
@@ -653,16 +653,22 @@ public class GenericTypeReflector {
      * replaced with the provided ones.
      *
      * @param original The type whose structure is to be copied
-     * @param annotations Annotations to use instead of the ones found on the {@code original}
+     * @param annotations Extra annotations to be added on top of the ones found on the {@code original}
      *
      * @return A type of the same structure as the original but with replaced annotations
      */
 	public static AnnotatedType updateAnnotations(AnnotatedType original, Annotation[] annotations) {
-		if (Arrays.equals(original.getAnnotations(), annotations)) {
+		if (annotations == null || annotations.length == 0 || Arrays.equals(original.getAnnotations(), annotations)) {
 			return original;
 		}
 		return replaceAnnotations(original, merge(original.getAnnotations(), annotations));
 	}
+
+	public static AnnotatedParameterizedType replaceParameters(AnnotatedParameterizedType type, AnnotatedType[] typeArguments) {
+        Type[] rawArguments = Arrays.stream(typeArguments).map(AnnotatedType::getType).toArray(Type[]::new);
+        ParameterizedType rawType = (ParameterizedType) TypeFactory.parameterizedClass(erase(type.getType()), rawArguments);
+        return new AnnotatedParameterizedTypeImpl(rawType, type.getAnnotations(), typeArguments);
+    }
 
     /**
      * Creates a new {@link AnnotatedType} of the same structure and with the same annotations as the
@@ -676,31 +682,6 @@ public class GenericTypeReflector {
         return replaceAnnotations(type, type.getAnnotations());
     }
 
-    /**
-     * Returns an array containing all annotations declared by the given annotated types, without duplicates.
-     *
-     * @param types Annotated types whose annotations are to be extracted and merged
-     * @return An array containing all annotations declared by the given annotated types, without duplicates
-     */
-    public static Annotation[] getMergedAnnotations(AnnotatedType... types) {
-        return Arrays.stream(types)
-                .flatMap(type -> Arrays.stream(type.getAnnotations()))
-                .distinct()
-                .toArray(Annotation[]::new);
-    }
-
-    private static AnnotatedType mergeVariableAnnotations(AnnotatedType type) {
-        if (!(type instanceof AnnotatedParameterizedType)) {
-            return type;
-        }
-        Class raw = (Class) ((ParameterizedType) type.getType()).getRawType();
-        AnnotatedType[] typeParameters = new AnnotatedType[raw.getTypeParameters().length];
-        for (int i = 0; i < typeParameters.length; i++) {
-            typeParameters[i] = updateAnnotations(((AnnotatedParameterizedType) type).getAnnotatedActualTypeArguments()[i], raw.getTypeParameters()[i].getAnnotations());
-        }
-        return new AnnotatedParameterizedTypeImpl((ParameterizedType) type.getType(), type.getAnnotations(), typeParameters);
-    }
-    
     /**
      * Merges an arbitrary number of annotations arrays, and removes duplicates.
      *

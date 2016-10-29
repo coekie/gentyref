@@ -1,11 +1,15 @@
 package io.leangen.geantyref;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedArrayType;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.util.Arrays;
 
 /**
  * Utility class for creating instances of {@link Type}. These types can be used with the {@link
@@ -17,66 +21,74 @@ public class TypeFactory {
     private static final WildcardType UNBOUND_WILDCARD = new WildcardTypeImpl(new Type[]{Object.class}, new Type[]{});
 
     /**
-     * Creates a type of class <tt>clazz</tt> with <tt>arguments</tt> as type arguments.
+     * Creates a type of class {@code clazz} with {@code arguments} as type arguments.
      * <p>
-     * For example: <tt>parameterizedClass(Map.class, Integer.class, String.class)</tt>
-     * returns the type <tt>Map&lt;Integer, String&gt;</tt>.
+     * For example: {@code parameterizedClass(Map.class, Integer.class, String.class)}
+     * returns the type {@code Map<Integer, String>}.
      *
      * @param clazz     Type class of the type to create
-     * @param arguments Type arguments for the variables of <tt>clazz</tt>, or null if these are not
+     * @param arguments Type arguments for the variables of {@code clazz}, or null if these are not
      *                  known.
-     * @return A {@link ParameterizedType}, or simply <tt>clazz</tt> if <tt>arguments</tt> is
-     * <tt>null</tt> or empty.
+     * @return A {@link ParameterizedType}, or simply {@code clazz} if {@code arguments} is
+     * {@code null} or empty.
      */
     public static Type parameterizedClass(Class<?> clazz, Type... arguments) {
         return parameterizedInnerClass(null, clazz, arguments);
     }
 
+    public static AnnotatedType parameterizedAnnotatedClass(Class<?> clazz, Annotation[] annotations, AnnotatedType... arguments) {
+        if (arguments == null || arguments.length == 0) {
+            return GenericTypeReflector.annotate(clazz, annotations);
+        }
+        Type[] typeArguments = Arrays.stream(arguments).map(AnnotatedType::getType).toArray(Type[]::new);
+        return new AnnotatedParameterizedTypeImpl((ParameterizedType) parameterizedClass(clazz, typeArguments), annotations, arguments);
+    }
+    
     /**
-     * Creates a type of <tt>clazz</tt> nested in <tt>owner</tt>.
+     * Creates a type of {@code clazz} nested in {@code owner}.
      *
-     * @param owner The owner type. This should be a subtype of <tt>clazz.getDeclaringClass()</tt>,
-     *              or <tt>null</tt> if no owner is known.
+     * @param owner The owner type. This should be a subtype of {@code clazz.getDeclaringClass()},
+     *              or {@code null} if no owner is known.
      * @param clazz Type class of the type to create
-     * @return A {@link ParameterizedType} if the class declaring <tt>clazz</tt> is generic and its
-     * type parameters are known in <tt>owner</tt> and <tt>clazz</tt> itself has no type parameters.
-     * Otherwise, just returns <tt>clazz</tt>.
+     * @return A {@link ParameterizedType} if the class declaring {@code clazz} is generic and its
+     * type parameters are known in {@code owner} and {@code clazz} itself has no type parameters.
+     * Otherwise, just returns {@code clazz}.
      */
     public static Type innerClass(Type owner, Class<?> clazz) {
         return parameterizedInnerClass(owner, clazz, (Type[]) null);
     }
 
     /**
-     * Creates a type of <tt>clazz</tt> with <tt>arguments</tt> as type arguments, nested in
-     * <tt>owner</tt>. <p> In the ideal case, this returns a {@link ParameterizedType} with all
+     * Creates a type of {@code clazz} with {@code arguments} as type arguments, nested in
+     * {@code owner}. <p> In the ideal case, this returns a {@link ParameterizedType} with all
      * generic information in it. If some type arguments are missing or if the resulting type simply
-     * doesn't need any type parameters, it returns the raw <tt>clazz</tt>. Note that types with
+     * doesn't need any type parameters, it returns the raw {@code clazz}. Note that types with
      * some parameters specified and others not, don't exist in Java. <p> If the caller does not
-     * know the exact <tt>owner</tt> type or <tt>arguments</tt>, <tt>null</tt> should be given (or
+     * know the exact {@code owner} type or {@code arguments}, {@code null} should be given (or
      * {@link #parameterizedClass(Class, Type...)} or {@link #innerClass(Type, Class)} could be
-     * used). If they are not needed (non-generic owner and/or <tt>clazz</tt> has no type
+     * used). If they are not needed (non-generic owner and/or {@code clazz} has no type
      * parameters), they will be filled in automatically. If they are needed but are not given, the
-     * raw <tt>clazz</tt> is returned. <p> The specified <tt>owner</tt> may be any subtype of
-     * <tt>clazz.getDeclaringClass()</tt>. It is automatically converted into the right
-     * parameterized version of the declaring class. If <tt>clazz</tt> is a <tt>static</tt> (nested)
+     * raw {@code clazz} is returned. <p> The specified {@code owner} may be any subtype of
+     * {@code clazz.getDeclaringClass()}. It is automatically converted into the right
+     * parameterized version of the declaring class. If {@code clazz} is a {@code static} (nested)
      * class, the owner is not used.
      *
-     * @param owner     The owner type. This should be a subtype of <tt>clazz.getDeclaringClass()</tt>,
-     *                  or <tt>null</tt> if no owner is known.
+     * @param owner     The owner type. This should be a subtype of {@code clazz.getDeclaringClass()},
+     *                  or {@code null} if no owner is known.
      * @param clazz     Type class of the type to create
-     * @param arguments Type arguments for the variables of <tt>clazz</tt>, or null if these are not
+     * @param arguments Type arguments for the variables of {@code clazz}, or null if these are not
      *                  known.
-     * @return A {@link ParameterizedType} if <tt>clazz</tt> or the class declaring <tt>clazz</tt>
-     * is generic, and all the needed type arguments are specified in <tt>owner</tt> and
-     * <tt>arguments</tt>. Otherwise, just returns <tt>clazz</tt>.
-     * @throws IllegalArgumentException if <tt>arguments</tt> (is non-null and) has an incorrect
-     *                                  length, or if one of the <tt>arguments</tt> is not within
+     * @return A {@link ParameterizedType} if {@code clazz} or the class declaring {@code clazz}
+     * is generic, and all the needed type arguments are specified in {@code owner} and
+     * {@code arguments}. Otherwise, just returns {@code clazz}.
+     * @throws IllegalArgumentException if {@code arguments} (is non-null and) has an incorrect
+     *                                  length, or if one of the {@code arguments} is not within
      *                                  the bounds declared on the matching type variable, or if
-     *                                  owner is non-null but <tt>clazz</tt> has no declaring class
+     *                                  owner is non-null but {@code clazz} has no declaring class
      *                                  (e.g. is a top-level class), or if owner is not a a subtype
-     *                                  of <tt>clazz.getDeclaringClass()</tt>.
-     * @throws NullPointerException     if <tt>clazz</tt> or one of the elements in
-     *                                  <tt>arguments</tt> is null.
+     *                                  of {@code clazz.getDeclaringClass()}.
+     * @throws NullPointerException     if {@code clazz} or one of the elements in
+     *                                  {@code arguments} is null.
      */
     public static Type parameterizedInnerClass(Type owner, Class<?> clazz, Type... arguments) {
         // never allow an owner on a class that doesn't have one
@@ -222,7 +234,7 @@ public class TypeFactory {
 
     /**
      * Returns the wildcard type without bounds.
-     * This is the '<tt>?</tt>' in for example <tt>List&lt;?&gt;</tt>.
+     * This is the '{@code ?}' in for example {@code List<?>}.
      *
      * @return The unbound wildcard type
      */
@@ -231,8 +243,8 @@ public class TypeFactory {
     }
 
     /**
-     * Creates a wildcard type with an upper bound. <p> For example <tt>wildcardExtends(String.class)</tt>
-     * returns the type <tt>? extends String</tt>.
+     * Creates a wildcard type with an upper bound. <p> For example {@code wildcardExtends(String.class)}
+     * returns the type {@code ? extends String}.
      *
      * @param upperBound Upper bound of the wildcard
      * @return A wildcard type
@@ -247,7 +259,7 @@ public class TypeFactory {
     /**
      * Creates a wildcard type with a lower bound.
      * <p>
-     * For example <tt>wildcardSuper(String.class)</tt> returns the type <tt>? super String</tt>.
+     * For example {@code wildcardSuper(String.class)} returns the type {@code ? super String}.
      *
      * @param lowerBound Lower bound of the wildcard
      * @return A wildcard type
@@ -260,11 +272,11 @@ public class TypeFactory {
     }
 
     /**
-     * Creates a array type. <p> If <tt>componentType</tt> is not a generic type but a {@link Class}
+     * Creates a array type. <p> If {@code componentType} is not a generic type but a {@link Class}
      * object, this returns the {@link Class} representing the non-generic array type. Otherwise,
-     * returns a {@link GenericArrayType}. <p> For example: <ul> <li><tt>arrayOf(String.class)</tt>
-     * returns <tt>String[].class</tt></li> <li><tt>arrayOf(parameterizedClass(List.class,
-     * String.class))</tt> returns the {@link GenericArrayType} for <tt>List&lt;String&gt;[]</tt>
+     * returns a {@link GenericArrayType}. <p> For example: <ul> <li>{@code arrayOf(String.class)}
+     * returns {@code String[].class}</li> <li>{@code arrayOf(parameterizedClass(List.class,
+     * String.class))} returns the {@link GenericArrayType} for {@code List<String>[]}
      * </ul>
      *
      * @param componentType The type of the components of the array.
@@ -274,4 +286,7 @@ public class TypeFactory {
         return GenericArrayTypeImpl.createArrayType(componentType);
     }
 
+    public static AnnotatedArrayType arrayOf(AnnotatedType componentType, Annotation[] annotations) {
+        return AnnotatedArrayTypeImpl.createArrayType(componentType, annotations);
+    }
 }

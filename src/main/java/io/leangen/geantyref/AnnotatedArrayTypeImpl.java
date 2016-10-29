@@ -14,8 +14,8 @@ class AnnotatedArrayTypeImpl extends AnnotatedTypeImpl implements AnnotatedArray
         this.componentType = componentType;
     }
 
-    static AnnotatedType createArrayType(Annotation[] annotations, AnnotatedType componentType) {
-            return new AnnotatedArrayTypeImpl(GenericArrayTypeImpl.createArrayType(componentType.getType()), annotations, componentType);
+    static AnnotatedArrayType createArrayType(AnnotatedType componentType, Annotation[] annotations) {
+        return new AnnotatedArrayTypeImpl(GenericArrayTypeImpl.createArrayType(componentType.getType()), annotations, componentType);
     }
 
     @Override

@@ -16,15 +16,15 @@ public interface Annotations {
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface A2 {}
-    
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface A3 {}
-    
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface A4 {}
-    
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface A5 {}

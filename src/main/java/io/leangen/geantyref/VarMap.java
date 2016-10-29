@@ -35,7 +35,7 @@ class VarMap {
     }
 
     /**
-     * Creates a VarMap mapping the type parameters of the class used in <tt>type</tt> to their
+     * Creates a VarMap mapping the type parameters of the class used in {@code type} to their
      * actual value.
      */
     VarMap(AnnotatedParameterizedType type) {
@@ -81,7 +81,7 @@ class VarMap {
 
     AnnotatedType map(AnnotatedType type) {
         if (type.getType() instanceof Class) {
-            return type;
+            return updateAnnotations(type, ((Class) type.getType()).getAnnotations());
         } else if (type instanceof AnnotatedTypeVariable) {
             TypeVariable tv = (TypeVariable) type.getType();
             if (!map.containsKey(tv)) {
@@ -93,10 +93,15 @@ class VarMap {
         } else if (type instanceof AnnotatedParameterizedType) {
             AnnotatedParameterizedType pType = (AnnotatedParameterizedType) type;
             ParameterizedType inner = (ParameterizedType) pType.getType();
-            AnnotatedType[] args = map(pType.getAnnotatedActualTypeArguments());
-            Type[] rawArgs = stream(args).map(AnnotatedType::getType).toArray(Type[]::new);
-            ParameterizedType v = new ParameterizedTypeImpl((Class) inner.getRawType(), rawArgs, inner.getOwnerType() == null ? null : map(annotate(inner.getOwnerType())).getType());
-            return new AnnotatedParameterizedTypeImpl(v, pType.getAnnotations(), args);
+            Class raw = (Class) inner.getRawType();
+            AnnotatedType[] typeParameters = new AnnotatedType[raw.getTypeParameters().length];
+            for (int i = 0; i < typeParameters.length; i++) {
+                AnnotatedType typeParameter = map(pType.getAnnotatedActualTypeArguments()[i]);
+                typeParameters[i] = updateAnnotations(typeParameter, raw.getTypeParameters()[i].getAnnotations());
+            }
+            Type[] rawArgs = stream(typeParameters).map(AnnotatedType::getType).toArray(Type[]::new);
+            ParameterizedType newInner = new ParameterizedTypeImpl((Class) inner.getRawType(), rawArgs, inner.getOwnerType() == null ? null : map(annotate(inner.getOwnerType())).getType());
+            return new AnnotatedParameterizedTypeImpl(newInner, merge(pType.getAnnotations(), raw.getAnnotations()), typeParameters);
         } else if (type instanceof AnnotatedWildcardType) {
             AnnotatedWildcardType wType = (AnnotatedWildcardType) type;
             AnnotatedType[] up = map(wType.getAnnotatedUpperBounds());
@@ -110,7 +115,7 @@ class VarMap {
             WildcardType w = new WildcardTypeImpl(upperBounds, stream(lw).map(AnnotatedType::getType).toArray(Type[]::new));
             return new AnnotatedWildcardTypeImpl(w, wType.getAnnotations(), lw, up);
         } else if (type instanceof AnnotatedArrayType) {
-            return AnnotatedArrayTypeImpl.createArrayType(type.getAnnotations(), map(((AnnotatedArrayType) type).getAnnotatedGenericComponentType()));
+            return AnnotatedArrayTypeImpl.createArrayType(map(((AnnotatedArrayType) type).getAnnotatedGenericComponentType()), type.getAnnotations());
         } else {
             throw new RuntimeException("Not implemented: mapping " + type.getClass() + " (" + type + ")");
         }
