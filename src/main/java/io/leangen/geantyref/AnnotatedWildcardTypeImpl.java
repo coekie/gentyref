@@ -44,6 +44,6 @@ class AnnotatedWildcardTypeImpl extends AnnotatedTypeImpl implements AnnotatedWi
 
     @Override
     public int hashCode() {
-        return super.hashCode() + Arrays.hashCode(lowerBounds) + Arrays.hashCode(upperBounds);
+        return super.hashCode() ^ Arrays.hashCode(lowerBounds) ^ Arrays.hashCode(upperBounds);
     }
 }

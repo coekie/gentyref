@@ -40,6 +40,6 @@ class AnnotatedTypeVariableImpl extends AnnotatedTypeImpl implements AnnotatedTy
 
     @Override
     public int hashCode() {
-        return super.hashCode() + Arrays.hashCode(annotatedBounds);
+        return super.hashCode() ^ Arrays.hashCode(annotatedBounds);
     }
 }

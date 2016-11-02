@@ -134,7 +134,7 @@ class AnnotatedCaptureTypeImpl implements AnnotatedCaptureType {
 
     @Override
     public int hashCode() {
-        return wildcard.hashCode() + variable.hashCode();
+        return wildcard.hashCode() ^ variable.hashCode();
     }
 
     @Override
