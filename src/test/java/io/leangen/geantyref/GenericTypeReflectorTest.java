@@ -1,6 +1,9 @@
 package io.leangen.geantyref;
 
 import java.awt.*;
+import java.lang.reflect.AnnotatedArrayType;
+import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -9,6 +12,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+
+import static io.leangen.geantyref.GenericTypeReflector.getExactSubType;
 
 /**
  * Test for reflection done in GenericTypeReflector.
@@ -62,7 +68,7 @@ public class GenericTypeReflectorTest extends AbstractGenericsReflectorTest {
         }
     }
 
-    public void testgetExactParameterTypes() throws SecurityException, NoSuchMethodException {
+    public void testGetExactParameterTypes() throws SecurityException, NoSuchMethodException {
         // method: boolean add(int index, E o), erasure is boolean add(int index, Object o)
         Method getMethod = List.class.getMethod("add", int.class, Object.class);
         Type[] result = GenericTypeReflector.getExactParameterTypes(getMethod, new TypeToken<ArrayList<String>>() {
@@ -71,4 +77,47 @@ public class GenericTypeReflectorTest extends AbstractGenericsReflectorTest {
         assertEquals(int.class, result[0]);
         assertEquals(String.class, result[1]);
     }
+
+    public void testGetExactSubType() {
+        AnnotatedParameterizedType parent = (AnnotatedParameterizedType) new TypeToken<P<String, Integer>>(){}.getAnnotatedType();
+        AnnotatedParameterizedType subType = (AnnotatedParameterizedType) getExactSubType(parent, C.class);
+        assertNotNull(subType);
+        assertEquals(Integer.class, subType.getAnnotatedActualTypeArguments()[0].getType());
+        assertEquals(String.class, subType.getAnnotatedActualTypeArguments()[1].getType());
+    }
+
+    public void testGetExactSubTypeUnresolvable() {
+        AnnotatedParameterizedType parent = (AnnotatedParameterizedType) new TypeToken<P<String, Integer>>(){}.getAnnotatedType();
+        AnnotatedType resolved = GenericTypeReflector.getExactSubType(parent, C1.class);
+        assertNotNull(resolved);
+        assertEquals(C1.class, resolved.getType());
+    }
+
+    public void testGetExactSubTypeNotOverlapping() {
+        AnnotatedParameterizedType parent = (AnnotatedParameterizedType) new TypeToken<List<String>>(){}.getAnnotatedType();
+        AnnotatedType subType = getExactSubType(parent, Set.class);
+        assertNull(subType);
+    }
+
+    public void testGetExactSubTypeNotParameterized() {
+        AnnotatedParameterizedType parent = (AnnotatedParameterizedType) new TypeToken<List<String>>(){}.getAnnotatedType();
+        AnnotatedType subType = getExactSubType(parent, String.class);
+        assertNotNull(subType);
+        assertEquals(String.class, subType.getType());
+    }
+
+    public void testGetExactSubTypeArray() {
+        AnnotatedType parent = new TypeToken<List<String>[]>(){}.getAnnotatedType();
+        AnnotatedType subType = getExactSubType(parent, ArrayList[].class);
+        assertNotNull(subType);
+        assertTrue(subType instanceof AnnotatedArrayType);
+        AnnotatedType componentType = ((AnnotatedArrayType) subType).getAnnotatedGenericComponentType();
+        assertTrue(componentType instanceof AnnotatedParameterizedType);
+        assertEquals(String.class, ((AnnotatedParameterizedType) componentType).getAnnotatedActualTypeArguments()[0].getType());
+    }
+
+    private class P<S, K> {}
+    private class M<U, R> extends P<U, R>{}
+    private class C<X, Y> extends M<Y, X>{}
+    private class C1<X, Y, Z> extends M<Y, X>{}
 }

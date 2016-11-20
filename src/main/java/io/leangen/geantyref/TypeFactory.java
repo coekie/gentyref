@@ -43,7 +43,7 @@ public class TypeFactory {
         Type[] typeArguments = Arrays.stream(arguments).map(AnnotatedType::getType).toArray(Type[]::new);
         return new AnnotatedParameterizedTypeImpl((ParameterizedType) parameterizedClass(clazz, typeArguments), annotations, arguments);
     }
-    
+
     /**
      * Creates a type of {@code clazz} nested in {@code owner}.
      *

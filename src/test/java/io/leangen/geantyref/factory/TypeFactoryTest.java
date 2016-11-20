@@ -62,7 +62,7 @@ public class TypeFactoryTest extends TestCase {
         try {
             parameterizedClass(List.class);
             fail("expected exception");
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException expected) {//expected
         }
     }
 
@@ -70,7 +70,7 @@ public class TypeFactoryTest extends TestCase {
         try {
             parameterizedClass(List.class, String.class, String.class);
             fail("expected exception");
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException expected) {//expected
         }
     }
 
@@ -121,7 +121,7 @@ public class TypeFactoryTest extends TestCase {
         try {
             innerClass(String.class, Integer.class);
             fail("expected exception");
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException expected) {//expected
         }
     }
 
@@ -196,7 +196,7 @@ public class TypeFactoryTest extends TestCase {
         try {
             parameterizedInnerClass(String.class, SimpleOuter.GenericInner.class, String.class);
             fail("expected exception");
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException expected) {//expected
         }
     }
 
@@ -204,7 +204,7 @@ public class TypeFactoryTest extends TestCase {
         try {
             innerClass(String.class, SimpleOuter.GenericInner.class);
             fail("expected exception");
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException expected) {//expected
         }
     }
 
@@ -257,7 +257,7 @@ public class TypeFactoryTest extends TestCase {
         try {
             parameterizedInnerClass(String.class, GenericOuter.StaticGenericInner.class, Integer.class);
             fail("expected exception");
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException expected) {//expected
         }
     }
 
@@ -268,7 +268,7 @@ public class TypeFactoryTest extends TestCase {
         try {
             parameterizedClass(List.class, new Type[]{null});
             fail("expected exception");
-        } catch (NullPointerException expected) {
+        } catch (NullPointerException expected) {//expected
         }
     }
 
@@ -282,7 +282,7 @@ public class TypeFactoryTest extends TestCase {
         try {
             parameterizedClass(Bound.class, String.class);
             fail("expected exception");
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException expected) {//expected
         }
     }
 
@@ -296,7 +296,7 @@ public class TypeFactoryTest extends TestCase {
         try {
             parameterizedClass(ReferingBound.class, parameterizedClass(List.class, Integer.class), Number.class);
             fail("expected exception");
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException expected) {//expected
         }
     }
 
@@ -311,7 +311,7 @@ public class TypeFactoryTest extends TestCase {
         try {
             parameterizedClass(RecursiveBound.class, NotInRecursiveBound.class);
             fail("expected exception");
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException expected) {//expected
         }
     }
 
@@ -325,7 +325,7 @@ public class TypeFactoryTest extends TestCase {
         try {
             parameterizedClass(RawBound.class, parameterizedClass(Collection.class, String.class));
             fail("expected exception");
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException expected) {//expected
         }
     }
 
@@ -342,7 +342,7 @@ public class TypeFactoryTest extends TestCase {
         try {
             parameterizedClass(ParameterizedBound.class, List.class);
             fail("expected exception");
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException expected) {//expected
         }
     }
 
@@ -381,7 +381,7 @@ public class TypeFactoryTest extends TestCase {
                     String.class
             );
             fail("expected exception");
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException expected) {//expected
         }
     }
 
@@ -401,7 +401,7 @@ public class TypeFactoryTest extends TestCase {
         try {
             parameterizedClass(Bound.class, wildcardExtends(Thread.class));
             fail("expected exception");
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException expected) {//expected
         }
     }
 
@@ -421,7 +421,7 @@ public class TypeFactoryTest extends TestCase {
         try {
             parameterizedClass(Bound.class, wildcardSuper(String.class));
             fail("expected exception");
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException expected) { //expected
         }
     }
 
@@ -450,15 +450,12 @@ public class TypeFactoryTest extends TestCase {
                     wildcardExtends(Integer.class)
             );
             fail("expected exception");
-        } catch (TypeArgumentNotInBoundException expected) {
+        } catch (TypeArgumentNotInBoundException expected) { //expected
         }
     }
 
     public void testLocalClass() {
-        class Local<T> {
-        }
-        System.out.println(Local.class.getDeclaringClass());
-
+        class Local<T> {}
         assertEquals(new TypeToken<Local<String>>() {
                 }.getType(),
                 parameterizedClass(Local.class, String.class));
@@ -470,8 +467,7 @@ public class TypeFactoryTest extends TestCase {
      * represented). (Java reflection also doesn't see the enclosing class as owner).
      */
     public void testLocalClassWithOwner() {
-        class Local<T> {
-        }
+        class Local<T> {}
         try {
             parameterizedInnerClass(TypeFactoryTest.class, Local.class, String.class);
             fail("expected exception");
@@ -510,10 +506,10 @@ public class TypeFactoryTest extends TestCase {
                 TypeFactory.arrayOf(parameterizedClass(List.class, String.class)));
     }
 
-    static class Bound<T extends Number> {
+    private static class Bound<T extends Number> {
     }
 
-    static class ReferingBound<A extends List<B>, B> {
+    private static class ReferingBound<A extends List<B>, B> {
     }
 
     static class RecursiveBound<A extends RecursiveBound<A>> {
@@ -522,17 +518,17 @@ public class TypeFactoryTest extends TestCase {
     static class InRecursiveBound extends RecursiveBound<InRecursiveBound> {
     }
 
-    static class NotInRecursiveBound extends RecursiveBound<InRecursiveBound> {
+    private static class NotInRecursiveBound extends RecursiveBound<InRecursiveBound> {
     }
 
     @SuppressWarnings("rawtypes")
-    static class RawBound<A extends List> {
+    private static class RawBound<A extends List> {
     }
 
-    static class ParameterizedBound<A extends List<Integer>> {
+    private static class ParameterizedBound<A extends List<Integer>> {
     }
 
-    static class BoundReferingToOwner<X> {
+    private static class BoundReferingToOwner<X> {
         class In<Y extends X> {
         }
     }
