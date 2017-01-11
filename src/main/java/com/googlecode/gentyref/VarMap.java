@@ -72,7 +72,9 @@ class VarMap {
 		} else if (type instanceof TypeVariable) {
 			TypeVariable<?> tv = (TypeVariable<?>) type;
 			if (!map.containsKey(type)) {
-				throw new UnresolvedTypeVariableException(tv);
+        // return a wildcard type with the best known upper bound.
+				Type[] bounds = tv.getBounds();
+				return new WildcardTypeImpl(map(bounds), new Type[0]);
 			}
 			return map.get(type);
 		} else if (type instanceof ParameterizedType) {
