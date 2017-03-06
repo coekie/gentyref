@@ -4,7 +4,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.AnnotatedWildcardType;
 import java.lang.reflect.WildcardType;
-import java.util.Arrays;
 
 import static io.leangen.geantyref.GenericTypeReflector.typeArraysEqual;
 
@@ -44,6 +43,6 @@ class AnnotatedWildcardTypeImpl extends AnnotatedTypeImpl implements AnnotatedWi
 
     @Override
     public int hashCode() {
-        return super.hashCode() ^ Arrays.hashCode(lowerBounds) ^ Arrays.hashCode(upperBounds);
+        return 31 * super.hashCode() ^ GenericTypeReflector.hashCode(lowerBounds) ^ GenericTypeReflector.hashCode(upperBounds);
     }
 }

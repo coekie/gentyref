@@ -4,6 +4,7 @@ import java.awt.*;
 import java.lang.reflect.AnnotatedArrayType;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -71,11 +72,18 @@ public class GenericTypeReflectorTest extends AbstractGenericsReflectorTest {
     public void testGetExactParameterTypes() throws SecurityException, NoSuchMethodException {
         // method: boolean add(int index, E o), erasure is boolean add(int index, Object o)
         Method getMethod = List.class.getMethod("add", int.class, Object.class);
-        Type[] result = GenericTypeReflector.getExactParameterTypes(getMethod, new TypeToken<ArrayList<String>>() {
-        }.getType());
+        Type[] result = GenericTypeReflector.getExactParameterTypes(getMethod, new TypeToken<ArrayList<String>>() {}.getType());
         assertEquals(2, result.length);
         assertEquals(int.class, result[0]);
         assertEquals(String.class, result[1]);
+    }
+
+    public void testGetExactConstructorParameterTypes() throws SecurityException, NoSuchMethodException {
+        // constructor: D(T o), erasure is D(Object o)
+        Constructor ctor = D.class.getDeclaredConstructor(Object.class);
+        Type[] result = GenericTypeReflector.getExactParameterTypes(ctor, new TypeToken<D<String>>() {}.getType());
+        assertEquals(1, result.length);
+        assertEquals(String.class, result[0]);
     }
 
     public void testGetExactSubType() {
@@ -120,4 +128,5 @@ public class GenericTypeReflectorTest extends AbstractGenericsReflectorTest {
     private class M<U, R> extends P<U, R>{}
     private class C<X, Y> extends M<Y, X>{}
     private class C1<X, Y, Z> extends M<Y, X>{}
+    private static class D<T> { D(T t){}}
 }

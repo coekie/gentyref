@@ -7,6 +7,7 @@ import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.AnnotatedTypeVariable;
 import java.lang.reflect.AnnotatedWildcardType;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
@@ -21,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -491,15 +493,15 @@ public class GenericTypeReflector {
     }
 
     /**
-     * Returns the exact parameter types of the given method in the given type.
-     * This may be different from {@code m.getGenericParameterTypes()} when the method was declared in a superclass,
+     * Returns the exact parameter types of the given method/constructor in the given type.
+     * This may be different from {@code exe.getAnnotatedParameterTypes()} when the method was declared in a superclass,
      * or {@code declaringType} has a type parameter that is used in one of the parameters, or {@code declaringType} is a raw type.
      */
-    public static AnnotatedType[] getExactParameterTypes(Method m, AnnotatedType declaringType) {
-        AnnotatedType[] parameterTypes = m.getAnnotatedParameterTypes();
-        AnnotatedType exactDeclaringType = getExactSuperType(capture(declaringType), m.getDeclaringClass());
-        if (exactDeclaringType == null) { // capture(type) is not a subtype of m.getDeclaringClass()
-            throw new IllegalArgumentException("The method " + m + " is not a member of type " + declaringType);
+    public static AnnotatedType[] getExactParameterTypes(Executable exe, AnnotatedType declaringType) {
+        AnnotatedType[] parameterTypes = exe.getAnnotatedParameterTypes();
+        AnnotatedType exactDeclaringType = getExactSuperType(capture(declaringType), exe.getDeclaringClass());
+        if (exactDeclaringType == null) { // capture(type) is not a subtype of exe.getDeclaringClass()
+            throw new IllegalArgumentException("The method/constructor " + exe + " is not a member of type " + declaringType);
         }
 
         AnnotatedType[] result = new AnnotatedType[parameterTypes.length];
@@ -509,8 +511,8 @@ public class GenericTypeReflector {
         return result;
     }
 
-    public static Type[] getExactParameterTypes(Method m, Type declaringType) {
-        return stream(getExactParameterTypes(m, annotate(declaringType))).map(AnnotatedType::getType).toArray(Type[]::new);
+    public static Type[] getExactParameterTypes(Executable exe, Type declaringType) {
+        return stream(getExactParameterTypes(exe, annotate(declaringType))).map(AnnotatedType::getType).toArray(Type[]::new);
     }
 
     /**
@@ -793,6 +795,17 @@ public class GenericTypeReflector {
         return true;
     }
 
+    public static int hashCode(AnnotatedType[] t1) {
+        OptionalInt typeHash = Arrays.stream(t1)
+                .mapToInt(t -> t.getType().hashCode())
+                .reduce((x,y) -> x ^ y);
+        OptionalInt annotationHash = Arrays.stream(t1)
+                .flatMap(t -> Arrays.stream(t.getAnnotations()))
+                .mapToInt(Annotation::hashCode)
+                .reduce((x,y) -> x ^ y);
+        return 31 * typeHash.orElse(0) ^ annotationHash.orElse(0);
+    }
+    
     /**
      * Checks whether the two provided types are of the same structure and annotations on all levels.
      *

@@ -4,7 +4,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.AnnotatedTypeVariable;
 import java.lang.reflect.TypeVariable;
-import java.util.Arrays;
 
 import static io.leangen.geantyref.GenericTypeReflector.typeArraysEqual;
 
@@ -40,6 +39,6 @@ class AnnotatedTypeVariableImpl extends AnnotatedTypeImpl implements AnnotatedTy
 
     @Override
     public int hashCode() {
-        return super.hashCode() ^ Arrays.hashCode(annotatedBounds);
+        return super.hashCode() ^ GenericTypeReflector.hashCode(annotatedBounds);
     }
 }

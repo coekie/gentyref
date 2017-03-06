@@ -4,7 +4,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.ParameterizedType;
-import java.util.Arrays;
 
 import static io.leangen.geantyref.GenericTypeReflector.typeArraysEqual;
 
@@ -32,6 +31,6 @@ class AnnotatedParameterizedTypeImpl extends AnnotatedTypeImpl implements Annota
 
     @Override
     public int hashCode() {
-        return super.hashCode() ^ Arrays.hashCode(typeArguments);
+        return 31 * super.hashCode() ^ GenericTypeReflector.hashCode(typeArguments);
     }
 }
