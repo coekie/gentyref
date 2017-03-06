@@ -21,8 +21,8 @@
 		<connection>scm:git:git://github.com/leangen/geantyref</connection>
 		<developerConnection>scm:git:git://github.com/leangen/geantyref</developerConnection>
 		<url>https://github.com/leangen/geantyref</url>
-	  <tag>HEAD</tag>
-  </scm>
+	  	<tag>HEAD</tag>
+  	</scm>
 	<distributionManagement>
 		<repository>
 			<id>bintray-leangen</id>
@@ -74,18 +74,6 @@
                     <releaseProfiles>release</releaseProfiles>
                     <pushChanges>false</pushChanges>
                     <tagNameFormat>geantyref-v@{project.version}</tagNameFormat>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.7</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
                 </configuration>
             </plugin>
 		</plugins>
@@ -155,6 +143,25 @@
 						</executions>
 						<configuration>
 							<useAgent>true</useAgent>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		
+		<profile>
+			<id>central</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<version>1.6.7</version>
+						<extensions>true</extensions>
+						<configuration>
+							<serverId>ossrh</serverId>
+							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+							<autoReleaseAfterClose>false</autoReleaseAfterClose>
 						</configuration>
 					</plugin>
 				</plugins>
