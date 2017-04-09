@@ -20,6 +20,22 @@ All functionality of the library is exposed via a handful of classes:
 * `TypeFactory` : contains static methods used for `Type/AnnotatedType` instance creation
 * `TypeToken` : Used to create `Type/AnnotatedType` literals (using [THC pattern](http://gafter.blogspot.nl/2006/12/super-type-tokens.html))
 
+## Usage
+
+### Maven:
+
+```xml
+<dependency>
+    <groupId>io.leangen.geantyref</groupId>
+    <artifactId>geantyref</artifactId>
+    <version>1.2.0</version>
+</dependency>
+```
+
+### Other build tools:
+
+You can find instructions at [maven.org](https://search.maven.org/#artifactdetails%7Cio.leangen.geantyref%7Cgeantyref%7C1.2.0%7Cjar)
+
 ## Examples
 
 ### Getting the exact return type of a method
@@ -214,22 +230,6 @@ feel free to explore a bit on your own.
 ## Wiki
 
 More info can be found at the project [Wiki](https://github.com/leangen/geantyref/wiki).
-
-## Usage
-
-### Maven:
-
-```xml
-<dependency>
-    <groupId>io.leangen.geantyref</groupId>
-    <artifactId>geantyref</artifactId>
-    <version>1.2.0</version>
-</dependency>
-```
-
-### Other build tools:
-
-You can find instructions at [maven.org](https://search.maven.org/#artifactdetails%7Cio.leangen.geantyref%7Cgeantyref%7C1.2.0%7Cjar)
 
 ## License
 [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
