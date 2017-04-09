@@ -5,7 +5,31 @@
 [![Hex.pm](https://img.shields.io/hexpm/l/plug.svg?maxAge=2592000)](https://raw.githubusercontent.com/leangen/geantyref/master/LICENSE)
 [![Semver](http://img.shields.io/SemVer/2.0.0.png)](http://semver.org/spec/v2.0.0.html)
 
-A fork of the excellent [GenTyRef](https://code.google.com/archive/p/gentyref/) library, adding support for working with [AnnotatedTypes](https://jaxenter.com/jsr-308-explained-java-type-annotations-107706.html) introduced in Java 8.
+A fork of the excellent [GenTyRef](https://code.google.com/archive/p/gentyref/) library, adding support for working with [AnnotatedTypes](https://jaxenter.com/jsr-308-explained-java-type-annotations-107706.html) introduced in Java 8 plus many nifty features.
+
+**Table of Contents**
+
+- [GeAnTyRef](#)
+	- [Goal](#)
+	- [Overview](#)
+	- [Usage](#)
+		- [Maven:](#)
+		- [Other build tools:](#)
+	- [Examples](#)
+		- [Getting the exact return type of a method](#)
+		- [Getting the exact type of a field](#)
+		- [Getting the exact types of method parameters](#)
+		- [Getting the exact super type](#)
+		- [Getting the exact sub type](#)
+		- [Getting annotated return/parameter/field/sub/super types](#)
+		- [Creating type literals using TypeToken](#)
+		- [Creating annotated type literals using TypeToken](#)
+		- [Creating types dynamically using TypeFactory](#)
+		- [Creating annotated types dynamically using TypeFactory](#)
+		- [Turning any Type into an AnnotatedType](#)
+		- [More](#)
+	- [Wiki](#)
+	- [License](#)
 
 ## Goal
 
