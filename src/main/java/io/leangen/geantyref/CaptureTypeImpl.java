@@ -20,7 +20,7 @@ class CaptureTypeImpl implements CaptureType {
      * @param wildcard The wildcard this is a capture of
      * @param variable The type variable where the wildcard is a parameter for.
      */
-    public CaptureTypeImpl(WildcardType wildcard, TypeVariable<?> variable) {
+    CaptureTypeImpl(WildcardType wildcard, TypeVariable<?> variable) {
         this.wildcard = wildcard;
         this.variable = variable;
         this.lowerBounds = wildcard.getLowerBounds();

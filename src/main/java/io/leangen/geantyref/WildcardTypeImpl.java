@@ -8,7 +8,7 @@ class WildcardTypeImpl implements WildcardType {
     private final Type[] upperBounds;
     private final Type[] lowerBounds;
 
-    public WildcardTypeImpl(Type[] upperBounds, Type[] lowerBounds) {
+    WildcardTypeImpl(Type[] upperBounds, Type[] lowerBounds) {
         if (upperBounds.length == 0)
             throw new IllegalArgumentException("There must be at least one upper bound. For an unbound wildcard, the upper bound must be Object");
         this.upperBounds = upperBounds;

@@ -138,14 +138,14 @@ class AnnotatedCaptureTypeImpl implements AnnotatedCaptureType {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof AnnotatedCaptureType)) {
+    public boolean equals(Object other) {
+        if (!(other instanceof AnnotatedCaptureType)) {
             return false;
         }
-        AnnotatedCaptureType other = ((AnnotatedCaptureType) obj);
-        if (!wildcard.equals(other.getAnnotatedWildcardType()) || !variable.equals(other.getAnnotatedTypeVariable())) {
+        AnnotatedCaptureType that = ((AnnotatedCaptureType) other);
+        if (!wildcard.equals(that.getAnnotatedWildcardType()) || !variable.equals(that.getAnnotatedTypeVariable())) {
             return false;
         }
-        return typeArraysEqual(upperBounds, other.getAnnotatedUpperBounds());
+        return typeArraysEqual(upperBounds, that.getAnnotatedUpperBounds());
     }
 }

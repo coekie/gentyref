@@ -3,6 +3,7 @@ package io.leangen.geantyref;
 import java.lang.reflect.TypeVariable;
 
 class UnresolvedTypeVariableException extends RuntimeException {
+    private static final long serialVersionUID = -1337450928967900324L;
     private final TypeVariable<?> tv;
 
     UnresolvedTypeVariableException(TypeVariable<?> tv) {

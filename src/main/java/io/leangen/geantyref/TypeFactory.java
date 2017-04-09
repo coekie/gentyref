@@ -6,10 +6,12 @@ import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Utility class for creating instances of {@link Type}. These types can be used with the {@link
@@ -288,5 +290,12 @@ public class TypeFactory {
 
     public static AnnotatedArrayType arrayOf(AnnotatedType componentType, Annotation[] annotations) {
         return AnnotatedArrayTypeImpl.createArrayType(componentType, annotations);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <A extends Annotation> A annotation(Class<A> annotationType, Map<String, Object> values) throws AnnotationFormatException {
+        return (A) Proxy.newProxyInstance(annotationType.getClassLoader(),
+                new Class[] { annotationType },
+                new AnnotationInvocationHandler(annotationType, values));
     }
 }

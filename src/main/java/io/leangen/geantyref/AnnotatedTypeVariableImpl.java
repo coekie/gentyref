@@ -11,15 +11,15 @@ class AnnotatedTypeVariableImpl extends AnnotatedTypeImpl implements AnnotatedTy
 
     private AnnotatedType[] annotatedBounds;
 
-    public AnnotatedTypeVariableImpl(TypeVariable<?> type) {
+    AnnotatedTypeVariableImpl(TypeVariable<?> type) {
         this(type, type.getAnnotations());
     }
 
-    public AnnotatedTypeVariableImpl(TypeVariable<?> type, Annotation[] annotations) {
+    AnnotatedTypeVariableImpl(TypeVariable<?> type, Annotation[] annotations) {
         this(type, annotations, type.getAnnotatedBounds());
     }
 
-    public AnnotatedTypeVariableImpl(TypeVariable<?> type, Annotation[] annotations, AnnotatedType[] annotatedBounds) {
+    private AnnotatedTypeVariableImpl(TypeVariable<?> type, Annotation[] annotations, AnnotatedType[] annotatedBounds) {
         super(type, annotations);
         this.annotatedBounds = annotatedBounds;
     }

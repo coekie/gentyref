@@ -14,7 +14,7 @@ public class TypeArgumentNotInBoundException extends IllegalArgumentException {
     private final TypeVariable<?> parameter;
     private final Type bound;
 
-    public TypeArgumentNotInBoundException(Type argument, TypeVariable<?> parameter, Type bound) {
+    TypeArgumentNotInBoundException(Type argument, TypeVariable<?> parameter, Type bound) {
         super("Given argument [" + argument + "]" +
                 " for type parameter [" + parameter.getName() + "] is not within the bound [" + bound + "]");
         this.argument = argument;

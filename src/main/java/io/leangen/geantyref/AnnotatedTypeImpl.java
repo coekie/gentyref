@@ -13,11 +13,11 @@ class AnnotatedTypeImpl implements AnnotatedType {
     protected Type type;
     protected Map<Class<? extends Annotation>, Annotation> annotations;
 
-    public AnnotatedTypeImpl(Type type) {
+    AnnotatedTypeImpl(Type type) {
         this(type, new Annotation[0]);
     }
 
-    public AnnotatedTypeImpl(Type type, Annotation[] annotations) {
+    AnnotatedTypeImpl(Type type, Annotation[] annotations) {
         this.type = Objects.requireNonNull(type);
         this.annotations = new HashMap<>();
         for (Annotation annotation : annotations) {

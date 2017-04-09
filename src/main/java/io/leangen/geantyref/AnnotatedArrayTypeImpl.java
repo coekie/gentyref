@@ -9,7 +9,7 @@ class AnnotatedArrayTypeImpl extends AnnotatedTypeImpl implements AnnotatedArray
 
     private AnnotatedType componentType;
 
-    public AnnotatedArrayTypeImpl(Type type, Annotation[] annotations, AnnotatedType componentType) {
+    AnnotatedArrayTypeImpl(Type type, Annotation[] annotations, AnnotatedType componentType) {
         super(type, annotations);
         this.componentType = componentType;
     }

@@ -11,7 +11,7 @@ class AnnotatedParameterizedTypeImpl extends AnnotatedTypeImpl implements Annota
 
     private AnnotatedType[] typeArguments;
 
-    public AnnotatedParameterizedTypeImpl(ParameterizedType rawType, Annotation[] annotations, AnnotatedType[] typeArguments) {
+    AnnotatedParameterizedTypeImpl(ParameterizedType rawType, Annotation[] annotations, AnnotatedType[] typeArguments) {
         super(rawType, annotations);
         this.typeArguments = typeArguments;
     }

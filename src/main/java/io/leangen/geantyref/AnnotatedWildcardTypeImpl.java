@@ -12,7 +12,7 @@ class AnnotatedWildcardTypeImpl extends AnnotatedTypeImpl implements AnnotatedWi
     private AnnotatedType[] lowerBounds;
     private AnnotatedType[] upperBounds;
 
-    public AnnotatedWildcardTypeImpl(WildcardType type, Annotation[] annotations, AnnotatedType[] lowerBounds, AnnotatedType[] upperBounds) {
+    AnnotatedWildcardTypeImpl(WildcardType type, Annotation[] annotations, AnnotatedType[] lowerBounds, AnnotatedType[] upperBounds) {
         super(type, annotations);
         this.lowerBounds = lowerBounds;
         if (upperBounds == null || upperBounds.length == 0) {

@@ -1,0 +1,21 @@
+package io.leangen.geantyref;
+
+/**
+ * Indicates that invalid data has been encountered during annotation creation.
+ * Similar to {@linkplain java.lang.annotation.AnnotationFormatError} but meant to be handled by the user.
+ * 
+ * License: Apache License, Version 2.0
+ * See the license.txt file in the root directory or <http://www.apache.org/licenses/LICENSE-2.0>.
+ */
+public class AnnotationFormatException extends Exception {
+
+    private static final long serialVersionUID = -2680103741623459660L;
+
+    AnnotationFormatException() {
+        super();
+    }
+
+    AnnotationFormatException(String message) {
+        super(message);
+    }
+}

@@ -3,12 +3,20 @@ package io.leangen.geantyref.factory;
 
 import junit.framework.TestCase;
 
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import io.leangen.geantyref.AnnotationFormatException;
 import io.leangen.geantyref.TypeArgumentNotInBoundException;
 import io.leangen.geantyref.TypeFactory;
 import io.leangen.geantyref.TypeToken;
@@ -21,11 +29,23 @@ import static io.leangen.geantyref.TypeFactory.parameterizedInnerClass;
 import static io.leangen.geantyref.TypeFactory.unboundWildcard;
 import static io.leangen.geantyref.TypeFactory.wildcardExtends;
 import static io.leangen.geantyref.TypeFactory.wildcardSuper;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertNotEquals;
 
 public class TypeFactoryTest extends TestCase {
     private static final Type GENERICOUTER_STRING = new TypeToken<GenericOuter<String>>() {
     }.getType();
 
+    private static final Annotation a1Literal = new TypeToken<@A1(value = "Test value", values = {"value 1", "value 2"}, longs = {2L, 4L, 6L}) String>() {
+    }.getAnnotatedType().getAnnotation(A1.class);
+
+    private static final Annotation a2Literal = new TypeToken<
+            @A2(annotations = {
+                    @A1(value = "Test value", values = {"value 1", "value 2"}, longs = {2L, 4L, 6L}),
+                    @A1(value = "Different value", values = {"value 3", "value 4"}, longs = {4L, 16L, 36L})
+            }) String>() {
+    }.getAnnotatedType().getAnnotation(A2.class);
+    
     /**
      * If there are no type parameters, it's just a Class
      */
@@ -188,7 +208,7 @@ public class TypeFactoryTest extends TestCase {
         try {
             innerClass(String.class, SimpleOuter.SimpleInner.class);
             fail("expected exception");
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException expected) {//expected
         }
     }
 
@@ -471,7 +491,7 @@ public class TypeFactoryTest extends TestCase {
         try {
             parameterizedInnerClass(TypeFactoryTest.class, Local.class, String.class);
             fail("expected exception");
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException expected) {//expected
         }
     }
 
@@ -506,6 +526,82 @@ public class TypeFactoryTest extends TestCase {
                 TypeFactory.arrayOf(parameterizedClass(List.class, String.class)));
     }
 
+    public void testAnnotationCreation() throws AnnotationFormatException {
+        String value = "Test value";
+        String[] values = new String[] {"value 1", "value 2"};
+        Map<String, Object> elements = new HashMap<>();
+        elements.put("value", value);
+        elements.put("values", values);
+        A1 a1 = TypeFactory.annotation(A1.class, elements);
+        assertEquals(value, a1.value());
+        assertArrayEquals(values, a1.values());
+        assertArrayEquals(new long[] {1L, 2L, 3L}, a1.longs());
+        long[] longs = new long[] {5L, 9L, 13L};
+        elements.put("longs", longs);
+        a1 = TypeFactory.annotation(A1.class, elements);
+        assertArrayEquals(longs, a1.longs());
+    }
+
+    public void testIncompleteAnnotationCreation() {
+        Map<String, Object> elements = new HashMap<>();
+        elements.put("value", "Test value");
+        try {
+            TypeFactory.annotation(A1.class, elements);
+            fail("expected exception");
+        } catch (AnnotationFormatException e) {//expected
+        }
+    }
+
+    public void testIncompatibleAnnotationCreation() {
+        Map<String, Object> elements = new HashMap<>();
+        elements.put("value", "Test value");
+        elements.put("values", new int[] {1, 2});
+        try {
+            TypeFactory.annotation(A1.class, elements);
+            fail("expected exception");
+        } catch (AnnotationFormatException e) {//expected
+        }
+    }
+    
+    public void testAnnotationEqualityAndHashCode() throws AnnotationFormatException {
+        Map<String, Object> a1Vals = new HashMap<>();
+        a1Vals.put("value", "Test value");
+        a1Vals.put("values", new String[] {"value 1", "value 2"});
+        a1Vals.put("longs", new long[] {2L, 4L, 6L});
+        A1 a = TypeFactory.annotation(A1.class, a1Vals);
+
+        a1Vals.put("value", "Different value");
+        a1Vals.put("values", new String[] {"value 3", "value 4"});
+        a1Vals.put("longs", new long[] {4L, 16L, 36L});
+        A1 b = TypeFactory.annotation(A1.class, a1Vals);
+
+        a1Vals.put("longs", new long[] {2L, 3L, 6L});
+        A1 c = TypeFactory.annotation(A1.class, a1Vals);
+        
+        Map<String, Object> a2Vals = new HashMap<>();
+        a2Vals.put("annotations", new A1[] {a, b});
+        
+        A2 a2 = TypeFactory.annotation(A2.class, a2Vals);
+        Map<String, Object> b2Vals = new HashMap<>();
+        b2Vals.put("annotations", new A1[] {a, c});
+        
+        A2 b2 = TypeFactory.annotation(A2.class, b2Vals);
+        
+        assertEquals(a, a1Literal);
+        assertEquals(a.hashCode(), a1Literal.hashCode());
+        assertEquals(a.toString(), a1Literal.toString());
+        assertEquals(a2, a2Literal);
+        assertEquals(a2.hashCode(), a2Literal.hashCode());
+        assertEquals(a2.toString(), a2Literal.toString());
+
+        assertNotEquals(c, a1Literal);
+        assertNotEquals(c.hashCode(), a1Literal.hashCode());
+        assertNotEquals(c.toString(), a1Literal.toString());
+        assertNotEquals(b2, a2Literal);
+        assertNotEquals(b2.hashCode(), a2Literal.hashCode());
+        assertNotEquals(b2.toString(), a2Literal.toString());
+    }
+
     private static class Bound<T extends Number> {
     }
 
@@ -531,6 +627,24 @@ public class TypeFactoryTest extends TestCase {
     private static class BoundReferingToOwner<X> {
         class In<Y extends X> {
         }
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE_USE)
+    public @interface A1 {
+        String value();
+
+        String[] values();
+
+        String def() default "";
+
+        long[] longs() default {1L, 2L, 3L};
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE_USE)
+    public @interface A2 {
+        A1[] annotations();
     }
 }
 

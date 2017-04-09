@@ -751,10 +751,10 @@ public class GenericTypeReflector {
         return replaceAnnotations(original, merge(original.getAnnotations(), annotations));
     }
 
-    public static AnnotatedParameterizedType replaceParameters(AnnotatedParameterizedType type, AnnotatedType[] typeArguments) {
-        Type[] rawArguments = stream(typeArguments).map(AnnotatedType::getType).toArray(Type[]::new);
+    public static AnnotatedParameterizedType replaceParameters(AnnotatedParameterizedType type, AnnotatedType[] typeParameters) {
+        Type[] rawArguments = stream(typeParameters).map(AnnotatedType::getType).toArray(Type[]::new);
         ParameterizedType rawType = (ParameterizedType) TypeFactory.parameterizedClass(erase(type.getType()), rawArguments);
-        return new AnnotatedParameterizedTypeImpl(rawType, type.getAnnotations(), typeArguments);
+        return new AnnotatedParameterizedTypeImpl(rawType, type.getAnnotations(), typeParameters);
     }
 
     /**
@@ -795,11 +795,11 @@ public class GenericTypeReflector {
         return true;
     }
 
-    public static int hashCode(AnnotatedType[] t1) {
-        OptionalInt typeHash = Arrays.stream(t1)
+    public static int hashCode(AnnotatedType... types) {
+        OptionalInt typeHash = Arrays.stream(types)
                 .mapToInt(t -> t.getType().hashCode())
                 .reduce((x,y) -> x ^ y);
-        OptionalInt annotationHash = Arrays.stream(t1)
+        OptionalInt annotationHash = Arrays.stream(types)
                 .flatMap(t -> Arrays.stream(t.getAnnotations()))
                 .mapToInt(Annotation::hashCode)
                 .reduce((x,y) -> x ^ y);
