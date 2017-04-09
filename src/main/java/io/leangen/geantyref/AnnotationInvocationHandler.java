@@ -24,7 +24,7 @@ import java.util.TreeSet;
  * without a default value, {@linkplain AnnotationFormatException} is thrown.
  * </p>
  *
- * @implSpec {@linkplain #equals(Object)} and {@linkplain #hashCode()} and implemented as specified
+ * Note: {@linkplain #equals(Object)} and {@linkplain #hashCode()} and implemented as specified
  * by {@linkplain Annotation}, so instances are safe to mix with normal annotations.
  * @see Annotation
  */

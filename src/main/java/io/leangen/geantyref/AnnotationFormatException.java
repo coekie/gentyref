@@ -5,7 +5,7 @@ package io.leangen.geantyref;
  * Similar to {@linkplain java.lang.annotation.AnnotationFormatError} but meant to be handled by the user.
  * 
  * License: Apache License, Version 2.0
- * See the license.txt file in the root directory or <http://www.apache.org/licenses/LICENSE-2.0>.
+ * See the LICENSE file in the root directory or at <a href="http://www.apache.org/licenses/LICENSE-2">apache.org</a>.
  */
 public class AnnotationFormatException extends Exception {
 
