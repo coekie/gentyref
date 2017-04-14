@@ -1,3 +1,8 @@
+/*
+ * License: Apache License, Version 2.0
+ * See the LICENSE file in the root directory or at <a href="http://www.apache.org/licenses/LICENSE-2">apache.org</a>.
+ */
+
 package io.leangen.geantyref;
 
 import org.junit.Test;
@@ -10,6 +15,7 @@ import java.lang.reflect.AnnotatedWildcardType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import static io.leangen.geantyref.Annotations.A1;
@@ -137,7 +143,7 @@ public class AnnotationsMergeTest {
     }
 
     private static Annotation[] sort(Annotation[] annotations) {
-        Arrays.sort(annotations, (o1, o2) -> o1.toString().compareTo(o2.toString()));
+        Arrays.sort(annotations, Comparator.comparing(Annotation::toString));
         return annotations;
     }
 }
