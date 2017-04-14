@@ -293,10 +293,26 @@ public class TypeFactory {
         return GenericArrayTypeImpl.createArrayType(componentType);
     }
 
+    /**
+     * Creates an {@link AnnotatedArrayType} wrapped around an array types created by {@link #arrayOf(Type)}
+     * 
+     * @param componentType The type of the components of the array.
+     * @param annotations The annotations to be added to the array type itself.
+     * @return An array type.
+     */
     public static AnnotatedArrayType arrayOf(AnnotatedType componentType, Annotation[] annotations) {
         return AnnotatedArrayTypeImpl.createArrayType(componentType, annotations);
     }
-    
+
+    /**
+     * Creates an instance of an annotation.
+     * 
+     * @param annotationType The {@link Class} representing the type of the annotation to be created.
+     * @param values A map of values to be assigned to the annotation elements.
+     * @param <A> The type of the annotation.
+     * @return An {@link Annotation} instanceof matching {@code annotationType}
+     * @throws AnnotationFormatException Thrown if incomplete or invalid {@code values} are provided
+     */
     @SuppressWarnings("unchecked")
     public static <A extends Annotation> A annotation(Class<A> annotationType, Map<String, Object> values) throws AnnotationFormatException {
         return (A) Proxy.newProxyInstance(annotationType.getClassLoader(),
