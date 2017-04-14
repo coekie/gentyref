@@ -15,17 +15,17 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * An implementation of {@linkplain Annotation} that mimics the behavior of normal annotations.
- * It is an {@linkplain InvocationHandler}, meant to be used via {@linkplain TypeFactory#annotation(Class, Map)}.
+ * An implementation of {@link Annotation} that mimics the behavior of normal annotations.
+ * It is an {@link InvocationHandler}, meant to be used via {@link TypeFactory#annotation(Class, Map)}.
  * <p>
  * The constructor checks that the all the elements required by the annotation interface are provided 
  * and that the types are compatible. If extra elements are provided, they are ignored.
  * If a value is of an incompatible type is provided or no value is provided for an element 
- * without a default value, {@linkplain AnnotationFormatException} is thrown.
+ * without a default value, {@link AnnotationFormatException} is thrown.
  * </p>
  *
- * Note: {@linkplain #equals(Object)} and {@linkplain #hashCode()} and implemented as specified
- * by {@linkplain Annotation}, so instances are safe to mix with normal annotations.
+ * Note: {@link #equals(Object)} and {@link #hashCode()} and implemented as specified
+ * by {@link Annotation}, so instances are safe to mix with normal annotations.
  * @see Annotation
  */
 class AnnotationInvocationHandler implements Annotation, InvocationHandler, Serializable {
