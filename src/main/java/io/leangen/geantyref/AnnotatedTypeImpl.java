@@ -54,11 +54,14 @@ class AnnotatedTypeImpl implements AnnotatedType {
 
     @Override
     public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
         if (!(other instanceof AnnotatedType)) {
             return false;
         }
-        AnnotatedType otherType = (AnnotatedType) other;
-        return this.getType().equals(otherType.getType()) && Arrays.equals(this.getAnnotations(), otherType.getAnnotations());
+        AnnotatedType that = (AnnotatedType) other;
+        return this.getType().equals(that.getType()) && Arrays.equals(this.getAnnotations(), that.getAnnotations());
     }
 
     @Override

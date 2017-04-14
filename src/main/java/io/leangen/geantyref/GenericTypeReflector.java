@@ -344,7 +344,7 @@ public class GenericTypeReflector {
     }
 
     /**
-     * If type is an array type, returns the type of the component of the array.
+     * If type is an array type, returns the annotated type of the component of the array.
      * Otherwise, returns null.
      */
     public static AnnotatedType getArrayComponentType(AnnotatedType type) {
@@ -359,8 +359,13 @@ public class GenericTypeReflector {
         }
     }
 
+    /**
+     * If type is an array type, returns the type of the component of the array.
+     * Otherwise, returns null.
+     */
     public static Type getArrayComponentType(Type type) {
-        return getArrayComponentType(annotate(type)).getType();
+        AnnotatedType componentType = getArrayComponentType(annotate(type));
+        return componentType == null ? null : componentType.getType();
     }
 
     private static boolean contains(Type containingType, Type containedType) {
@@ -498,7 +503,7 @@ public class GenericTypeReflector {
     }
 
     /**
-     * Returns the exact parameter types of the given method/constructor in the given type.
+     * Returns the exact annotated parameter types of the given method/constructor in the given type.
      * This may be different from {@code exe.getAnnotatedParameterTypes()} when the method was declared in a superclass,
      * or {@code declaringType} has a type parameter that is used in one of the parameters, or {@code declaringType} is a raw type.
      */
@@ -516,6 +521,11 @@ public class GenericTypeReflector {
         return result;
     }
 
+    /**
+     * Returns the exact parameter types of the given method/constructor in the given type.
+     * This may be different from {@code exe.getParameterTypes()} when the method was declared in a superclass,
+     * or {@code declaringType} has a type parameter that is used in one of the parameters, or {@code declaringType} is a raw type.
+     */
     public static Type[] getExactParameterTypes(Executable exe, Type declaringType) {
         return stream(getExactParameterTypes(exe, annotate(declaringType))).map(AnnotatedType::getType).toArray(Type[]::new);
     }
@@ -756,6 +766,13 @@ public class GenericTypeReflector {
         return replaceAnnotations(original, merge(original.getAnnotations(), annotations));
     }
 
+    /**
+     * Creates a new {@link AnnotatedParameterizedType} of the same raw class as the provided {@code type}
+     * by with all of its type parameters replaced by {@code typeParameters}.
+     * @param type The original parameterized type from which the raw class is to be taken
+     * @param typeParameters The new type parameters to use
+     * @return The new parameterized type
+     */
     public static AnnotatedParameterizedType replaceParameters(AnnotatedParameterizedType type, AnnotatedType[] typeParameters) {
         Type[] rawArguments = stream(typeParameters).map(AnnotatedType::getType).toArray(Type[]::new);
         ParameterizedType rawType = (ParameterizedType) TypeFactory.parameterizedClass(erase(type.getType()), rawArguments);
@@ -786,10 +803,10 @@ public class GenericTypeReflector {
                 .orElse(new Annotation[0]);
     }
 
-    public static boolean typeArraysEqual(AnnotatedType[] t1, AnnotatedType[] t2) {
-        if (t1 == null && t2 != null) return false;
-        if (t2 == null && t1 != null) return false;
-        if (t1 == null) return true;
+    static boolean typeArraysEqual(AnnotatedType[] t1, AnnotatedType[] t2) {
+        if (t1 == t2) return true;
+        if (t1 == null) return false;
+        if (t2 == null) return false;
         if (t1.length != t2.length) return false;
 
         for (int i = 0; i < t1.length; i++) {
