@@ -7,6 +7,7 @@ package io.leangen.geantyref;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedArrayType;
+import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Modifier;
@@ -16,6 +17,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -49,6 +51,18 @@ public class TypeFactory {
         }
         Type[] typeArguments = Arrays.stream(arguments).map(AnnotatedType::getType).toArray(Type[]::new);
         return new AnnotatedParameterizedTypeImpl((ParameterizedType) parameterizedClass(clazz, typeArguments), annotations, arguments);
+    }
+
+    public static AnnotatedParameterizedType parameterizedAnnotatedType(ParameterizedType type, Annotation[] typeAnnotations, Annotation[]... argumentAnnotations) {
+        if (argumentAnnotations == null || argumentAnnotations.length == 0) {
+            return (AnnotatedParameterizedType) GenericTypeReflector.annotate(type, typeAnnotations);
+        }
+        AnnotatedType[] typeArguments = new AnnotatedType[type.getActualTypeArguments().length];
+        for (int i = 0; i < typeArguments.length; i++) {
+            Annotation[] annotations = argumentAnnotations.length > i ? argumentAnnotations[i] : null;
+            typeArguments[i] = GenericTypeReflector.annotate(type.getActualTypeArguments()[i], annotations);
+        }
+        return (AnnotatedParameterizedType) parameterizedAnnotatedClass(GenericTypeReflector.erase(type), typeAnnotations, typeArguments);
     }
 
     /**
@@ -295,7 +309,7 @@ public class TypeFactory {
 
     /**
      * Creates an {@link AnnotatedArrayType} wrapped around an array types created by {@link #arrayOf(Type)}
-     * 
+     *
      * @param componentType The type of the components of the array.
      * @param annotations The annotations to be added to the array type itself.
      * @return An array type.
@@ -306,7 +320,7 @@ public class TypeFactory {
 
     /**
      * Creates an instance of an annotation.
-     * 
+     *
      * @param annotationType The {@link Class} representing the type of the annotation to be created.
      * @param values A map of values to be assigned to the annotation elements.
      * @param <A> The type of the annotation.
@@ -317,6 +331,6 @@ public class TypeFactory {
     public static <A extends Annotation> A annotation(Class<A> annotationType, Map<String, Object> values) throws AnnotationFormatException {
         return (A) Proxy.newProxyInstance(annotationType.getClassLoader(),
                 new Class[] { annotationType },
-                new AnnotationInvocationHandler(annotationType, values));
+                new AnnotationInvocationHandler(annotationType, values == null ? Collections.emptyMap() : values));
     }
 }

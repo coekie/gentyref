@@ -39,4 +39,9 @@ class AnnotatedArrayTypeImpl extends AnnotatedTypeImpl implements AnnotatedArray
     public int hashCode() {
         return super.hashCode() ^ componentType.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return componentType.toString() + " " + annotationsString() + "[]";
+    }
 }

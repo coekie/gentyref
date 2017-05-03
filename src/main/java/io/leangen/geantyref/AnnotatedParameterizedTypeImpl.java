@@ -38,4 +38,22 @@ class AnnotatedParameterizedTypeImpl extends AnnotatedTypeImpl implements Annota
     public int hashCode() {
         return 31 * super.hashCode() ^ GenericTypeReflector.hashCode(typeArguments);
     }
+
+    @Override
+    public String toString() {
+        ParameterizedType rawType = (ParameterizedType) type;
+        String rawName = GenericTypeReflector.getTypeName(rawType.getRawType());
+
+        StringBuilder typeName = new StringBuilder();
+        if (rawType.getOwnerType() != null) {
+            typeName.append(GenericTypeReflector.getTypeName(rawType.getOwnerType())).append('.');
+
+            String prefix = (rawType.getOwnerType() instanceof ParameterizedType) ? ((Class<?>) ((ParameterizedType) rawType.getOwnerType()).getRawType()).getName() + '$'
+                    : ((Class<?>) rawType.getOwnerType()).getName() + '$';
+            if (rawName.startsWith(prefix))
+                rawName = rawName.substring(prefix.length());
+        }
+        typeName.append(rawName);
+        return annotationsString() + typeName.toString() + "<" + typesString(typeArguments) + ">";
+    }
 }

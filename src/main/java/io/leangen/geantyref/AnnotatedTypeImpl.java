@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 class AnnotatedTypeImpl implements AnnotatedType {
 
@@ -46,7 +47,7 @@ class AnnotatedTypeImpl implements AnnotatedType {
         return annotations.values().toArray(new Annotation[annotations.size()]);
     }
 
-    //TODO return declared annotations, not all
+    //should this maybe return only annotations directly on type?
     @Override
     public Annotation[] getDeclaredAnnotations() {
         return getAnnotations();
@@ -67,5 +68,22 @@ class AnnotatedTypeImpl implements AnnotatedType {
     @Override
     public int hashCode() {
         return 31 * (this.getType().hashCode() ^ Arrays.hashCode(this.getAnnotations()));
+    }
+
+    @Override
+    public String toString() {
+        return annotationsString() + GenericTypeReflector.getTypeName(type);
+    }
+
+    String annotationsString() {
+        return annotations.isEmpty() ? "" : annotations.values().stream()
+                .map(Annotation::toString)
+                .collect(Collectors.joining(", ")) + " ";
+    }
+
+    String typesString(AnnotatedType[] types) {
+        return Arrays.stream(types)
+                .map(Object::toString)
+                .collect(Collectors.joining(", "));
     }
 }

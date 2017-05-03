@@ -184,10 +184,8 @@ class AnnotationInvocationHandler implements Annotation, InvocationHandler, Seri
         // remove the trailing separator
         if (values.size() > 0) {
             result.delete(result.length() - 2, result.length());
-            result.append(")");
-        } else {
-            result.delete(result.length() - 1, result.length());
         }
+        result.append(")");
 
         return result.toString();
     }
