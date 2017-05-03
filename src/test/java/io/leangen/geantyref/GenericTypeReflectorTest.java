@@ -32,6 +32,7 @@ public class GenericTypeReflectorTest extends AbstractGenericsReflectorTest {
     }
 
     public void testGetTypeParameter() {
+        @SuppressWarnings("serial")
         class StringList extends ArrayList<String> {
         }
         assertEquals(String.class, GenericTypeReflector.getTypeParameter(StringList.class, Collection.class.getTypeParameters()[0]));
@@ -105,6 +106,13 @@ public class GenericTypeReflectorTest extends AbstractGenericsReflectorTest {
         assertNotNull(resolved);
         assertEquals(C1.class, resolved.getType());
     }
+    
+    public void testGetExactSubTypeUnresolvable2() {
+        AnnotatedType parent = new TypeToken<N>(){}.getAnnotatedType();
+        AnnotatedType resolved = GenericTypeReflector.getExactSubType(parent, C1.class);
+        assertNotNull(resolved);
+        assertEquals(C1.class, resolved.getType());
+    }
 
     public void testGetExactSubTypeNotOverlapping() {
         AnnotatedParameterizedType parent = (AnnotatedParameterizedType) new TypeToken<List<String>>(){}.getAnnotatedType();
@@ -129,9 +137,10 @@ public class GenericTypeReflectorTest extends AbstractGenericsReflectorTest {
         assertEquals(String.class, ((AnnotatedParameterizedType) componentType).getAnnotatedActualTypeArguments()[0].getType());
     }
 
-    private class P<S, K> {}
-    private class M<U, R> extends P<U, R>{}
-    private class C<X, Y> extends M<Y, X>{}
-    private class C1<X, Y, Z> extends M<Y, X>{}
-    private static class D<T> { D(T t){}}
+    private class N {}
+    private class P<S, K> extends N {}
+    private class M<U, R> extends P<U, R> {}
+    private class C<X, Y> extends M<Y, X> {}
+    private class C1<X, Y, Z> extends M<Y, X> {}
+    private static class D<T> { D(T t) {}}
 }

@@ -311,15 +311,15 @@ public class TypeFactoryTest extends TestCase {
         }
     }
 
-    public void testTypeArgumentInReferingBound() {
-        assertEquals(new TypeToken<ReferingBound<List<Integer>, Integer>>() {
+    public void testTypeArgumentInReferringBound() {
+        assertEquals(new TypeToken<ReferringBound<List<Integer>, Integer>>() {
                 }.getType(),
-                parameterizedClass(ReferingBound.class, parameterizedClass(List.class, Integer.class), Integer.class));
+                parameterizedClass(ReferringBound.class, parameterizedClass(List.class, Integer.class), Integer.class));
     }
 
-    public void testTypeArgumentsNotInReferingBound() {
+    public void testTypeArgumentsNotInReferringBound() {
         try {
-            parameterizedClass(ReferingBound.class, parameterizedClass(List.class, Integer.class), Number.class);
+            parameterizedClass(ReferringBound.class, parameterizedClass(List.class, Integer.class), Number.class);
             fail("expected exception");
         } catch (IllegalArgumentException expected) {//expected
         }
@@ -381,16 +381,16 @@ public class TypeFactoryTest extends TestCase {
                 parameterizedClass(RawBound.class, ArrayList.class));
     }
 
-    public void testTypeArgumentInBoundReferingToOwner() {
+    public void testTypeArgumentInBoundReferringToOwner() {
         Type result = parameterizedInnerClass(
-                parameterizedClass(BoundReferingToOwner.class, Number.class),
-                BoundReferingToOwner.In.class,
+                parameterizedClass(BoundReferringToOwner.class, Number.class),
+                BoundReferringToOwner.In.class,
                 Integer.class
         );
 
         // unfortunately this doesn't compile with JDK 5 (but it does with the Eclipse compiler)
         // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6557954
-//		assertEquals(new TypeToken<BoundReferingToOwner<Number>.In<Integer>>(){}.getType(),
+//		assertEquals(new TypeToken<BoundReferringToOwner<Number>.In<Integer>>(){}.getType(),
 //				result
 //		);
 
@@ -398,11 +398,11 @@ public class TypeFactoryTest extends TestCase {
         assertTrue(result instanceof ParameterizedType);
     }
 
-    public void testTypeArgumentNotInBoundReferingToOwner() {
+    public void testTypeArgumentNotInBoundReferringToOwner() {
         try {
             parameterizedInnerClass(
-                    parameterizedClass(BoundReferingToOwner.class, Number.class),
-                    BoundReferingToOwner.In.class,
+                    parameterizedClass(BoundReferringToOwner.class, Number.class),
+                    BoundReferringToOwner.In.class,
                     String.class
             );
             fail("expected exception");
@@ -450,27 +450,27 @@ public class TypeFactoryTest extends TestCase {
         }
     }
 
-    public void testWildcardInReferingBound() {
-        assertEquals(new TypeToken<ReferingBound<?, String>>() {
+    public void testWildcardInReferringBound() {
+        assertEquals(new TypeToken<ReferringBound<?, String>>() {
                 }.getType(),
-                parameterizedClass(ReferingBound.class, unboundWildcard(), String.class));
+                parameterizedClass(ReferringBound.class, unboundWildcard(), String.class));
     }
 
-    public void testInReferingToWildcardBound() {
+    public void testInReferringToWildcardBound() {
         // JDK doesn't allow this, but the eclipse compiler does.
         // We prefer to be lenient, so we allow it.
         // But we can't assertEquals it to a TypeToken because that wouldn't compile.
         parameterizedClass(
-                ReferingBound.class,
+                ReferringBound.class,
                 parameterizedClass(List.class, wildcardExtends(Integer.class)),
                 wildcardExtends(Number.class)
         );
     }
 
-    public void testNotInReferingToWildcardBound() {
+    public void testNotInReferringToWildcardBound() {
         try {
             parameterizedClass(
-                    ReferingBound.class,
+                    ReferringBound.class,
                     parameterizedClass(List.class, wildcardExtends(Number.class)),
                     wildcardExtends(Integer.class)
             );
@@ -592,25 +592,25 @@ public class TypeFactoryTest extends TestCase {
         
         A2 b2 = TypeFactory.annotation(A2.class, b2Vals);
         
-        assertEquals(a, a1Literal);
-        assertEquals(a.hashCode(), a1Literal.hashCode());
-        assertEquals(a.toString(), a1Literal.toString());
-        assertEquals(a2, a2Literal);
-        assertEquals(a2.hashCode(), a2Literal.hashCode());
-        assertEquals(a2.toString(), a2Literal.toString());
+        assertEquals(a1Literal, a);
+        assertEquals(a1Literal.hashCode(), a.hashCode());
+        assertEquals(a1Literal.toString(), a.toString());
+        assertEquals(a2Literal, a2);
+        assertEquals(a2Literal.hashCode(), a2.hashCode());
+        assertEquals(a2Literal.toString(), a2.toString());
 
-        assertNotEquals(c, a1Literal);
-        assertNotEquals(c.hashCode(), a1Literal.hashCode());
-        assertNotEquals(c.toString(), a1Literal.toString());
-        assertNotEquals(b2, a2Literal);
-        assertNotEquals(b2.hashCode(), a2Literal.hashCode());
-        assertNotEquals(b2.toString(), a2Literal.toString());
+        assertNotEquals(a1Literal, c);
+        assertNotEquals(a1Literal.hashCode(), c.hashCode());
+        assertNotEquals(a1Literal.toString(), c.toString());
+        assertNotEquals(a2Literal, b2);
+        assertNotEquals(a2Literal.hashCode(), b2.hashCode());
+        assertNotEquals(a2Literal.toString(), b2.toString());
     }
 
     private static class Bound<T extends Number> {
     }
 
-    private static class ReferingBound<A extends List<B>, B> {
+    private static class ReferringBound<A extends List<B>, B> {
     }
 
     static class RecursiveBound<A extends RecursiveBound<A>> {
@@ -629,7 +629,7 @@ public class TypeFactoryTest extends TestCase {
     private static class ParameterizedBound<A extends List<Integer>> {
     }
 
-    private static class BoundReferingToOwner<X> {
+    private static class BoundReferringToOwner<X> {
         class In<Y extends X> {
         }
     }

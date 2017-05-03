@@ -36,7 +36,7 @@ import java.util.TreeSet;
  */
 class AnnotationInvocationHandler implements Annotation, InvocationHandler, Serializable {
 
-    private static final long serialVersionUID = 4531865662440020201L;
+    private static final long serialVersionUID = 8615044376674805680L;
     /**
      * Maps primitive {@code Class}es to their corresponding wrapper {@code Class}.
      */
@@ -173,7 +173,7 @@ class AnnotationInvocationHandler implements Annotation, InvocationHandler, Seri
         for (String elementName : sorted) {
             String value;
             if (values.get(elementName).getClass().isArray()) {
-                value = Arrays.deepToString(new Object[]{values.get(elementName)})
+                value = Arrays.deepToString(new Object[] {values.get(elementName)})
                         .replaceAll("^\\[\\[", "[")
                         .replaceAll("]]$", "]");
             } else {

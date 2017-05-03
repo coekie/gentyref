@@ -149,8 +149,9 @@ public class GenericTypeReflector {
                 return subType;
             }
 
-            if (! searchSuperClass.isAssignableFrom(superClass))
+            if (!searchSuperClass.isAssignableFrom(superClass)) {
                 return null;
+            }
         }
 
         for (AnnotatedType superType: getExactDirectSuperTypes(subType)) {
@@ -211,6 +212,9 @@ public class GenericTypeReflector {
         }
         if (searchSubClass.getTypeParameters().length == 0) {
             return annotatedSubType;
+        }
+        if (!(superType instanceof AnnotatedParameterizedType)) {
+            return annotate(searchSubClass);
         }
         AnnotatedParameterizedType parameterizedSuperType = (AnnotatedParameterizedType) superType;
         AnnotatedParameterizedType matched = (AnnotatedParameterizedType) getExactSuperType(annotatedSubType, rawSuperType);
