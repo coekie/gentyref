@@ -23,26 +23,43 @@ import java.util.TreeSet;
  * An implementation of {@link Annotation} that mimics the behavior of normal annotations.
  * It is an {@link InvocationHandler}, meant to be used via {@link TypeFactory#annotation(Class, Map)}.
  * <p>
- * The constructor checks that the all the elements required by the annotation interface are provided 
+ * The constructor checks that the all the elements required by the annotation interface are provided
  * and that the types are compatible. If extra elements are provided, they are ignored.
- * If a value is of an incompatible type is provided or no value is provided for an element 
+ * If a value is of an incompatible type is provided or no value is provided for an element
  * without a default value, {@link AnnotationFormatException} is thrown.
  * </p>
- *
+ * <p>
  * Note: {@link #equals(Object)} and {@link #hashCode()} and implemented as specified
  * by {@link Annotation}, so instances are safe to mix with normal annotations.
+ *
  * @see Annotation
  */
 class AnnotationInvocationHandler implements Annotation, InvocationHandler, Serializable {
 
     private static final long serialVersionUID = 4531865662440020201L;
+    /**
+     * Maps primitive {@code Class}es to their corresponding wrapper {@code Class}.
+     */
+    private static final Map<Class<?>, Class<?>> primitiveWrapperMap = new HashMap<>();
+
+    static {
+        primitiveWrapperMap.put(Boolean.TYPE, Boolean.class);
+        primitiveWrapperMap.put(Byte.TYPE, Byte.class);
+        primitiveWrapperMap.put(Character.TYPE, Character.class);
+        primitiveWrapperMap.put(Short.TYPE, Short.class);
+        primitiveWrapperMap.put(Integer.TYPE, Integer.class);
+        primitiveWrapperMap.put(Long.TYPE, Long.class);
+        primitiveWrapperMap.put(Double.TYPE, Double.class);
+        primitiveWrapperMap.put(Float.TYPE, Float.class);
+    }
+
     private final Class<? extends Annotation> annotationType;
     private final Map<String, Object> values;
     private final int hashCode;
 
     AnnotationInvocationHandler(Class<? extends Annotation> annotationType, Map<String, Object> values) throws AnnotationFormatException {
         Class[] interfaces = annotationType.getInterfaces();
-        if(annotationType.isAnnotation() && interfaces.length == 1 && interfaces[0] == Annotation.class) {
+        if (annotationType.isAnnotation() && interfaces.length == 1 && interfaces[0] == Annotation.class) {
             this.annotationType = annotationType;
             this.values = Collections.unmodifiableMap(normalize(annotationType, values));
             this.hashCode = calculateHashCode();
@@ -51,27 +68,19 @@ class AnnotationInvocationHandler implements Annotation, InvocationHandler, Seri
         }
     }
 
-    @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if (values.containsKey(method.getName())) {
-            return values.get(method.getName());
-        }
-        return method.invoke(this, args);
-    }
-
-    @Override
-    public Class<? extends Annotation> annotationType() {
-        return annotationType;
-    }
-
-    private static Map<String, Object> normalize(Class<? extends Annotation> annotationType, Map<String, Object> values) throws AnnotationFormatException {
+    static Map<String, Object> normalize(Class<? extends Annotation> annotationType, Map<String, Object> values) throws AnnotationFormatException {
         Set<String> missing = new HashSet<>();
         Set<String> invalid = new HashSet<>();
         Map<String, Object> valid = new HashMap<>();
         for (Method element : annotationType.getDeclaredMethods()) {
             String elementName = element.getName();
             if (values.containsKey(elementName)) {
-                if (element.getReturnType().isInstance(values.get(elementName))) {
+                Class<?> returnType = element.getReturnType();
+                if (returnType.isPrimitive()) {
+                    returnType = primitiveWrapperMap.get(returnType);
+                }
+
+                if (returnType.isInstance(values.get(elementName))) {
                     valid.put(elementName, values.get(elementName));
                 } else {
                     invalid.add(elementName);
@@ -91,6 +100,19 @@ class AnnotationInvocationHandler implements Annotation, InvocationHandler, Seri
             throw new AnnotationFormatException("Incompatible type(s) provided for " + String.join(",", invalid));
         }
         return valid;
+    }
+
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        if (values.containsKey(method.getName())) {
+            return values.get(method.getName());
+        }
+        return method.invoke(this, args);
+    }
+
+    @Override
+    public Class<? extends Annotation> annotationType() {
+        return annotationType;
     }
 
     /**
@@ -151,7 +173,7 @@ class AnnotationInvocationHandler implements Annotation, InvocationHandler, Seri
         for (String elementName : sorted) {
             String value;
             if (values.get(elementName).getClass().isArray()) {
-                value = Arrays.deepToString(new Object[] {values.get(elementName)})
+                value = Arrays.deepToString(new Object[]{values.get(elementName)})
                         .replaceAll("^\\[\\[", "[")
                         .replaceAll("]]$", "]");
             } else {
@@ -206,8 +228,8 @@ class AnnotationInvocationHandler implements Annotation, InvocationHandler, Seri
         if (element instanceof float[]) {
             return Arrays.hashCode((float[]) element);
         }
-        if(element instanceof double[]) {
-            return Arrays.hashCode((double[])element);
+        if (element instanceof double[]) {
+            return Arrays.hashCode((double[]) element);
         }
         if (element instanceof boolean[]) {
             return Arrays.hashCode((boolean[]) element);
