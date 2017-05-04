@@ -2,6 +2,7 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.leangen.geantyref/geantyref/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.leangen.geantyref/geantyref)
 [![Javadoc](https://javadoc-emblem.rhcloud.com/doc/io.leangen.geantyref/geantyref/badge.svg)](http://www.javadoc.io/doc/io.leangen.geantyref/geantyref)
+[![Build Status](https://travis-ci.org/leangen/geantyref.svg?branch=master)](https://travis-ci.org/leangen/geantyref)
 [![Hex.pm](https://img.shields.io/hexpm/l/plug.svg?maxAge=2592000)](https://raw.githubusercontent.com/leangen/geantyref/master/LICENSE)
 [![Semver](http://img.shields.io/SemVer/2.0.0.png)](http://semver.org/spec/v2.0.0.html)
 
