@@ -73,7 +73,7 @@ class StringList extends ArrayList<String> {
 ```
 Getting the exact return type of `StringList`'s `get` method is rather difficult:
 ```java
-Method get = StringList.class.getMethod(""get", int.class);
+Method get = StringList.class.getMethod("get", int.class);
 get.getGenericReturnType() //yields T, which is not very useful information
 ```
 
@@ -153,7 +153,7 @@ AnnotatedType listOfNonNullStrings = Person.class.getField("nicknames").getAnnot
 Class raw = GenericTypeReflector.erase(listOfNonNullStrings.getType());
 Method get = raw.getMethod("get", int.class);
 
-//returns an AnnotatedType corresponding to: @NonNull String
+//returns an AnnotatedType representing: @NonNull String
 AnnotatedType nonNullString = GenericTypeReflector.getExactReturnType(get, listOfNonNullStrings);
 ```
 Similarly, `getExactFieldType`, `getExactParameterTypes`, `getExactSuperType`, `getExactSubType`
