@@ -129,14 +129,14 @@ GeAnTyRef allows us to simply call
 Even more interestingly, it is sometimes possible to get the exact sub type of a type.
 For example, if we had `List<String>` and we wanted `ArrayList<String>` if would be possible,
 as the `ArrayList`'s sole type parameter is coming from `List`, i.e. `ArrayList` does not define
-and type parameters itself, `List<String>` already contains all the needed information.
+any type parameters itself, `List<String>` already contains all the needed information.
 This is rather difficult to calculate using standard reflection, but if we already had a reference to
 `List<String>` called `listOfString`, it is enough to call:
 
 `GenericTypeReflector.getExactSubType(listOfString, ArrayList.class)` to get `ArrayList<String>`
 
 Still, how to get to `listOfString`? Probably by calling one of the methods described above.
-But, it also possible to create a type literal directly via `TypeToken`, or construct the desired 
+But, it's also possible to create a type literal directly via `TypeToken`, or construct the desired 
 `Type` (`List<String>`) dynamically using `TypeFactory`.
 
 ### Getting annotated return/parameter/field/sub/super types
@@ -151,8 +151,7 @@ class Person {
 
 AnnotatedType listOfNonNullStrings = Person.class.getField("nicknames").getAnnotatedType();
 
-Class raw = GenericTypeReflector.erase(listOfNonNullStrings.getType());
-Method get = raw.getMethod("get", int.class);
+Method get = List.class.getMethod("get", int.class);
 
 //returns an AnnotatedType representing: @NonNull String
 AnnotatedType nonNullString = GenericTypeReflector.getExactReturnType(get, listOfNonNullStrings);
@@ -162,7 +161,7 @@ work with `AnnotatedType`s.
 
 ### Creating type literals using `TypeToken`
 
-This approach is known as _Typesafe Heterogenous Container_ (THC) or _type token_, is widely used
+This approach, known as _Typesafe Heterogenous Container_ (THC) or _type token_, is widely used
 in libraries like Jackson or Gson that need to work with generic types. There are various sources
 describing the intricacies of this approach, [Neal Gafter's blog](http://gafter.blogspot.nl/2006/12/super-type-tokens.html) being a classic one.
 
@@ -192,7 +191,7 @@ Class<List> listType = List.class;
 Class<String> typeParameter = String.class;
 
 //returns a Type representing List<String>
-Type listOfString = TypeFactory.parameterizedClass(listType, typeParameter);
+Type listOfStrings = TypeFactory.parameterizedClass(listType, typeParameter);
 
 Class<Map> mapType = Map.class;
 Class<String> keyTypeParameter = String.class;
@@ -243,6 +242,17 @@ AnnotatedType something = GenericTypeReflector.annotate(Something.class);
 
 This method will correctly turn a `ParameterizedType` into an `AnnotatedParameterizedType`,
 `WildcardType` into an `AnnotatedWildcardType` etc.
+
+To turn a `ParameterizedType` into an `AnnotatedParameterizedType` more precisely:
+
+```java
+Type listOfStrings = TypeFactory.parameterizedClass(List.class, String.class);
+Annotation[] typeAnnotations = { myAnnotation };
+Annotation[] argumentAnnotations = { anotherAnnotation };
+//Get an AnnotatedParameterizedType representing: @MyAnnotation List<@AnotherAnnotation String>
+AnnotatedParameterizedType annotatedListOfAnnotatedStrings =
+    parameterizedAnnotatedType(listOfStrings, typeAnnotations, argumentAnnotations);
+```
 
 ### More
 
