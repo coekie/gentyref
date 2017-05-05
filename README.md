@@ -243,7 +243,7 @@ AnnotatedType something = GenericTypeReflector.annotate(Something.class);
 This method will correctly turn a `ParameterizedType` into an `AnnotatedParameterizedType`,
 `WildcardType` into an `AnnotatedWildcardType` etc.
 
-To turn a `ParameterizedType` into an `AnnotatedParameterizedType` more precisely:
+To turn a `ParameterizedType` into an `AnnotatedParameterizedType` with customized annotations:
 
 ```java
 Type listOfStrings = TypeFactory.parameterizedClass(List.class, String.class);
