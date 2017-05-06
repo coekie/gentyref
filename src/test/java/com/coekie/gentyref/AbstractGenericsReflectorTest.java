@@ -5,8 +5,6 @@
 
 package com.coekie.gentyref;
 
-import junit.framework.TestCase;
-
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -17,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.RandomAccess;
+import junit.framework.TestCase;
 
 public abstract class AbstractGenericsReflectorTest extends TestCase {
     /**
@@ -269,18 +268,18 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-//	public void testMultiBoundParametrizedStringList() {
-//		class C<T extends Object & StringList> implements WithF<T>{
-//			@SuppressWarnings("unused")
-//			public T f;
-//		}
-//		// raw
-//		new C().f = new Object(); // compile check
-//		assertEquals(tt(Object.class), getFieldType(C.class, "f"));
-//		// wildcard
-//		TypeToken<? extends StringList> ft = getF(new TypeToken<C<?>>(){});
-//		checkedTestExactSuperclassChain(LIST_OF_STRING, tt(StringList.class), ft);
-//	}
+	public void testMultiBoundParametrizedStringList() {
+		class C<T extends Object & StringList> implements WithF<T>{
+			@SuppressWarnings("unused")
+			public T f;
+		}
+		// raw
+		new C().f = new Object(); // compile check
+		assertEquals(tt(Object.class), getFieldType(C.class, "f"));
+		// wildcard
+		TypeToken<? extends StringList> ft = getF(new TypeToken<C<?>>(){});
+		checkedTestExactSuperclassChain(LIST_OF_STRING, tt(StringList.class), ft);
+	}
 
     public void testFListOfT_String() {
         class C<T> implements WithF<List<T>> {
@@ -317,35 +316,37 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
         });
     }
 
-//	public void testTextendsStringList() {
-//		class C<T extends StringList> implements WithF<T>{
-//			public T f;
-//		}
-//
-//		// raw
-//		if (COMPILE_CHECK) {
-//			@SuppressWarnings("rawtypes")
-//			C c = null;
-//			List<String> listOfString = c.f;
-//		}
-//		testExactSuperclass(LIST_OF_STRING, getFieldType(C.class, "f"));
-//
-//		// wildcard
-//		TypeToken<? extends StringList> ft = getF(new TypeToken<C<?>>(){});
-//		checkedTestExactSuperclassChain(LIST_OF_STRING, tt(StringList.class), ft);
-//	}
+    public void testTextendsStringList() {
+        class C<T extends StringList> implements WithF<T> {
 
-//	public void testExtendViaOtherTypeParam() {
-//		class C<T extends StringList, U extends T> implements WithF<U> {
-//			@SuppressWarnings("unused")
-//			public U f;
-//		}
-//		// raw
-//		testExactSuperclass(LIST_OF_STRING, getFieldType(C.class, "f"));
-//		// wildcard
-//		TypeToken<? extends StringList> ft = getF(new TypeToken<C<?,?>>(){});
-//		checkedTestExactSuperclassChain(LIST_OF_STRING, tt(StringList.class), ft);
-//	}
+            public T f;
+        }
+
+        // raw
+        if (COMPILE_CHECK) {
+            @SuppressWarnings("rawtypes")
+            C c = null;
+            List<String> listOfString = c.f;
+        }
+        testExactSuperclass(LIST_OF_STRING, getFieldType(C.class, "f"));
+
+        // wildcard
+        TypeToken<? extends StringList> ft = getF(new TypeToken<C<?>>() {});
+        checkedTestExactSuperclassChain(LIST_OF_STRING, tt(StringList.class), ft);
+    }
+
+    public void testExtendViaOtherTypeParam() {
+        class C<T extends StringList, U extends T> implements WithF<U> {
+
+            @SuppressWarnings("unused")
+            public U f;
+        }
+        // raw
+        testExactSuperclass(LIST_OF_STRING, getFieldType(C.class, "f"));
+        // wildcard
+        TypeToken<? extends StringList> ft = getF(new TypeToken<C<?, ?>>() {});
+        checkedTestExactSuperclassChain(LIST_OF_STRING, tt(StringList.class), ft);
+    }
 
     public void testListOfListOfT_StringInterface() {
         checkedTestExactSuperclassChain(COLLECTION_OF_LIST_OF_STRING, LIST_OF_LIST_OF_STRING, tt(ListOfListOfT_String.class));
@@ -444,16 +445,17 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
         });
     }
 
-//	public void testWildcardTExtendsListOfListOfString() {
-//		class C<T extends List<List<String>>> implements WithF<T> {
-//			@SuppressWarnings("unused")
-//			public T f;
-//		}
-//		use(C.class);
-//
-//		TypeToken<? extends List<List<String>>> ft = getF(new TypeToken<C<?>>(){});
-//		checkedTestExactSuperclass(COLLECTION_OF_LIST_OF_STRING, ft);
-//	}
+    public void testWildcardTExtendsListOfListOfString() {
+        class C<T extends List<List<String>>> implements WithF<T> {
+
+            @SuppressWarnings("unused")
+            public T f;
+        }
+        use(C.class);
+
+        TypeToken<? extends List<List<String>>> ft = getF(new TypeToken<C<?>>() {});
+        checkedTestExactSuperclass(COLLECTION_OF_LIST_OF_STRING, ft);
+    }
 
     /**
      * Supertype of a raw type is erased
@@ -494,8 +496,15 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     }
 
     /**
+     * Original reasoning:
      * If a type has no parameters, it doesn't matter that it got erased.
      * So even though Middleclass was erased, its supertype is not.
+     * Correction:
+     * Even though that would have been type-safe, that's not what the specification says.
+     * From the JLS, talking about raw types:
+     * "Inherited type members that depend on type variables will be inherited as raw types as a
+     * consequence of the rule that the supertypes of a raw type are erased".
+     * So this is technically a Gentyref bug.
      */
     public void testSubclassRawViaUnparameterized() {
         class Superclass<T extends Number> implements WithF<T> {
@@ -508,26 +517,26 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
         }
         use(Superclass.class);
 
-        // doesn't compile with sun compiler (but does work in eclipse)
-//		TypeToken<Integer> ft = getStrictF(tt(Subclass.class));
-//		assertCheckedTypeEquals(tt(Integer.class), ft);
         assertEquals(tt(Integer.class), getFieldType(Subclass.class, "f"));
     }
 
-//	public void testUExtendsListOfExtT() {
-//		class C<T, U extends List<? extends T>> implements WithF<U> {
-//			@SuppressWarnings("unused")
-//			public U f;
-//		}
-//
-//		// this doesn't compile in eclipse nor with sun compiler, so we hold the compilers hand by adding some steps in between
-//		// TypeToken<? extends List<? extends String>> ft = getF(new TypeToken<C<? extends String, ?>>(){});
-//		TypeToken<? extends C<? extends String, ?>> tt = new TypeToken<C<? extends String, ?>>(){};
-//		TypeToken<? extends C<? extends String, ? extends List<? extends String>>> ttt = tt;
-//		TypeToken<? extends List<? extends String>> ft = getF(ttt);
-//
-//		checkedTestInexactSupertype(COLLECTION_OF_EXT_STRING, ft);
-//	}
+    // TODO broken because TypeToken.get also looks for annotations,
+    // and GenericTypeReflector.annotate uses erase() which doesn't support CaptureType.
+    public void ignored_testUExtendsListOfExtT() {
+        class C<T, U extends List<? extends T>> implements WithF<U> {
+
+            @SuppressWarnings("unused")
+            public U f;
+        }
+
+        if (COMPILE_CHECK) {
+            C<? extends String, ?> c = null;
+            Collection<? extends String> f = c.f;
+        }
+
+        testInexactSupertype(COLLECTION_OF_EXT_STRING,
+            getF(new TypeToken<C<? extends String, ?>>() {}));
+    }
 
     /**
      * Similar for inner types: the outer type of a raw inner type is also erased
@@ -756,10 +765,10 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     public interface ListOfListOfString extends List<List<String>> {
     }
 
-//	public void testGraphWildcard() {
-//		TypeToken<? extends List<? extends Edge<? extends Node<?,?>,?>>> ft = getF(new TypeToken<Node<?, ?>>(){});
-//		testInexactSupertype(new TypeToken<List<? extends Edge<? extends Node<?,?>,?>>>(){}, ft);
-//	}
+    public void testGraphWildcard() {
+        testInexactSupertype(new TypeToken<List<? extends Edge<? extends Node<?, ?>, ?>>>() {},
+            getF(new TypeToken<Node<?, ?>>() {}));
+    }
 
     public interface ListOfListOfExtT<T> extends List<List<? extends T>> {
     }
