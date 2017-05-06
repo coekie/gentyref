@@ -1,14 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.leangen.geantyref</groupId>
-    <artifactId>geantyref</artifactId>
+    <groupId>com.coekie.gentyref</groupId>
+    <artifactId>gentyref</artifactId>
     <packaging>jar</packaging>
-    <version>1.2.2-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
 
-    <inceptionYear>2016</inceptionYear>
-    <name>GeAnTyRef</name>
-    <url>https://github.com/leangen/geantyref</url>
-    <description>Generic type reflection library with support for AnnotatedType</description>
+    <inceptionYear>2008</inceptionYear>
+    <name>GenTyRef</name>
+    <url>https://github.com/coekie/gentyref</url>
+    <description>Generic type reflection library</description>
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -18,16 +18,12 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git://github.com/leangen/geantyref</connection>
-        <developerConnection>scm:git:git://github.com/leangen/geantyref</developerConnection>
-        <url>https://github.com/leangen/geantyref</url>
+        <connection>scm:git:git://github.com/coekie/gentyref</connection>
+        <developerConnection>scm:git:git://github.com/coekie/gentyref</developerConnection>
+        <url>https://github.com/coekie/gentyref</url>
         <tag>HEAD</tag>
     </scm>
     <distributionManagement>
-        <repository>
-            <id>bintray-leangen</id>
-            <url>https://api.bintray.com/maven/leangen/maven/geantyref/</url>
-        </repository>
         <snapshotRepository>
             <id>ossrh</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
@@ -35,7 +31,7 @@
     </distributionManagement>
     <issueManagement>
         <system>GitHub Issue Tracking</system>
-        <url>https://github.com/leangen/geantyref/issues</url>
+        <url>https://github.com/coekie/gentyref/issues</url>
     </issueManagement>
 
     <properties>
@@ -84,7 +80,7 @@
                     <useReleaseProfile>false</useReleaseProfile>
                     <releaseProfiles>release</releaseProfiles>
                     <pushChanges>false</pushChanges>
-                    <tagNameFormat>geantyref-v@{project.version}</tagNameFormat>
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
                 </configuration>
             </plugin>
 
@@ -194,6 +190,10 @@
     </profiles>
 
     <developers>
+        <developer>
+            <name>Wouter Coekaerts</name>
+            <email>wouter@coekaerts.be</email>
+        </developer>
         <developer>
             <name>Bojan Tomic</name>
             <email>veggen@gmail.com</email>

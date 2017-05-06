@@ -1,16 +1,16 @@
-# GeAnTyRef
+# GenTyRef
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.leangen.geantyref/geantyref/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.leangen.geantyref/geantyref)
-[![Javadoc](https://javadoc-emblem.rhcloud.com/doc/io.leangen.geantyref/geantyref/badge.svg)](http://www.javadoc.io/doc/io.leangen.geantyref/geantyref)
-[![Build Status](https://travis-ci.org/leangen/geantyref.svg?branch=master)](https://travis-ci.org/leangen/geantyref)
-[![Hex.pm](https://img.shields.io/hexpm/l/plug.svg?maxAge=2592000)](https://raw.githubusercontent.com/leangen/geantyref/master/LICENSE)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.coekie.gentyref/gentyref/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.coekie.gentyref/gentyref)
+[![Javadoc](https://javadoc-emblem.rhcloud.com/doc/com.coekie.gentyref/gentyref/badge.svg)](http://www.javadoc.io/doc/com.coekie.gentyref/gentyref)
+[![Build Status](https://travis-ci.org/coekie/gentyref.svg?branch=master)](https://travis-ci.org/coekie/gentyref)
+[![Hex.pm](https://img.shields.io/hexpm/l/plug.svg?maxAge=2592000)](https://raw.githubusercontent.com/coekie/gentyref/master/LICENSE)
 [![Semver](http://img.shields.io/SemVer/2.0.0.png)](http://semver.org/spec/v2.0.0.html)
 
-A fork of the excellent [GenTyRef](https://code.google.com/archive/p/gentyref/) library, adding support for working with [AnnotatedTypes](https://jaxenter.com/jsr-308-explained-java-type-annotations-107706.html) introduced in Java 8 plus many nifty features.
+A small library for reflection related to generic types in Java.
 
 **Table of Contents**
 
-- [GeAnTyRef](#)
+- [GenTyRef](#)
 	- [Goal](#goal)
 	- [Overview](#overview)
 	- [Usage](#usage)
@@ -51,15 +51,15 @@ All functionality of the library is exposed via a handful of classes:
 
 ```xml
 <dependency>
-    <groupId>io.leangen.geantyref</groupId>
-    <artifactId>geantyref</artifactId>
-    <version>1.2.1</version>
+    <groupId>com.coekie.gentyref</groupId>
+    <artifactId>gentyref</artifactId>
+    <version>2.0.0</version>
 </dependency>
 ```
 
 ### Other build tools:
 
-You can find instructions at [maven.org](https://search.maven.org/#artifactdetails%7Cio.leangen.geantyref%7Cgeantyref%7C1.2.1%7Cjar)
+You can find instructions at [maven.org](https://search.maven.org/#artifactdetails%7Ccom.coekie.gentyref%7Cgentyref%7C1.2.1%7Cjar)
 
 ## Examples
 
@@ -121,7 +121,7 @@ class LongContainer extends NumberContainer<Long> {}
 If we'd call `LongContainer.class.getGenericSuperclass()` it would correctly return `NumberContainer<Long>`
 but getting from there to `Container<Long>` is much more difficult, as there's no direct way.
 
-GeAnTyRef allows us to simply call
+GenTyRef allows us to simply call
 `GenericTypeReflector.getExactSuperType(LongContainer.class, Container.class)` to get `Container<Long>`
 
 ### Getting the exact sub type
