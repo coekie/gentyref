@@ -1,5 +1,9 @@
 package com.coekie.gentyref;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -7,14 +11,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class GenericMethodTest extends TestCase {
+public class GenericMethodTest {
 
   /**
    * Test if UnresolvedTypeVariableException is thrown if there is an unresolved type parameter
    * coming from a simple generic method in a parameter.
    */
+  @Test
   public void testSimpleGenericMethodUnresolvedParameter()
       throws SecurityException, NoSuchMethodException {
     class C {
@@ -40,6 +45,7 @@ public class GenericMethodTest extends TestCase {
    * Test if UnresolvedTypeVariableException is thrown if there is an unresolved type parameter
    * coming from a simple generic method in a return type
    */
+  @Test
   public void testSimpleGenericMethodUnresolvedReturnType()
       throws SecurityException, NoSuchMethodException {
     class C {
@@ -69,6 +75,7 @@ public class GenericMethodTest extends TestCase {
    * coming from a simple generic method, deep in the return type, nested in a generic array and
    * wildcards
    */
+  @Test
   public void testSimpleGenericMethodDeepUnresolvedReturnType()
       throws SecurityException, NoSuchMethodException {
     class C {
@@ -92,6 +99,7 @@ public class GenericMethodTest extends TestCase {
    * Test expected UnresolvedTypeVariableException for getExactReturnType and getExactParameterTypes
    * on Arrays.asList
    */
+  @Test
   public void testArraysAsListUnresolved() throws SecurityException, NoSuchMethodException {
     Method asList = Arrays.class.getMethod("asList", Object[].class);
     try {
@@ -123,6 +131,7 @@ public class GenericMethodTest extends TestCase {
     return C.class;
   }
 
+  @Test
   public void testReturnsTypeVariableFromOuterMethod()
       throws SecurityException, NoSuchMethodException {
     Class<?> c = returnsTypeVariableFromOuterMethod();
@@ -145,6 +154,7 @@ public class GenericMethodTest extends TestCase {
     return C.class;
   }
 
+  @Test
   public void testExtendsWithTypeVariableFromOuterMethod()
       throws SecurityException, NoSuchMethodException {
     Class<?> c = extendsWithTypeVariableFromOuterMethod();
@@ -169,6 +179,7 @@ public class GenericMethodTest extends TestCase {
    * different from the other tests in that the type variable from the method is not introduced by
    * navigating types, but is directly given by the gentyref API user.
    */
+  @Test
   public void testTypeVariableFromMethodGiven() throws SecurityException, NoSuchMethodException {
     Type listE = typeVariableFromMethod();
     TypeVariable<?> e =

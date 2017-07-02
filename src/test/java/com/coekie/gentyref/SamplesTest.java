@@ -1,11 +1,15 @@
 package com.coekie.gentyref;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  * Simple samples of what gentyref does, in the form of tests. See
@@ -13,7 +17,7 @@ import junit.framework.TestCase;
  *
  * @author Wouter Coekaerts <wouter@coekaerts.be>
  */
-public class SamplesTest extends TestCase {
+public class SamplesTest {
   interface Processor<T> {
     void process(T t);
   }
@@ -40,6 +44,7 @@ public class SamplesTest extends TestCase {
     return GenericTypeReflector.isSuperType(type, processorClass);
   }
 
+  @Test
   public void testProsessor() {
     assertTrue(isStringProcessor(StringProcessor.class));
     assertFalse(isStringProcessor(IntegerProcessor.class));
@@ -55,6 +60,7 @@ public class SamplesTest extends TestCase {
 
   class StringCollector extends Collector<String> {}
 
+  @Test
   public void testCollectorList() throws NoSuchMethodException {
     Method listMethod = StringCollector.class.getMethod("list");
 
@@ -70,6 +76,7 @@ public class SamplesTest extends TestCase {
     assertEquals(new TypeToken<List<String>>() {}.getType(), exactReturnType);
   }
 
+  @Test
   public void testCollectorAdd() throws NoSuchMethodException {
     Method addMethod = StringCollector.class.getMethod("add", Object.class);
 

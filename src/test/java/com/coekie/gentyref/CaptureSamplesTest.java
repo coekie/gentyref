@@ -1,21 +1,26 @@
 package com.coekie.gentyref;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  * see http://code.google.com/p/gentyref/wiki/CaptureType
  *
  * @author Wouter Coekaerts <wouter@coekaerts.be>
  */
-public class CaptureSamplesTest extends TestCase {
+public class CaptureSamplesTest {
   class Foo<T> {
     List<? extends Number> listWildcard;
     List<T> listT;
   }
 
+  @Test
   public void testFoo() throws NoSuchFieldException {
     Foo<? extends Number> foo = new Foo<Integer>();
     foo.listWildcard = new ArrayList<Long>();
@@ -42,6 +47,7 @@ public class CaptureSamplesTest extends TestCase {
     T t;
   }
 
+  @Test
   @SuppressWarnings("unused")
   public void testBar() throws NoSuchFieldException {
     Bar<?> bar = new Bar<Integer>();

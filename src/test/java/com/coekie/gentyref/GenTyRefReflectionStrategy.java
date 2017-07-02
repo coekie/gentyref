@@ -1,9 +1,10 @@
 package com.coekie.gentyref;
 
+import static org.junit.Assert.assertEquals;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import junit.framework.Assert;
 
 class GenTyRefReflectionStrategy extends AbstractReflectionStrategy {
   public boolean isSupertype(Type superType, Type subType) {
@@ -15,7 +16,7 @@ class GenTyRefReflectionStrategy extends AbstractReflectionStrategy {
 
     // sanity check: erase(result) == searchClass and result is a supertype of type
     if (result != null) {
-      Assert.assertEquals(searchClass, GenericTypeReflector.erase(result));
+      assertEquals(searchClass, GenericTypeReflector.erase(result));
       GenericTypeReflector.isSuperType(result, type);
     }
 

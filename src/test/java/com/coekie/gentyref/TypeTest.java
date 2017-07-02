@@ -1,10 +1,12 @@
 package com.coekie.gentyref;
 
+import static org.junit.Assert.assertEquals;
+
 import java.lang.reflect.Type;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  * Test the implementation of our types:
@@ -16,7 +18,7 @@ import junit.framework.TestCase;
  *
  * @author Wouter Coekaerts <wouter@coekaerts.be>
  */
-public class TypeTest extends TestCase {
+public class TypeTest {
 
   private void assertTypesEqual(TypeToken<?> expectedToken, Type type, String toString) {
     Type expected = expectedToken.getType();
@@ -28,6 +30,7 @@ public class TypeTest extends TestCase {
     //      "WARN: jdk gives different toString for " + toString + ":\n   " + expected.toString());
   }
 
+  @Test
   public void testParameterizedType() {
     assertTypesEqual(
         new TypeToken<List<String>>() {},
@@ -48,6 +51,7 @@ public class TypeTest extends TestCase {
     class InnerInnerWithParam<U> {}
   }
 
+  @Test
   public void testNested() {
     assertTypesEqual(
         new TypeToken<TypeTest.InnerWithParam<String>>() {},
@@ -64,6 +68,7 @@ public class TypeTest extends TestCase {
         "com.coekie.gentyref.TypeTest.InnerWithParam<java.lang.String>.InnerInnerWithParam<java.lang.Integer>");
   }
 
+  @Test
   public void testUnboundWildcard() {
     assertTypesEqual(
         new TypeToken<List<?>>() {},
@@ -82,6 +87,7 @@ public class TypeTest extends TestCase {
         "java.util.EnumSet<?>");
   }
 
+  @Test
   public void testSuperWildcard() {
     assertTypesEqual(
         new TypeToken<List<? super Number>>() {},
@@ -92,6 +98,7 @@ public class TypeTest extends TestCase {
         "java.util.List<? super java.lang.Number>");
   }
 
+  @Test
   public void testExtendsWildcard() {
     assertTypesEqual(
         new TypeToken<List<? extends Number>>() {},
@@ -102,6 +109,7 @@ public class TypeTest extends TestCase {
         "java.util.List<? extends java.lang.Number>");
   }
 
+  @Test
   public void testGenericArray() {
     assertTypesEqual(
         new TypeToken<List<?>[]>() {},
@@ -113,10 +121,12 @@ public class TypeTest extends TestCase {
         "java.util.List<?>[]");
   }
 
+  @Test
   public void testArray() {
     assertEquals("java.lang.String[]", GenericTypeReflector.getTypeName(String[].class));
   }
 
+  @Test
   public void testCapture() {
     // Note: there's no jdk counterpart for CaptureType
     assertEquals(

@@ -1,5 +1,8 @@
 package com.coekie.gentyref;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.awt.Dimension;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -9,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import org.junit.Test;
 
 /**
  * Test for reflection done in GenericTypeReflector. This class inherits most of its tests from the
@@ -19,6 +23,7 @@ public class GenericTypeReflectorTest extends AbstractGenericsReflectorTest {
     super(new GenTyRefReflectionStrategy());
   }
 
+  @Test
   public void testGetTypeParameter() {
     class StringList extends ArrayList<String> {}
     assertEquals(
@@ -27,6 +32,7 @@ public class GenericTypeReflectorTest extends AbstractGenericsReflectorTest {
             StringList.class, Collection.class.getTypeParameters()[0]));
   }
 
+  @Test
   public void testGetUpperBoundClassAndInterfaces() {
     class Foo<A extends Number & Iterable<A>, B extends A> {}
     TypeVariable<?> a = Foo.class.getTypeParameters()[0];
@@ -40,6 +46,7 @@ public class GenericTypeReflectorTest extends AbstractGenericsReflectorTest {
   }
 
   /** Call getExactReturnType with a method that is not a method of the given type. Issue #6 */
+  @Test
   public void testGetExactReturnTypeIllegalArgument()
       throws SecurityException, NoSuchMethodException {
     Method method = ArrayList.class.getMethod("set", int.class, Object.class);
@@ -52,6 +59,7 @@ public class GenericTypeReflectorTest extends AbstractGenericsReflectorTest {
   }
 
   /** Same as {@link #testGetExactReturnTypeIllegalArgument()} for getExactFieldType */
+  @Test
   public void testGetExactFieldTypeIllegalArgument()
       throws SecurityException, NoSuchFieldException {
     Field field = Dimension.class.getField("width");
@@ -62,6 +70,7 @@ public class GenericTypeReflectorTest extends AbstractGenericsReflectorTest {
     }
   }
 
+  @Test
   public void testgetExactParameterTypes() throws SecurityException, NoSuchMethodException {
     // method: boolean add(int index, E o), erasure is boolean add(int index, Object o)
     Method getMethod = List.class.getMethod("add", int.class, Object.class);

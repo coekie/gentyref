@@ -1,18 +1,22 @@
 package com.coekie.gentyref;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 /** Test for http://code.google.com/p/gentyref/issues/detail?id=3 */
-public class Issue3Test extends TestCase {
+public class Issue3Test {
   public class NamedDataObject {}
 
+  @SuppressWarnings("unused")
   public abstract class HierarchicalNamedDataObject<
           RealClass extends HierarchicalNamedDataObject<RealClass>>
       extends NamedDataObject {
@@ -29,6 +33,7 @@ public class Issue3Test extends TestCase {
     }
   }
 
+  @Test
   public void testIt() throws NoSuchMethodException {
     // the return type for the raw type is a raw list
     Method getChildren = HierarchicalNamedDataObject.class.getMethod("getChildren");
@@ -53,7 +58,7 @@ public class Issue3Test extends TestCase {
     // using getCollectionElementTypes, you can directly get the classes&interfaces contained in the
     // list
     assertEquals(
-        Arrays.<Class<?>>asList(HierarchicalNamedDataObject.class),
+        Collections.<Class<?>>singletonList(HierarchicalNamedDataObject.class),
         getCollectionElementTypes(getChildren, HierarchicalNamedDataObject.class));
   }
 
@@ -61,8 +66,7 @@ public class Issue3Test extends TestCase {
     return GenericTypeReflector.getUpperBoundClassAndInterfaces(
         GenericTypeReflector.getTypeParameter(
             GenericTypeReflector.getExactReturnType(
-                getter,
-                GenericTypeReflector.addWildcardParameters(HierarchicalNamedDataObject.class)),
+                getter, GenericTypeReflector.addWildcardParameters(clazz)),
             Collection.class.getTypeParameters()[0]));
   }
 }

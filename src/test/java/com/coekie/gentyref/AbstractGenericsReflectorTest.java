@@ -1,5 +1,9 @@
 package com.coekie.gentyref;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -10,9 +14,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.RandomAccess;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public abstract class AbstractGenericsReflectorTest extends TestCase {
+public abstract class AbstractGenericsReflectorTest {
   /**
    * A constant that's false, to use in an if() block for code that's only there to show that it
    * compiles. This code "proves" that the test is an actual valid test case, by showing the
@@ -248,11 +252,13 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     return TypeToken.get(t);
   }
 
+  @Test
   public void testBasic() {
     checkedTestExactSuperclassChain(tt(Object.class), tt(Number.class), tt(Integer.class));
     testNotSupertypes(tt(Integer.class), tt(Double.class));
   }
 
+  @Test
   public void testSimpleTypeParam() {
     checkedTestExactSuperclassChain(COLLECTION_OF_STRING, LIST_OF_STRING, ARRAYLIST_OF_STRING);
     testNotSupertypes(COLLECTION_OF_STRING, new TypeToken<ArrayList<Integer>>() {});
@@ -266,10 +272,12 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 
   public interface StringList extends List<String> {}
 
+  @Test
   public void testStringList() {
     checkedTestExactSuperclassChain(COLLECTION_OF_STRING, LIST_OF_STRING, tt(StringList.class));
   }
 
+  @Test
   public void testTextendsStringList() {
     class C<T extends StringList> implements WithF<T> {
       public T f;
@@ -288,6 +296,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     checkedTestExactSuperclassChain(LIST_OF_STRING, tt(StringList.class), ft);
   }
 
+  @Test
   public void testExtendViaOtherTypeParam() {
     class C<T extends StringList, U extends T> implements WithF<U> {
       @SuppressWarnings("unused")
@@ -300,6 +309,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     checkedTestExactSuperclassChain(LIST_OF_STRING, tt(StringList.class), ft);
   }
 
+  @Test
   @SuppressWarnings({"unchecked", "rawtypes"})
   public void testMultiBoundParametrizedStringList() {
     class C<T extends Object & StringList> implements WithF<T> {
@@ -314,6 +324,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     checkedTestExactSuperclassChain(LIST_OF_STRING, tt(StringList.class), ft);
   }
 
+  @Test
   public void testFListOfT_String() {
     class C<T> implements WithF<List<T>> {
       @SuppressWarnings("unused")
@@ -325,12 +336,14 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     assertCheckedTypeEquals(LIST_OF_STRING, ft);
   }
 
+  @Test
   public void testOfListOfString() {
     checkedTestExactSuperclassChain(
         COLLECTION_OF_LIST_OF_STRING, LIST_OF_LIST_OF_STRING, ARRAYLIST_OF_LIST_OF_STRING);
     testNotSupertypes(COLLECTION_OF_LIST_OF_STRING, new TypeToken<ArrayList<List<Integer>>>() {});
   }
 
+  @Test
   public void testFListOfListOfT_String() {
     class C<T> implements WithF<List<List<T>>> {
       @SuppressWarnings("unused")
@@ -344,6 +357,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 
   public interface ListOfListOfT<T> extends List<List<T>> {}
 
+  @Test
   public void testListOfListOfT_String() {
     checkedTestExactSuperclassChain(
         COLLECTION_OF_LIST_OF_STRING,
@@ -353,6 +367,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 
   public interface ListOfListOfT_String extends ListOfListOfT<String> {}
 
+  @Test
   public void testListOfListOfT_StringInterface() {
     checkedTestExactSuperclassChain(
         COLLECTION_OF_LIST_OF_STRING, LIST_OF_LIST_OF_STRING, tt(ListOfListOfT_String.class));
@@ -360,11 +375,13 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 
   public interface ListOfListOfString extends List<List<String>> {}
 
+  @Test
   public void testListOfListOfStringInterface() {
     checkedTestExactSuperclassChain(
         COLLECTION_OF_LIST_OF_STRING, LIST_OF_LIST_OF_STRING, tt(ListOfListOfString.class));
   }
 
+  @Test
   public void testWildcardTExtendsListOfListOfString() {
     class C<T extends List<List<String>>> implements WithF<T> {
       @SuppressWarnings("unused")
@@ -376,6 +393,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     checkedTestExactSuperclass(COLLECTION_OF_LIST_OF_STRING, ft);
   }
 
+  @Test
   public void testExtWildcard() {
     checkedTestExactSuperclass(COLLECTION_OF_EXT_STRING, ARRAYLIST_OF_EXT_STRING);
     checkedTestExactSuperclass(COLLECTION_OF_LIST_OF_EXT_STRING, ARRAYLIST_OF_LIST_OF_EXT_STRING);
@@ -385,11 +403,13 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 
   public interface ListOfListOfExtT<T> extends List<List<? extends T>> {}
 
+  @Test
   public void testListOfListOfExtT_String() {
     checkedTestExactSuperclass(
         COLLECTION_OF_LIST_OF_EXT_STRING, new TypeToken<ListOfListOfExtT<String>>() {});
   }
 
+  @Test
   public void testUExtendsListOfExtT() {
     class C<T, U extends List<? extends T>> implements WithF<U> {
       @SuppressWarnings("unused")
@@ -407,6 +427,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     checkedTestInexactSupertype(COLLECTION_OF_EXT_STRING, ft);
   }
 
+  @Test
   public void testListOfExtT() {
     class C<T> implements WithF<List<? extends T>> {
       @SuppressWarnings("unused")
@@ -418,6 +439,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     checkedTestExactSuperclass(COLLECTION_OF_EXT_STRING, ft);
   }
 
+  @Test
   public void testListOfSuperT() {
     class C<T> implements WithF<List<? super T>> {
       @SuppressWarnings("unused")
@@ -429,6 +451,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     checkedTestExactSuperclass(COLLECTION_OF_SUPER_STRING, ft);
   }
 
+  @Test
   public void testInnerFieldWithTypeOfOuter() {
     class Outer<T> {
       @SuppressWarnings("unused")
@@ -451,6 +474,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     assertCheckedTypeEquals(LIST_OF_LIST_OF_EXT_STRING, ft2);
   }
 
+  @Test
   public void testInnerExtendsWithTypeOfOuter() {
     class Outer<T> {
       class Inner extends ArrayList<T> {}
@@ -460,6 +484,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     checkedTestExactSuperclass(COLLECTION_OF_STRING, new TypeToken<Outer<String>.Inner>() {});
   }
 
+  @Test
   public void testInnerDifferentParams() {
     class Outer<T> {
       class Inner<S> {}
@@ -477,6 +502,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
   }
 
   /** Supertype of a raw type is erased */
+  @Test
   @SuppressWarnings({"unchecked", "rawtypes"})
   public void testSubclassRaw() {
     class Superclass<T extends Number> {
@@ -495,6 +521,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
    * Supertype of a raw type is erased. (And there's no such thing as a ParameterizedType with some
    * type parameters raw and others not)
    */
+  @Test
   @SuppressWarnings({"unchecked", "rawtypes"})
   public void testSubclassRawMix() {
     class Superclass<T, U extends Number> {
@@ -514,6 +541,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
    * If a type has no parameters, it doesn't matter that it got erased. So even though Middleclass
    * was erased, its supertype is not.
    */
+  @Test
   public void testSubclassRawViaUnparameterized() {
     class Superclass<T extends Number> implements WithF<T> {
       @SuppressWarnings("unused")
@@ -530,6 +558,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
   }
 
   /** Similar for inner types: the outer type of a raw inner type is also erased */
+  @Test
   @SuppressWarnings("unchecked")
   public void testInnerRaw() {
     class Outer<T extends Number> {
@@ -554,6 +583,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     }
   }
 
+  @Test
   public void testSuperWildcard() {
     Box<? super Integer> b = new Box<Integer>(); // compile check
     b.f = new Integer(0); // compile check
@@ -565,6 +595,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     checkedTestInexactSupertype(ft, tt(Integer.class));
   }
 
+  @Test
   public void testContainment() {
     checkedTestInexactSupertypeChain(
         new TypeToken<List<?>>() {},
@@ -576,6 +607,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
         new TypeToken<List<Object>>() {});
   }
 
+  @Test
   public void testArrays() {
     checkedTestExactSuperclassChain(tt(Object[].class), tt(Number[].class), tt(Integer[].class));
     testNotSupertypes(new TypeToken<Integer[]>() {}, new TypeToken<String[]>() {});
@@ -584,6 +616,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     checkedTestExactSuperclass(tt(Cloneable[].class), tt(Object[][].class));
   }
 
+  @Test
   public void testGenericArrays() {
     checkedTestExactSuperclass(
         new TypeToken<Collection<String>[]>() {}, new TypeToken<ArrayList<String>[]>() {});
@@ -599,6 +632,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
                     []>() {})); // not checked* because we're avoiding the inverse test
   }
 
+  @Test
   public void testArrayOfT() {
     class C<T> implements WithF<T[]> {
       @SuppressWarnings("unused")
@@ -610,6 +644,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     assertCheckedTypeEquals(tt(String[].class), ft);
   }
 
+  @Test
   public void testArrayOfListOfT() {
     class C<T> implements WithF<List<T>[]> {
       @SuppressWarnings("unused")
@@ -621,6 +656,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     assertCheckedTypeEquals(new TypeToken<List<String>[]>() {}, ft);
   }
 
+  @Test
   @SuppressWarnings({"unchecked", "rawtypes"})
   public void testArrayRaw() {
     class C<T> {
@@ -631,11 +667,13 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     assertEquals(tt(List.class), getFieldType(new TypeToken<C>() {}, "f"));
   }
 
+  @Test
   public void testPrimitiveArray() {
     testNotSupertypes(tt(double[].class), tt(float[].class));
     testNotSupertypes(tt(int[].class), tt(Integer[].class));
   }
 
+  @Test
   public void testCapture() {
     TypeToken<Box<?>> bw = new TypeToken<Box<?>>() {};
     TypeToken<?> capture1 = getF(bw);
@@ -649,6 +687,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     assertTrue(capture1.equals(capture1));
   }
 
+  @Test
   public void testCaptureBeforeReplaceSupertype() {
     class C<T> extends ArrayList<List<T>> {}
     use(C.class);
@@ -667,12 +706,14 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     public N n;
   }
 
+  @Test
   public void testGraphWildcard() {
     testInexactSupertype(
         new TypeToken<List<? extends Edge<? extends Node<?, ?>, ?>>>() {},
         getF(new TypeToken<Node<?, ?>>() {}));
   }
 
+  @Test
   public void testGraphCapture() throws NoSuchFieldException {
     Field e = Node.class.getField("e");
     Field n = Edge.class.getField("n");
@@ -688,6 +729,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
    * This test shows the need for capturing in isSupertype: the type parameters aren't contained,
    * but the capture of them is because of the bound on type variable
    */
+  @Test
   public void testCaptureContainment() {
     class C<T extends Number> {}
     use(C.class);
@@ -695,6 +737,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
     checkedTestMutualSupertypes(new TypeToken<C<? extends Number>>() {}, new TypeToken<C<?>>() {});
   }
 
+  @Test
   public void testCaptureContainmentViaOtherParam() {
     class C<T extends Number, S extends List<T>> {}
 
@@ -708,6 +751,7 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
   }
 
   // Issue #4
+  @Test
   public void testClassInMethod() throws NoSuchFieldException {
     class Outer<T> {
       Class<?> getInnerClass() {

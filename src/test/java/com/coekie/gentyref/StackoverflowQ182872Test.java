@@ -1,10 +1,12 @@
 package com.coekie.gentyref;
 
+import static org.junit.Assert.assertTrue;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  * Sample in the form of a JUnit test, to show gentyref solves the problem on
@@ -12,7 +14,8 @@ import junit.framework.TestCase;
  *
  * @author Wouter Coekaerts <wouter@coekaerts.be>
  */
-public class StackoverflowQ182872Test extends TestCase {
+@SuppressWarnings("unused")
+public class StackoverflowQ182872Test {
   private static Type LIST_OF_STRING = new TypeToken<List<String>>() {}.getType();
 
   public static class StringList extends ArrayList<String> {}
@@ -47,6 +50,7 @@ public class StackoverflowQ182872Test extends TestCase {
     return GenericTypeReflector.isSuperType(LIST_OF_STRING, returnType);
   }
 
+  @Test
   public void testIt() throws NoSuchMethodException {
     assertTrue(returnTypeExtendsListOfString(StackoverflowQ182872Test.class, "method1"));
     assertTrue(returnTypeExtendsListOfString(StackoverflowQ182872Test.class, "method2"));

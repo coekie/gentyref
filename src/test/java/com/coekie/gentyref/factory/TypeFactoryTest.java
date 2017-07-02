@@ -6,6 +6,10 @@ import static com.coekie.gentyref.TypeFactory.parameterizedInnerClass;
 import static com.coekie.gentyref.TypeFactory.unboundWildcard;
 import static com.coekie.gentyref.TypeFactory.wildcardExtends;
 import static com.coekie.gentyref.TypeFactory.wildcardSuper;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.coekie.gentyref.TypeArgumentNotInBoundException;
 import com.coekie.gentyref.TypeFactory;
@@ -17,30 +21,35 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.Ignore;
+import org.junit.Test;
 
-public class TypeFactoryTest extends TestCase {
+public class TypeFactoryTest {
   private static final Type GENERICOUTER_STRING =
       new TypeToken<GenericOuter<String>>() {}.getType();
 
   /** If there are no type parameters, it's just a Class */
+  @Test
   public void testSimpleClass() {
     assertEquals(String.class, parameterizedClass(String.class, (Type[]) null));
   }
 
   /** Also for an inner class: if there are no type parameters it's just a Class */
+  @Test
   public void testSimpleInner() {
     assertEquals(
         SimpleOuter.SimpleInner.class,
         innerClass(SimpleOuter.class, SimpleOuter.SimpleInner.class));
   }
 
+  @Test
   public void testSimpleGeneric() {
     assertEquals(
         new TypeToken<List<String>>() {}.getType(), parameterizedClass(List.class, String.class));
   }
 
   /** If the given parameters are null, it's a raw type */
+  @Test
   public void testSimpleRaw() {
     assertEquals(List.class, parameterizedClass(List.class, (Type[]) null));
   }
@@ -49,6 +58,7 @@ public class TypeFactoryTest extends TestCase {
    * An empty array as arguments is not the same as null: it means the caller explicitly expects the
    * class not to need type arguments. So we throw an exception if they were needed.
    */
+  @Test
   public void testEmptyArgumentsForGenericClass() {
     try {
       parameterizedClass(List.class, new Type[] {});
@@ -57,6 +67,7 @@ public class TypeFactoryTest extends TestCase {
     }
   }
 
+  @Test
   public void testTooManyTypeArguments() {
     try {
       parameterizedClass(List.class, new Type[] {String.class, String.class});
@@ -65,12 +76,14 @@ public class TypeFactoryTest extends TestCase {
     }
   }
 
+  @Test
   public void testGenericOwner() {
     assertEquals(
         new TypeToken<GenericOuter<String>.Inner>() {}.getType(),
         innerClass(GENERICOUTER_STRING, Inner.class));
   }
 
+  @Test
   public void testDoubleGeneric() {
     assertEquals(
         new TypeToken<GenericOuter<String>.DoubleGeneric<Integer>>() {}.getType(),
@@ -78,11 +91,13 @@ public class TypeFactoryTest extends TestCase {
   }
 
   /** If the owner is raw, the whole type is raw (test for a non-generic inner class) */
+  @Test
   public void testRawGenericOwner() {
     assertEquals(Inner.class, innerClass(GenericOuter.class, Inner.class));
   }
 
   /** If the owner is raw, the whole type is raw (test also for a generic inner class) */
+  @Test
   public void testDoubleGenericRawOwner() {
     assertEquals(
         DoubleGeneric.class,
@@ -90,15 +105,18 @@ public class TypeFactoryTest extends TestCase {
   }
 
   /** If the inner class is raw, the whole type is raw */
+  @Test
   public void testDoubleGenericRawInner() {
     assertEquals(DoubleGeneric.class, innerClass(GENERICOUTER_STRING, DoubleGeneric.class));
   }
 
   /** If the outer class is not specified, take it as a raw one */
+  @Test
   public void testDoubleGenericMissingOwner() {
     assertEquals(DoubleGeneric.class, parameterizedClass(DoubleGeneric.class, Integer.class));
   }
 
+  @Test
   public void testOwnerForTopLevel() {
     try {
       innerClass(String.class, Integer.class);
@@ -111,6 +129,7 @@ public class TypeFactoryTest extends TestCase {
    * An owner type that is a subtype of the enclosing class is converted into the right
    * parameterized version of that enclosing class.
    */
+  @Test
   public void testConcreteOuter() {
     assertEquals(
         new TypeToken<GenericOuter<String>.Inner>() {}.getType(),
@@ -123,6 +142,7 @@ public class TypeFactoryTest extends TestCase {
   }
 
   @SuppressWarnings("rawtypes")
+  @Test
   public void testConcreteRawOuter() {
     assertEquals(Inner.class, innerClass(RawOuter.class, Inner.class));
 
@@ -130,6 +150,7 @@ public class TypeFactoryTest extends TestCase {
     assertEquals(Inner.class, new TypeToken<RawOuter.Inner>() {}.getType());
   }
 
+  @Test
   public void testConcreteRawOuterGenericInner() {
     assertEquals(
         DoubleGeneric.class,
@@ -139,12 +160,14 @@ public class TypeFactoryTest extends TestCase {
     // returns DoubleGeneric?
   }
 
+  @Test
   public void testSimpleOuterGenericInner() {
     assertEquals(
         new TypeToken<SimpleOuter.GenericInner<String>>() {}.getType(),
         parameterizedInnerClass(SimpleOuter.class, SimpleOuter.GenericInner.class, String.class));
   }
 
+  @Test
   public void testSimpleOuterRawInner() {
     assertEquals(
         SimpleOuter.GenericInner.class,
@@ -152,18 +175,21 @@ public class TypeFactoryTest extends TestCase {
   }
 
   /** If the outer class is not specified, it doesn't matter if it's not generic anyways */
+  @Test
   public void testMissingSimpleOuterGenericInner() {
     assertEquals(
         new TypeToken<SimpleOuter.GenericInner<String>>() {}.getType(),
         parameterizedClass(SimpleOuter.GenericInner.class, String.class));
   }
 
+  @Test
   public void testMissingSimpleOuterRawInner() {
     assertEquals(
         SimpleOuter.GenericInner.class,
         parameterizedClass(SimpleOuter.GenericInner.class, (Type[]) null));
   }
 
+  @Test
   public void testWrongOwnerSimple() {
     try {
       innerClass(String.class, SimpleOuter.SimpleInner.class);
@@ -172,6 +198,7 @@ public class TypeFactoryTest extends TestCase {
     }
   }
 
+  @Test
   public void testWrongOwnerGeneric() {
     try {
       parameterizedInnerClass(String.class, SimpleOuter.GenericInner.class, String.class);
@@ -180,6 +207,7 @@ public class TypeFactoryTest extends TestCase {
     }
   }
 
+  @Test
   public void testWrongOwnerRaw() {
     try {
       innerClass(String.class, SimpleOuter.GenericInner.class);
@@ -188,6 +216,7 @@ public class TypeFactoryTest extends TestCase {
     }
   }
 
+  @Test
   public void testStaticInnerWithoutOwner() {
     Type result = parameterizedClass(GenericOuter.StaticGenericInner.class, Integer.class);
 
@@ -203,6 +232,7 @@ public class TypeFactoryTest extends TestCase {
     assertEquals(GenericOuter.class, ((ParameterizedType) result).getOwnerType());
   }
 
+  @Test
   public void testStaticInnerWithRawOwner() {
     assertEquals(
         new TypeToken<GenericOuter.StaticGenericInner<Integer>>() {}.getType(),
@@ -210,6 +240,7 @@ public class TypeFactoryTest extends TestCase {
             GenericOuter.class, GenericOuter.StaticGenericInner.class, Integer.class));
   }
 
+  @Test
   public void testStaticInnerWithRawSubclassOwner() {
     assertEquals(
         new TypeToken<GenericOuter.StaticGenericInner<Integer>>() {}.getType(),
@@ -223,6 +254,7 @@ public class TypeFactoryTest extends TestCase {
   }
 
   /** If the owner is given as a generic type, just ignore the type arguments */
+  @Test
   public void testStaticInnerWithGenericOwner() {
     Type result =
         parameterizedInnerClass(
@@ -232,6 +264,7 @@ public class TypeFactoryTest extends TestCase {
     assertEquals(GenericOuter.class, ((ParameterizedType) result).getOwnerType());
   }
 
+  @Test
   public void testStaticInnerWithWrongOwner() {
     try {
       parameterizedInnerClass(String.class, GenericOuter.StaticGenericInner.class, Integer.class);
@@ -244,6 +277,7 @@ public class TypeFactoryTest extends TestCase {
   // variable,...
   // The use of "getExactSuperType" should make it smart in handling those...
 
+  @Test
   public void testNullTypeArgument() {
     try {
       parameterizedClass(List.class, new Type[] {null});
@@ -254,12 +288,14 @@ public class TypeFactoryTest extends TestCase {
 
   static class Bound<T extends Number> {}
 
+  @Test
   public void testTypeArgumentInBound() {
     assertEquals(
         new TypeToken<Bound<Integer>>() {}.getType(),
         parameterizedClass(Bound.class, Integer.class));
   }
 
+  @Test
   public void testTypeArgumentsNotInBound() {
     try {
       parameterizedClass(Bound.class, String.class);
@@ -270,6 +306,7 @@ public class TypeFactoryTest extends TestCase {
 
   static class ReferingBound<A extends List<B>, B> {}
 
+  @Test
   public void testTypeArgumentInReferingBound() {
     assertEquals(
         new TypeToken<ReferingBound<List<Integer>, Integer>>() {}.getType(),
@@ -277,6 +314,7 @@ public class TypeFactoryTest extends TestCase {
             ReferingBound.class, parameterizedClass(List.class, Integer.class), Integer.class));
   }
 
+  @Test
   public void testTypeArgumentsNotInReferingBound() {
     try {
       parameterizedClass(
@@ -290,6 +328,7 @@ public class TypeFactoryTest extends TestCase {
 
   static class InRecursiveBound extends RecursiveBound<InRecursiveBound> {}
 
+  @Test
   public void testTypeArgumentInRecursiveBound() {
     assertEquals(
         new TypeToken<RecursiveBound<InRecursiveBound>>() {}.getType(),
@@ -298,6 +337,7 @@ public class TypeFactoryTest extends TestCase {
 
   static class NotInRecursiveBound extends RecursiveBound<InRecursiveBound> {}
 
+  @Test
   public void testTypeArgumentNotInRecursiveBound() {
     // type RecursiveBound<NotInRecursiveBound> is not valid
     try {
@@ -310,12 +350,14 @@ public class TypeFactoryTest extends TestCase {
   @SuppressWarnings("rawtypes")
   static class RawBound<A extends List> {}
 
+  @Test
   public void testTypeArgumentInRawBound() {
     assertEquals(
         new TypeToken<RawBound<List<String>>>() {}.getType(),
         parameterizedClass(RawBound.class, parameterizedClass(List.class, String.class)));
   }
 
+  @Test
   public void testTypeArgumentNotInRawBound() {
     try {
       parameterizedClass(RawBound.class, parameterizedClass(Collection.class, String.class));
@@ -331,7 +373,8 @@ public class TypeFactoryTest extends TestCase {
   // this is not implemented yet, because isSuperType() can't signal that it's raw
   // (and a dumb check that the argument is missing variables isn't good enough, because it would
   // also block a type that is raw but has an (indirect non-raw supertype)
-  public void ignoredTestRawTypeArgumentInParameterizedBoundNotValid() {
+  @Test @Ignore
+  public void testRawTypeArgumentInParameterizedBoundNotValid() {
 
     // ParameterizedBound<List> is not valid
     try {
@@ -342,6 +385,7 @@ public class TypeFactoryTest extends TestCase {
   }
 
   /** If the bound is raw, the a raw argument is fine */
+  @Test
   @SuppressWarnings("rawtypes")
   public void testRawTypeArgumentInRawBound() {
     assertEquals(
@@ -353,6 +397,7 @@ public class TypeFactoryTest extends TestCase {
     class In<Y extends X> {}
   }
 
+  @Test
   public void testTypeArgumentInBoundReferingToOwner() {
     Type result =
         parameterizedInnerClass(
@@ -370,6 +415,7 @@ public class TypeFactoryTest extends TestCase {
     assertTrue(result instanceof ParameterizedType);
   }
 
+  @Test
   public void testTypeArgumentNotInBoundReferingToOwner() {
     try {
       parameterizedInnerClass(
@@ -381,17 +427,20 @@ public class TypeFactoryTest extends TestCase {
     }
   }
 
+  @Test
   public void testUnboundWildcardTypeArgumentInBound() {
     assertEquals(
         new TypeToken<Bound<?>>() {}.getType(), parameterizedClass(Bound.class, unboundWildcard()));
   }
 
+  @Test
   public void testWildcardExtendsTypeArgumentInBound() {
     assertEquals(
         new TypeToken<Bound<? extends Integer>>() {}.getType(),
         parameterizedClass(Bound.class, wildcardExtends(Integer.class)));
   }
 
+  @Test
   public void testWildcardExtendsTypeArgumentNotInBound() {
     try {
       parameterizedClass(Bound.class, wildcardExtends(Thread.class));
@@ -400,18 +449,21 @@ public class TypeFactoryTest extends TestCase {
     }
   }
 
+  @Test
   public void testUnrelatedWildcardExtendsTypeArgumentInBound() {
     assertEquals(
         new TypeToken<Bound<? extends Runnable>>() {}.getType(),
         parameterizedClass(Bound.class, wildcardExtends(Runnable.class)));
   }
 
+  @Test
   public void testWildcardSuperTypeArgumentInBound() {
     assertEquals(
         new TypeToken<Bound<? super Integer>>() {}.getType(),
         parameterizedClass(Bound.class, wildcardSuper(Integer.class)));
   }
 
+  @Test
   public void testWildcardSuperTypeArgumentNotInBound() {
     try {
       parameterizedClass(Bound.class, wildcardSuper(String.class));
@@ -420,12 +472,14 @@ public class TypeFactoryTest extends TestCase {
     }
   }
 
+  @Test
   public void testWildcardInReferingBound() {
     assertEquals(
         new TypeToken<ReferingBound<?, String>>() {}.getType(),
         parameterizedClass(ReferingBound.class, unboundWildcard(), String.class));
   }
 
+  @Test
   public void testInReferingToWildcardBound() {
     // JDK doesn't allow this, but the eclipse compiler does.
     // We prefer to be lenient, so we allow it.
@@ -436,6 +490,7 @@ public class TypeFactoryTest extends TestCase {
         wildcardExtends(Number.class));
   }
 
+  @Test
   public void testNotInReferingToWildcardBound() {
     try {
       parameterizedClass(
@@ -447,6 +502,7 @@ public class TypeFactoryTest extends TestCase {
     }
   }
 
+  @Test
   public void testLocalClass() {
     class Local<T> {}
     System.out.println(Local.class.getDeclaringClass());
@@ -460,6 +516,7 @@ public class TypeFactoryTest extends TestCase {
    * doesn't have an class as its direct owner (the method is the owner, but that can't be
    * represented). (Java reflection also doesn't see the enclosing class as owner).
    */
+  @Test
   public void testLocalClassWithOwner() {
     class Local<T> {}
     try {
@@ -473,26 +530,31 @@ public class TypeFactoryTest extends TestCase {
     return ((ParameterizedType) typeToken.getType()).getActualTypeArguments()[0];
   }
 
+  @Test
   public void testUnboundWildcard() {
     assertEquals(getFirstTypeArgument(new TypeToken<List<?>>() {}), TypeFactory.unboundWildcard());
   }
 
+  @Test
   public void testWildcardExtends() {
     assertEquals(
         getFirstTypeArgument(new TypeToken<List<? extends String>>() {}),
         TypeFactory.wildcardExtends(String.class));
   }
 
+  @Test
   public void testWildcardSuper() {
     assertEquals(
         getFirstTypeArgument(new TypeToken<List<? super String>>() {}),
         TypeFactory.wildcardSuper(String.class));
   }
 
+  @Test
   public void testClassArray() {
     assertSame(String[].class, TypeFactory.arrayOf(String.class));
   }
 
+  @Test
   public void testGenericArray() {
     assertEquals(
         new TypeToken<List<String>[]>() {}.getType(),
