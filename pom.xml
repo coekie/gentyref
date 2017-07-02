@@ -3,7 +3,7 @@
 	<groupId>com.coekie.gentyref</groupId>
 	<artifactId>gentyref</artifactId>
 	<packaging>jar</packaging>
-	<version>1.3.0-SNAPSHOT</version>
+	<version>1.3.0</version>
 	<inceptionYear>2008</inceptionYear>
 	<name>GenTyRef</name>
 	<url>https://github.com/coekie/gentyref</url>
@@ -19,7 +19,7 @@
 		<connection>scm:git:git://github.com/coekie/gentyref</connection>
 		<developerConnection>scm:git:git://github.com/coekie/gentyref</developerConnection>
 		<url>https://github.com/coekie/gentyref</url>
-	  <tag>HEAD</tag>
+	  <tag>v1.3.0</tag>
   </scm>
 	<distributionManagement>
 		<snapshotRepository>
