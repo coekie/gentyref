@@ -1,7 +1,4 @@
 package com.coekie.gentyref.factory;
 
 @SuppressWarnings("rawtypes")
-public class RawOuter extends GenericOuter {
-
-
-}
+public class RawOuter extends GenericOuter {}

@@ -5,82 +5,83 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.List;
-
 import junit.framework.TestCase;
 
 /**
- * Simple samples of what gentyref does, in the form of tests.
- * See http://code.google.com/p/gentyref/wiki/ExampleUsage
+ * Simple samples of what gentyref does, in the form of tests. See
+ * http://code.google.com/p/gentyref/wiki/ExampleUsage
  *
  * @author Wouter Coekaerts <wouter@coekaerts.be>
  */
 public class SamplesTest extends TestCase {
-	interface Processor<T> {
-		void process(T t);
-	}
+  interface Processor<T> {
+    void process(T t);
+  }
 
-	class StringProcessor implements Processor<String> {
-		public void process(String s) {
-			System.out.println("processing " + s);
-		}
-	}
+  class StringProcessor implements Processor<String> {
+    public void process(String s) {
+      System.out.println("processing " + s);
+    }
+  }
 
-	class IntegerProcessor implements Processor<Integer> {
-		public void process(Integer i) {
-			System.out.println("processing " + i);
-		}
-	}
+  class IntegerProcessor implements Processor<Integer> {
+    public void process(Integer i) {
+      System.out.println("processing " + i);
+    }
+  }
 
-	/*
-	 * Returns true if processorClass extends Processor<String>
-	 */
-	public boolean isStringProcessor(Class<? extends Processor<?>> processorClass) {
-		// Use TypeToken to get an instanceof a specific Type
-		Type type = new TypeToken<Processor<String>>(){}.getType();
-		// Use GenericTypeReflector.isSuperType to check if a type is a supertype of another
-		return GenericTypeReflector.isSuperType(type, processorClass);
-	}
+  /*
+   * Returns true if processorClass extends Processor<String>
+   */
+  public boolean isStringProcessor(Class<? extends Processor<?>> processorClass) {
+    // Use TypeToken to get an instanceof a specific Type
+    Type type = new TypeToken<Processor<String>>() {}.getType();
+    // Use GenericTypeReflector.isSuperType to check if a type is a supertype of another
+    return GenericTypeReflector.isSuperType(type, processorClass);
+  }
 
-	public void testProsessor() {
-		assertTrue(isStringProcessor(StringProcessor.class));
-		assertFalse(isStringProcessor(IntegerProcessor.class));
-	}
+  public void testProsessor() {
+    assertTrue(isStringProcessor(StringProcessor.class));
+    assertFalse(isStringProcessor(IntegerProcessor.class));
+  }
 
-	abstract class Collector<T> {
-		public List<T> list() {
-			return null;
-		}
-		public void add(T item) {
-		}
-	}
+  abstract class Collector<T> {
+    public List<T> list() {
+      return null;
+    }
 
-	class StringCollector extends Collector<String> {
-	}
+    public void add(T item) {}
+  }
 
-	public void testCollectorList() throws NoSuchMethodException {
-		Method listMethod = StringCollector.class.getMethod("list");
+  class StringCollector extends Collector<String> {}
 
-		// java returns List<T>
-		Type returnType = listMethod.getGenericReturnType();
-		assertTrue(returnType instanceof ParameterizedType);
-		assertTrue(((ParameterizedType)returnType).getActualTypeArguments()[0] instanceof TypeVariable<?>);
+  public void testCollectorList() throws NoSuchMethodException {
+    Method listMethod = StringCollector.class.getMethod("list");
 
-		// we get List<String>
-		Type exactReturnType = GenericTypeReflector.getExactReturnType(listMethod, StringCollector.class);
-		assertEquals(new TypeToken<List<String>>(){}.getType(), exactReturnType);
-	}
+    // java returns List<T>
+    Type returnType = listMethod.getGenericReturnType();
+    assertTrue(returnType instanceof ParameterizedType);
+    assertTrue(
+        ((ParameterizedType) returnType).getActualTypeArguments()[0] instanceof TypeVariable<?>);
 
-	public void testCollectorAdd() throws NoSuchMethodException {
-		Method addMethod = StringCollector.class.getMethod("add", Object.class);
+    // we get List<String>
+    Type exactReturnType =
+        GenericTypeReflector.getExactReturnType(listMethod, StringCollector.class);
+    assertEquals(new TypeToken<List<String>>() {}.getType(), exactReturnType);
+  }
 
-		// returns [T]
-		Type[] parameterTypes = addMethod.getGenericParameterTypes();
-		assertEquals(1, parameterTypes.length);
-		assertTrue(parameterTypes[0] instanceof TypeVariable<?>);
+  public void testCollectorAdd() throws NoSuchMethodException {
+    Method addMethod = StringCollector.class.getMethod("add", Object.class);
 
-		// returns [String]
-		Type[] exactParameterTypes = GenericTypeReflector.getExactParameterTypes(addMethod, StringCollector.class);
-		assertEquals(1, exactParameterTypes.length);
-		assertEquals(String.class, exactParameterTypes[0]);
-	}
+    // returns [T]
+    Type[] parameterTypes = addMethod.getGenericParameterTypes();
+    assertEquals(1, parameterTypes.length);
+    assertTrue(parameterTypes[0] instanceof TypeVariable<?>);
+
+    // returns [String]
+    Type[] exactParameterTypes =
+        GenericTypeReflector.getExactParameterTypes(addMethod, StringCollector.class);
+    assertEquals(1, exactParameterTypes.length);
+    assertEquals(String.class, exactParameterTypes[0]);
+  }
 }
