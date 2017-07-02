@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.googlecode.gentyref</groupId>
+	<groupId>com.coekie.gentyref</groupId>
 	<artifactId>gentyref</artifactId>
 	<packaging>jar</packaging>
-	<version>1.2.1-SNAPSHOT</version>
+	<version>1.3.0-SNAPSHOT</version>
 	<inceptionYear>2008</inceptionYear>
 	<name>GenTyRef</name>
-	<url>http://code.google.com/p/gentyref/</url>
+	<url>https://github.com/coekie/gentyref</url>
 	<description>Generic type reflection library</description>
 	<licenses>
 		<license>
@@ -16,9 +16,9 @@
 		</license>
 	</licenses>
 	<scm>
-		<connection>scm:git:https://code.google.com/p/gentyref/</connection>
-		<developerConnection>scm:git:https://code.google.com/p/gentyref/</developerConnection>
-		<url>http://code.google.com/p/gentyref/source</url>
+		<connection>scm:git:git://github.com/coekie/gentyref</connection>
+		<developerConnection>scm:git:git://github.com/coekie/gentyref</developerConnection>
+		<url>https://github.com/coekie/gentyref</url>
 	  <tag>HEAD</tag>
   </scm>
 	<distributionManagement>
@@ -34,10 +34,10 @@
 		</repository>
 	</distributionManagement>
 	<issueManagement>
-		<system>Google Code Issue Tracking</system>
-		<url>http://code.google.com/p/gentyref/issues/list</url>
+		<system>GitHub Issue Tracking</system>
+		<url>https://github.com/coekie/gentyref/issues</url>
 	</issueManagement>
-	
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
