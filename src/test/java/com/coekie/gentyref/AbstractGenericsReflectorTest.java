@@ -641,8 +641,8 @@ public abstract class AbstractGenericsReflectorTest extends TestCase {
 	}
 
 	public void testGraphWildcard() {
-		TypeToken<? extends List<? extends Edge<? extends Node<?,?>,?>>> ft = getF(new TypeToken<Node<?, ?>>(){});
-		testInexactSupertype(new TypeToken<List<? extends Edge<? extends Node<?,?>,?>>>(){}, ft);
+		testInexactSupertype(new TypeToken<List<? extends Edge<? extends Node<?, ?>, ?>>>() {},
+				getF(new TypeToken<Node<?, ?>>() {}));
 	}
 
 	public void testGraphCapture() throws NoSuchFieldException {
